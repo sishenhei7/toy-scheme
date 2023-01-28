@@ -25,4 +25,8 @@ export class Parser {
 
   private tokens: Token[] = [];
   private cursor = 0;
+
+  public parse(sentence: string) {
+
+  }
 }
