@@ -3,18 +3,7 @@
  * 注意：为了更好地扩展性，这里不涉及任何 let、define 等语法，这些语法在后面处理
  */
 
-enum TokenType {
-  Quote,
-  LParen,
-  RParen,
-  Symbol,
-  Number,
-  String,
-  WhiteSpace,
-  Boolean,
-  Comment,
-  EOF,
-}
+import { TokenType, NodeAtom, NodeContainer } from "./node"
 
 const regexList: [TokenType, RegExp][] = [
   [TokenType.Quote, /^'/],
@@ -28,33 +17,33 @@ const regexList: [TokenType, RegExp][] = [
   [TokenType.Comment, /^;.*/]
 ]
 
-export class Token {
-  constructor(
-    private type: TokenType,
-    private start: number,
-    private end: number,
-  ) { }
+interface TokenItem {
+  token: TokenType
+  value: string
+  len: number
 }
 
 export function parse(st: string) {
-  const stack = []
   let index = 0
   return parseExpression()
 
-  function getNextToken() {
+  function getNextToken(): TokenItem {
     for (const [token, reg] of regexList) {
       const matched = reg.exec(st)
+      const value = matched[0]
 
       if (matched) {
         return {
           token,
-          len: matched[0].length
+          value,
+          len: value.length
         }
       }
     }
 
     return {
       token: TokenType.EOF,
+      value: null,
       len: 0
     }
   }
@@ -64,9 +53,24 @@ export function parse(st: string) {
     st = st.substring(n)
   }
 
-  function parseExpression() {
-    const { token, len } = getNextToken()
-    stack.push(new Token(token, index, index + len))
-    advance(len)
+  function parseExpression(): NodeAtom | NodeContainer {
+    const { token, value, len } = getNextToken()
+    let res = null
+
+    switch (token) {
+      case TokenType.WhiteSpace:
+      case TokenType.Comment:
+        return parseExpression();
+      case TokenType.LParen:
+        return parseParen();
+      default:
+        const start = index
+        advance(len)
+        return new NodeAtom(token, value, start, start + len);
+    }
+  }
+
+  function parseParen(): NodeContainer {
+
   }
 }
