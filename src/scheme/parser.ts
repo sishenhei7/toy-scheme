@@ -12,7 +12,7 @@ const regexList: [TokenType, RegExp][] = [
   [TokenType.Symbol, /^[^\s()',]+/],
   [TokenType.Number, /^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?/],
   [TokenType.String, /^"([^\\"]+|\\.)*"/],
-  [TokenType.WhiteSpace, /^\s*/],
+  [TokenType.WhiteSpace, /^\s+/],
   [TokenType.Boolean, /^#t|^#f/],
   [TokenType.Comment, /^;.*/],
 ];
@@ -25,17 +25,16 @@ interface TokenItem {
 
 export function parse(st: string) {
   let index = 0;
-  const nodeList = tokenizer().filter((item) => item.isIgnoreToken());
+  const nodeList = tokenizer().filter((item) => !item.isIgnoreToken());
   let nodeCursor = 0;
-  console.log("fsfsdfsdfsdfs");
   return parseExpression();
 
   function getNextToken(): TokenItem {
     for (const [token, reg] of regexList) {
       const matched = reg.exec(st);
-      const value = matched?.[0] || "";
 
       if (matched) {
+        const value = matched?.[0]
         return {
           token,
           value,
@@ -46,7 +45,7 @@ export function parse(st: string) {
 
     return {
       token: TokenType.EOF,
-      value: "",
+      value: '',
       len: 0,
     };
   }
@@ -86,11 +85,11 @@ export function parse(st: string) {
     while (nodeCursor < nodeList.length) {
       const currentNode = nodeList[nodeCursor++];
 
-      if (currentNode.isOpenToken()) {
+      if (currentNode.isCloseToken()) {
         break;
       }
 
-      if (currentNode.isCloseToken()) {
+      if (currentNode.isOpenToken()) {
         (currentNode as NodeContainer).body = parseExpression();
       }
 
@@ -105,6 +104,7 @@ export function parse(st: string) {
       lastNode = currentNode;
     }
 
-    return firstNode;
+    // eslint-diable-next-line
+    return firstNode as NodeAtom | NodeContainer | null;
   }
 }
