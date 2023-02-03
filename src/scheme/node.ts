@@ -1,4 +1,3 @@
-import { should } from '../../../vue-sourcecode/vue/packages/server-renderer/src/bundle-renderer/create-bundle-runner';
 export enum TokenType {
   Quote,
   LParen,
@@ -13,32 +12,23 @@ export enum TokenType {
 }
 
 export class INode {
-  type: TokenType
-  start: number
-  end: number
-
-  curr = null
-  next = null
-
-  public setChain(curr: INode, next: INode): void {
-    this.curr = curr
-    this.next = next
-  }
+  type = TokenType.EOF;
+  next: INode | null = null;
 
   public isOpenToken(): boolean {
-    return [TokenType.LParen].includes(this.type)
+    return [TokenType.LParen].includes(this.type);
   }
 
   public isCloseToken(): boolean {
-    return [TokenType.RParen].includes(this.type)
+    return [TokenType.RParen].includes(this.type);
   }
 
   public isIgnoreToken(): boolean {
-    return [TokenType.WhiteSpace, TokenType.Comment].includes(this.type)
+    return [TokenType.WhiteSpace, TokenType.Comment].includes(this.type);
   }
 
   static isContainerType(token: TokenType): boolean {
-    return [TokenType.LParen, TokenType.RParen].includes(token)
+    return [TokenType.LParen, TokenType.RParen].includes(token);
   }
 }
 
@@ -47,9 +37,9 @@ export class NodeAtom extends INode {
     public type: TokenType,
     public start: number,
     public end: number,
-    public value: string = '',
+    public value: string = ""
   ) {
-    super()
+    super();
   }
 }
 
@@ -58,8 +48,8 @@ export class NodeContainer extends INode {
     public type: TokenType,
     public start: number,
     public end: number,
-    public body: INode = null,
+    public body: INode | null = null
   ) {
-    super()
+    super();
   }
 }

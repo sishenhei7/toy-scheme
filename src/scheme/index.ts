@@ -10,8 +10,8 @@ const program = `
 
   (display (factorial 5))
 
-`
+`;
 
 export function test() {
-  console.log(parse(program))
+  console.log(parse(program));
 }

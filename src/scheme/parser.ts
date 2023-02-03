@@ -3,7 +3,7 @@
  * 注意：为了更好地扩展性，这里不涉及任何 let、define 等语法，这些语法在后面处理
  */
 
-import { TokenType, NodeAtom, NodeContainer, INode } from './node';
+import { TokenType, NodeAtom, NodeContainer, INode } from "./node";
 
 const regexList: [TokenType, RegExp][] = [
   [TokenType.Quote, /^'/],
@@ -14,95 +14,97 @@ const regexList: [TokenType, RegExp][] = [
   [TokenType.String, /^"([^\\"]+|\\.)*"/],
   [TokenType.WhiteSpace, /^\s*/],
   [TokenType.Boolean, /^#t|^#f/],
-  [TokenType.Comment, /^;.*/]
-]
+  [TokenType.Comment, /^;.*/],
+];
 
 interface TokenItem {
-  token: TokenType
-  value: string
-  len: number
+  token: TokenType;
+  value: string;
+  len: number;
 }
 
 export function parse(st: string) {
-  let index = 0
-  const nodeList = tokenizer()
-  let nodeCursor = 0
-  return parseExpression()
+  let index = 0;
+  const nodeList = tokenizer().filter((item) => item.isIgnoreToken());
+  let nodeCursor = 0;
+  console.log("fsfsdfsdfsdfs");
+  return parseExpression();
 
   function getNextToken(): TokenItem {
     for (const [token, reg] of regexList) {
-      const matched = reg.exec(st)
-      const value = matched[0]
+      const matched = reg.exec(st);
+      const value = matched?.[0] || "";
 
       if (matched) {
         return {
           token,
           value,
-          len: value.length
-        }
+          len: value.length,
+        };
       }
     }
 
     return {
       token: TokenType.EOF,
-      value: null,
-      len: 0
-    }
+      value: "",
+      len: 0,
+    };
   }
 
   function advance(n: number): void {
-    index += n
-    st = st.substring(n)
+    index += n;
+    st = st.substring(n);
   }
 
   function tokenizer(): INode[] {
-    const stack = []
+    const stack = [];
 
+    // eslint-disable-next-line
     while (true) {
-      const { token, value, len } = getNextToken()
+      const { token, value, len } = getNextToken();
 
       if (INode.isContainerType(token)) {
-        stack.push(new NodeContainer(token, index, index + len))
+        stack.push(new NodeContainer(token, index, index + len));
       } else {
-        stack.push(new NodeAtom(token, index, index + len, value))
+        stack.push(new NodeAtom(token, index, index + len, value));
       }
 
-      advance(len)
+      advance(len);
 
       if (token === TokenType.EOF) {
-        break
+        break;
       }
     }
 
-    return stack
+    return stack;
   }
 
-  function parseExpression(): NodeAtom | NodeContainer {
-    let lastNode = null
-    let firstNode = null
+  function parseExpression(): NodeAtom | NodeContainer | null {
+    let lastNode = null;
+    let firstNode = null;
 
     while (nodeCursor < nodeList.length) {
-      const currentNode = nodeList[nodeCursor++]
+      const currentNode = nodeList[nodeCursor++];
 
       if (currentNode.isOpenToken()) {
-        break
+        break;
       }
 
       if (currentNode.isCloseToken()) {
-        (currentNode as NodeContainer).body = parseExpression()
+        (currentNode as NodeContainer).body = parseExpression();
       }
 
       if (lastNode) {
-        lastNode.next = currentNode
+        lastNode.next = currentNode;
       }
 
       if (!firstNode) {
-        firstNode = currentNode
+        firstNode = currentNode;
       }
 
-      lastNode = currentNode
+      lastNode = currentNode;
     }
 
-    return firstNode
+    return firstNode;
   }
 }

@@ -1,3 +1,1 @@
-export class Evaluator {
-
-}
+export class Evaluator {}
