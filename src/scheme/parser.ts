@@ -3,7 +3,7 @@
  * 注意：为了更好地扩展性，这里不涉及任何 let、define 等语法，这些语法在后面处理
  */
 
-import { TokenType, NodeAtom, NodeContainer } from "./node"
+import { TokenType, NodeAtom, NodeContainer, INode } from './node';
 
 const regexList: [TokenType, RegExp][] = [
   [TokenType.Quote, /^'/],
@@ -25,6 +25,8 @@ interface TokenItem {
 
 export function parse(st: string) {
   let index = 0
+  const nodeList = tokenizer()
+  let nodeCursor = 0
   return parseExpression()
 
   function getNextToken(): TokenItem {
@@ -53,24 +55,54 @@ export function parse(st: string) {
     st = st.substring(n)
   }
 
-  function parseExpression(): NodeAtom | NodeContainer {
-    const { token, value, len } = getNextToken()
-    let res = null
+  function tokenizer(): INode[] {
+    const stack = []
 
-    switch (token) {
-      case TokenType.WhiteSpace:
-      case TokenType.Comment:
-        return parseExpression();
-      case TokenType.LParen:
-        return parseParen();
-      default:
-        const start = index
-        advance(len)
-        return new NodeAtom(token, value, start, start + len);
+    while (true) {
+      const { token, value, len } = getNextToken()
+
+      if (INode.isContainerType(token)) {
+        stack.push(new NodeContainer(token, index, index + len))
+      } else {
+        stack.push(new NodeAtom(token, index, index + len, value))
+      }
+
+      advance(len)
+
+      if (token === TokenType.EOF) {
+        break
+      }
     }
+
+    return stack
   }
 
-  function parseParen(): NodeContainer {
+  function parseExpression(): NodeAtom | NodeContainer {
+    let lastNode = null
+    let firstNode = null
 
+    while (nodeCursor < nodeList.length) {
+      const currentNode = nodeList[nodeCursor++]
+
+      if (currentNode.isOpenToken()) {
+        break
+      }
+
+      if (currentNode.isCloseToken()) {
+        (currentNode as NodeContainer).body = parseExpression()
+      }
+
+      if (lastNode) {
+        lastNode.next = currentNode
+      }
+
+      if (!firstNode) {
+        firstNode = currentNode
+      }
+
+      lastNode = currentNode
+    }
+
+    return firstNode
   }
 }
