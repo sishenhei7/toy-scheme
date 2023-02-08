@@ -5,7 +5,7 @@ export class StackFrame {
 export class Env {
   private obj: Map<string, any> = new Map()
 
-  constructor(private parentEnv?: Env | null = null, private stackFrame?: StackFrame | null = null) {}
+  constructor(private parentEnv: Env | null = null, private stackFrame: StackFrame | null = null) {}
 
   // TODO: add return type
   public get(key: string): any {

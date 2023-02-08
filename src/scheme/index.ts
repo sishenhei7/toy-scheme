@@ -1,4 +1,5 @@
 import { parse } from "./parser";
+import { Evaluator } from "./evaluator";
 
 const program = `
   ; Factorial
@@ -13,5 +14,7 @@ const program = `
 `;
 
 export function test() {
+  const evaluator = new Evaluator();
+  console.log(evaluator);
   console.log(parse(program));
 }
