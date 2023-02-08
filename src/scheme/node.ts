@@ -32,6 +32,9 @@ export class INode {
   }
 }
 
+/**
+ * 变量Symbol
+ */
 export class NodeAtom extends INode {
   constructor(
     public type: TokenType,
@@ -42,6 +45,10 @@ export class NodeAtom extends INode {
     super();
   }
 }
+
+/**
+ * expression
+ */
 
 export class NodeContainer extends INode {
   constructor(
