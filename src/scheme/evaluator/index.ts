@@ -8,19 +8,6 @@ import { SetEvaluator } from './set';
 import { BeginEvaluator } from './begin';
 import { QuoteEvaluator } from './quote';
 
-// export enum TokenType {
-//   Quote,
-//   LParen,
-//   RParen,
-//   Symbol,
-//   Number,
-//   String,
-//   WhiteSpace,
-//   Boolean,
-//   Comment,
-//   EOF,
-// }
-
 export type Cont = (node: INode) => INode;
 
 export interface IEvaluator {
