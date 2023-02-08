@@ -48,7 +48,7 @@ export class NodeContainer extends INode {
     public type: TokenType,
     public start: number,
     public end: number,
-    public body: INode | null = null
+    public body: NodeAtom | NodeContainer | null = null
   ) {
     super();
   }
