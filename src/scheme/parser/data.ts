@@ -1,8 +1,8 @@
 /**
  * 数据结构：
- * 占位: 表达式、符号
- * 简单：number、string、boolean、quote、nil
- * 复杂：todo
+ * 占位数据: 表达式、符号
+ * 简单数据：number、string、boolean、quote、nil
+ * 复杂数据：暂时还没有
  */
 import { type TokenItem, TokenType } from './token'
 

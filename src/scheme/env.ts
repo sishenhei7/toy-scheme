@@ -1,3 +1,5 @@
+import type { BaseData } from './parser/data'
+
 export class StackFrame {}
 
 export class Env {
@@ -5,8 +7,7 @@ export class Env {
 
   constructor(private parentEnv: Env | null = null, private stackFrame: StackFrame | null = null) {}
 
-  // TODO: add return type
-  public get(key: string): any {
+  public get(key: string): BaseData {
     if (this.obj.has(key)) {
       return this.obj.get(key)
     }
@@ -18,7 +19,6 @@ export class Env {
     return this.parentEnv.get(key)
   }
 
-  // TODO: add type
   public set(key: string, value: any): void {
     if (this.obj.has(key)) {
       this.obj.set(key, value)
@@ -31,7 +31,6 @@ export class Env {
     this.parentEnv.set(key, value)
   }
 
-  // TODO: add type
   public define(key: string, value: any): void {
     this.obj.set(key, value)
   }

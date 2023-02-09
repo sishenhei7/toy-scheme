@@ -32,7 +32,6 @@ export class Evaluator {
     ]
   }
 
-  // TODO: add return type
   public evaluate(node: BaseData | null, env: Env, cont: Cont): BaseData {
     if (!node) {
       return new SchemeNil()
