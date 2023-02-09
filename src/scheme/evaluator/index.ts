@@ -1,4 +1,4 @@
-import type { BaseData } from '../parser/data'
+import { type BaseData, SchemeExp, SchemeSym, SchemeNil } from '../parser/data'
 import type { Env } from '../env'
 import { IfEvaluator } from './if'
 import { DefineEvaluator } from './define'
@@ -33,32 +33,29 @@ export class Evaluator {
   }
 
   // TODO: add return type
-  public evaluate(node: BaseData | null, env: Env, cont: Cont): any {
+  public evaluate(node: BaseData | null, env: Env, cont: Cont): BaseData {
     if (!node) {
-      return null
+      return new SchemeNil()
     }
 
-    // if (node instanceof NodeContainer) {
-    //   return this.evaluate(node.body, env, cont)
-    // }
+    if (SchemeExp.matches(node)) {
+      let currentNode: SchemeExp | null = node
+      let res = new SchemeNil()
+      while (currentNode) {
+        res = this.evaluate(currentNode.body, env, cont)
+        currentNode = currentNode.next
+      }
+      return res
+    }
 
-    // // TODO: 处理 EOF
-    // switch (node.type) {
-    //   case TokenType.Number:
-    //     return Number(node.value)
-    //   case TokenType.String:
-    //     return String(node.value)
-    //   case TokenType.Boolean:
-    //     return Boolean(node.value)
-    //   case TokenType.Quote || TokenType.Symbol:
-    //     for (const evaluator of this.evaluators) {
-    //       if (evaluator.matches(node)) {
-    //         return evaluator.evaluate(node, env, cont)
-    //       }
-    //     }
-    //     throw Error(`Evaluate Error: unknown quote or symbol: ${node.type}!`)
-    //   default:
-    //     throw Error(`Evaluate Error: unknown token type: ${node.type}!`)
-    // }
+    if (SchemeSym.matches(node) && node.body) {
+      for (const evaluator of this.evaluators) {
+        if (evaluator.matches(node)) {
+          return evaluator.evaluate(node, env, cont)
+        }
+      }
+    }
+
+    return node
   }
 }

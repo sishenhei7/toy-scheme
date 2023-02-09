@@ -1,4 +1,4 @@
-import type { BaseData } from '../parser/data'
+import { type BaseData, SchemeBoolean } from '../parser/data'
 import type { Env } from '../env'
 import type { IEvaluator, Evaluator, Cont } from './index'
 
@@ -13,31 +13,35 @@ export class IfEvaluator implements IEvaluator {
     return false
   }
 
-  public applyCont(cont: Cont, env: Env, val: any) {
-    // const thenExp =
-  }
-
-  public getCont(node: BaseData, env: Env, cont: Cont): Cont {
-    const thenNode = node.next?.next
-    const elseNode = node.next?.next?.next
-    return (val) =>
-      val
-        ? this.evaluator.evaluate(thenNode as any, env, cont)
-        : this.evaluator.evaluate(elseNode as any, env, cont)
-  }
-
   public evaluate(node: BaseData, env: Env, cont: Cont): BaseData {
-    const newCont = this.getCont(node, env, cont)
-    return this.evaluator.evaluate(node.next as any, env, newCont)
+    const predicateNode = this.getPredicate(node)
+    const thenNode = this.getThenValue(node)
+    const elseNode = this.getElseValue(node)
+    return this.evaluator.evaluate(predicateNode, env, (val: BaseData) => {
+      return SchemeBoolean.isTrue(val)
+        ? this.evaluator.evaluate(thenNode, env, cont)
+        : this.evaluator.evaluate(elseNode, env, cont)
+    })
   }
 
-  private getPredicate(node: BaseData) {
+  private getPredicate(node: BaseData): BaseData {
+    if (!node?.next) {
+      throw Error('Syntax error: if clause need predicate clause!')
+    }
     return node.next
   }
-  private getThenValue(node: BaseData) {
-    return node.next?.next
+
+  private getThenValue(node: BaseData): BaseData {
+    if (!node?.next?.next) {
+      throw Error('Syntax error: if clause need then clause!')
+    }
+    return node.next.next
   }
-  private getElseValue(node: BaseData) {
-    return node.next?.next?.next
+
+  private getElseValue(node: BaseData): BaseData {
+    if (!node.next?.next?.next) {
+      throw Error('Syntax error: if clause need else clause!')
+    }
+    return node.next.next.next
   }
 }

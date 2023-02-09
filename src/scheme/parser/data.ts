@@ -1,7 +1,7 @@
 /**
  * 数据结构：
  * 占位: 表达式、符号
- * 简单：number、string、boolean、quote
+ * 简单：number、string、boolean、quote、nil
  * 复杂：todo
  */
 import { type TokenItem, TokenType } from './token'
@@ -19,14 +19,24 @@ export class ILocation {
 
 export class BaseData extends ILocation {
   public next: BaseData | null = null
+
+  static isNil(item: BaseData): item is SchemeNil {
+    return item instanceof SchemeNil
+  }
 }
 
 /**
  * 占位数据结构：表达式
  */
 export class SchemeExp extends BaseData {
+  next: SchemeExp | null = null
+
   constructor(public body: BaseData | null) {
     super()
+  }
+
+  static matches(item: BaseData): item is SchemeExp {
+    return item instanceof SchemeExp
   }
 }
 
@@ -37,6 +47,10 @@ export class SchemeSym extends BaseData {
   constructor(public body: string) {
     super()
   }
+
+  static matches(item: BaseData): item is SchemeSym {
+    return item instanceof SchemeSym
+  }
 }
 
 /**
@@ -45,6 +59,10 @@ export class SchemeSym extends BaseData {
 export class SchemeNumber extends BaseData {
   constructor(public value: number) {
     super()
+  }
+
+  static matches(item: BaseData): item is SchemeNumber {
+    return item instanceof SchemeNumber
   }
 }
 
@@ -55,6 +73,10 @@ export class SchemeString extends BaseData {
   constructor(public value: string) {
     super()
   }
+
+  static matches(item: BaseData): item is SchemeString {
+    return item instanceof SchemeString
+  }
 }
 
 /**
@@ -63,6 +85,14 @@ export class SchemeString extends BaseData {
 export class SchemeBoolean extends BaseData {
   constructor(public value: boolean) {
     super()
+  }
+
+  static matches(item: BaseData): item is SchemeBoolean {
+    return item instanceof SchemeBoolean
+  }
+
+  static isTrue(item: BaseData): boolean {
+    return SchemeBoolean.matches(item) && item.value
   }
 }
 
@@ -73,10 +103,28 @@ export class SchemeQuote extends BaseData {
   constructor(public value: string) {
     super()
   }
+
+  static matches(item: BaseData): item is SchemeQuote {
+    return item instanceof SchemeQuote
+  }
+}
+
+/**
+ * 基础数据结构：nil
+ */
+export class SchemeNil extends BaseData {
+  constructor() {
+    super()
+  }
+
+  static matches(item: BaseData): item is SchemeNil {
+    return item instanceof SchemeNil
+  }
 }
 
 /**
  * 把一段 token 数组解析成 data 单链表
+ * Todo: 是否需要一个指向 parent 的指针？
  */
 export function getParser(tokenList: TokenItem[]): () => BaseData | null {
   let tokenCursor = 0
