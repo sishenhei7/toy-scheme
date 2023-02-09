@@ -1,4 +1,4 @@
-import type { INode } from '../node'
+import type { BaseData } from '../parser/data'
 import type { Env } from '../env'
 import type { IEvaluator, Evaluator, Cont } from './index'
 
@@ -17,13 +17,13 @@ import type { IEvaluator, Evaluator, Cont } from './index'
  *  (iter ls 0))
  */
 export class LetEvaluator implements IEvaluator {
-  constructor(private evaluator: Evaluator) { }
+  constructor(private evaluator: Evaluator) {}
 
   public matches(): boolean {
     return false
   }
 
-  public evaluate(node: INode, env: Env, cont: Cont): INode {
+  public evaluate(node: BaseData, env: Env, cont: Cont): BaseData {
     return node
   }
 }

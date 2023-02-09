@@ -1,6 +1,4 @@
-export class StackFrame {
-
-}
+export class StackFrame {}
 
 export class Env {
   private obj: Map<string, any> = new Map()
