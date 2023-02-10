@@ -1,7 +1,7 @@
 /**
  * 数据结构：
  * 占位数据: 表达式、符号
- * 简单数据：number、string、boolean、quote、nil
+ * 简单数据：number、string、boolean、quote
  * 复杂数据：暂时还没有
  */
 import { type TokenItem, TokenType } from './token'
@@ -18,19 +18,13 @@ export class ILocation {
 }
 
 export class BaseData extends ILocation {
-  public next: BaseData | null = null
-
-  static isNil(item: BaseData): item is SchemeNil {
-    return item instanceof SchemeNil
-  }
+  next: BaseData | null = null
 }
 
 /**
  * 占位数据结构：表达式
  */
 export class SchemeExp extends BaseData {
-  next: SchemeExp | null = null
-
   constructor(public body: BaseData | null) {
     super()
   }
@@ -110,17 +104,21 @@ export class SchemeQuote extends BaseData {
 }
 
 /**
- * 基础数据结构：nil
+ * 基础数据结构：nil (因为scheme里面并没有nil，所以这里不引入nil)
  */
-export class SchemeNil extends BaseData {
-  constructor() {
-    super()
-  }
+// export class SchemeNil extends BaseData {
+//   constructor(private value = null) {
+//     super()
+//   }
 
-  static matches(item: BaseData): item is SchemeNil {
-    return item instanceof SchemeNil
-  }
-}
+//   static matches(item: BaseData): item is SchemeNil {
+//     return item instanceof SchemeNil
+//   }
+
+//   static isNil(item: BaseData): item is SchemeNil {
+//     return item instanceof SchemeNil
+//   }
+// }
 
 /**
  * 把一段 token 数组解析成 data 单链表
@@ -130,14 +128,14 @@ export function getParser(tokenList: TokenItem[]): () => BaseData | null {
   let tokenCursor = 0
   const rParenEndList: number[] = []
 
-  function parseTokenList(): BaseData | null {
+  function parseTokenList(): ReturnType<ReturnType<typeof getParser>> {
     let last: BaseData | null = null
     let first: BaseData | null = null
     let shouldEnd = false
 
-    while (!shouldEnd && tokenCursor < tokenList.length) {
+    while (!shouldEnd && tokenList.length && tokenCursor < tokenList.length) {
       const { type, value, start, end } = tokenList[tokenCursor++]
-      let currentData = null
+      let currentData: BaseData | null = null
 
       switch (type) {
         case TokenType.Boolean:

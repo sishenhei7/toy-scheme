@@ -1,4 +1,4 @@
-import { type BaseData, SchemeExp, SchemeSym, SchemeNil } from '../parser/data'
+import { type BaseData, SchemeExp, SchemeSym } from '../parser/data'
 import type { Env } from '../env'
 import { IfEvaluator } from './if'
 import { DefineEvaluator } from './define'
@@ -32,17 +32,12 @@ export class Evaluator {
 
   public evaluate(node: BaseData | null, env: Env, cont: Cont): BaseData {
     if (!node) {
-      return new SchemeNil()
+      // 暂不支持()这样空语句的形式
+      throw Error(`Evaluating error: unexpected ${node}`)
     }
 
     if (SchemeExp.matches(node)) {
-      let currentNode: SchemeExp | null = node
-      let res = new SchemeNil()
-      while (currentNode) {
-        res = this.evaluate(currentNode.body, env, cont)
-        currentNode = currentNode.next
-      }
-      return res
+      return this.evaluate(node.body, env, cont)
     }
 
     if (SchemeSym.matches(node)) {

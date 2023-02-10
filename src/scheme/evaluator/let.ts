@@ -27,7 +27,13 @@ export class LetEvaluator implements IEvaluator {
     return node
   }
 
-  private isLet(tag: string) { return tag === 'let' }
-  private isLetStar(tag: string) { return tag === 'let*' }
-  private isLetRec(tag: string) { return tag === 'letrec' }
+  private isLet(tag: string) {
+    return tag === 'let'
+  }
+  private isLetStar(tag: string) {
+    return tag === 'let*'
+  }
+  private isLetRec(tag: string) {
+    return tag === 'letrec'
+  }
 }
