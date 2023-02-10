@@ -5,6 +5,7 @@
  * 复杂数据：暂时还没有
  */
 import { type TokenItem, TokenType } from './token'
+import { assert } from '../utils'
 
 export class ILocation {
   start: number = 0
@@ -157,9 +158,7 @@ export function getParser(tokenList: TokenItem[]): () => BaseData | null {
           currentData = new SchemeExp(parseTokenList())
 
           // 使用上次右括号的 end 来更新此节点的 end
-          if (rParenEndList.length === 0) {
-            throw Error('Parsing error: too many left paren')
-          }
+          assert(rParenEndList.length > 0, 'Parsing error: too many left paren')
           currentData.setLocationInfo(start, rParenEndList.pop()!)
 
           break

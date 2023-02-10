@@ -1,4 +1,5 @@
 import { ILocation } from './data'
+import { assert } from '../utils'
 
 export enum TokenType {
   Quote,
@@ -71,9 +72,7 @@ export function tokenizer(st: string): TokenItem[] {
       }
     }
 
-    if (!isMatched) {
-      throw Error(`Token parsing failed: ${st}`)
-    }
+    assert(isMatched, `Token parsing failed: ${st}`)
   }
 
   return stack

@@ -16,4 +16,8 @@ export class SetEvaluator implements IEvaluator {
   public evaluate(node: BaseData, env: Env, cont: Cont): BaseData {
     return node
   }
+
+  private getVar(node: BaseData) {
+
+  }
 }

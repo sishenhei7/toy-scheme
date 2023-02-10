@@ -6,7 +6,7 @@ import type { IEvaluator, Evaluator, Cont } from './index'
  * 语法：
  * (cond
  *     (predicate_1 clauses_1)
- *     (predicate_1 clauses_1)
+ *     (predicate_2 clauses_2)
  *     (else        clauses_else))
  */
 

@@ -1,4 +1,5 @@
 import type { BaseData } from './parser/data'
+import { assert } from './utils'
 
 export class StackFrame {}
 
@@ -12,10 +13,7 @@ export class Env {
       return this.obj.get(key)
     }
 
-    if (!this.parentEnv) {
-      throw Error('${key} is not defined!')
-    }
-
+    assert(this.parentEnv, `${key} is not defined!`)
     return this.parentEnv.get(key)
   }
 
@@ -24,10 +22,7 @@ export class Env {
       this.obj.set(key, value)
     }
 
-    if (!this.parentEnv) {
-      throw Error('${key} is not defined!')
-    }
-
+    assert(this.parentEnv, `${key} is not defined!`)
     this.parentEnv.set(key, value)
   }
 

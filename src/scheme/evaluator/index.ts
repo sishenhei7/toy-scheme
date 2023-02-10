@@ -1,5 +1,6 @@
 import { type BaseData, SchemeExp, SchemeSym } from '../parser/data'
 import type { Env } from '../env'
+import { assert } from '../utils'
 import { IfEvaluator } from './if'
 import { DefineEvaluator } from './define'
 import { CondEvaluator } from './cond'
@@ -31,10 +32,8 @@ export class Evaluator {
   }
 
   public evaluate(node: BaseData | null, env: Env, cont: Cont): BaseData {
-    if (!node) {
-      // 暂不支持()这样空语句的形式
-      throw Error(`Evaluating error: unexpected ${node}`)
-    }
+    // 暂不支持()这样空语句的形式
+    assert(node, `Evaluating error: unexpected ${node}`)
 
     if (SchemeExp.matches(node)) {
       return this.evaluate(node.body, env, cont)
