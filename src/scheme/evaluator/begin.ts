@@ -12,8 +12,8 @@ import type { IEvaluator, Evaluator, Cont } from './index'
 export class BeginEvaluator implements IEvaluator {
   constructor(private evaluator: Evaluator) {}
 
-  public matches(): boolean {
-    return false
+  public matches(tag: string): boolean {
+    return tag === 'begin'
   }
 
   public evaluate(node: BaseData, env: Env, cont: Cont): BaseData {

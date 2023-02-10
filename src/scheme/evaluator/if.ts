@@ -1,4 +1,4 @@
-import { type BaseData, SchemeBoolean } from '../parser/data'
+import { type BaseData, SchemeBoolean } from '../parser/data';
 import type { Env } from '../env'
 import type { IEvaluator, Evaluator, Cont } from './index'
 
@@ -9,8 +9,8 @@ import type { IEvaluator, Evaluator, Cont } from './index'
 export class IfEvaluator implements IEvaluator {
   constructor(private evaluator: Evaluator) {}
 
-  public matches(): boolean {
-    return false
+  public matches(tag: string): boolean {
+    return tag === 'if'
   }
 
   public evaluate(node: BaseData, env: Env, cont: Cont): BaseData {

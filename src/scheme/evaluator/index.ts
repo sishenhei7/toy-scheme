@@ -6,12 +6,11 @@ import { CondEvaluator } from './cond'
 import { CallCCEvaluator } from './call-cc'
 import { SetEvaluator } from './set'
 import { BeginEvaluator } from './begin'
-import { QuoteEvaluator } from './quote'
 
 export type Cont = (node: BaseData) => BaseData
 
 export interface IEvaluator {
-  matches(node: BaseData): boolean
+  matches(tag: string): boolean
   evaluate(node: BaseData, env: Env, cont: Cont): BaseData
 }
 
@@ -27,8 +26,7 @@ export class Evaluator {
       new CondEvaluator(this),
       new CallCCEvaluator(this),
       new SetEvaluator(this),
-      new BeginEvaluator(this),
-      new QuoteEvaluator(this)
+      new BeginEvaluator(this)
     ]
   }
 
@@ -49,7 +47,7 @@ export class Evaluator {
 
     if (SchemeSym.matches(node) && node.body) {
       for (const evaluator of this.evaluators) {
-        if (evaluator.matches(node)) {
+        if (evaluator.matches(node.body)) {
           return evaluator.evaluate(node, env, cont)
         }
       }

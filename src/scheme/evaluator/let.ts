@@ -19,11 +19,15 @@ import type { IEvaluator, Evaluator, Cont } from './index'
 export class LetEvaluator implements IEvaluator {
   constructor(private evaluator: Evaluator) {}
 
-  public matches(): boolean {
-    return false
+  public matches(tag: string): boolean {
+    return this.isLet(tag) || this.isLetStar(tag) || this.isLetRec(tag)
   }
 
   public evaluate(node: BaseData, env: Env, cont: Cont): BaseData {
     return node
   }
+
+  private isLet(tag: string) { return tag === 'let' }
+  private isLetStar(tag: string) { return tag === 'let*' }
+  private isLetRec(tag: string) { return tag === 'letrec' }
 }

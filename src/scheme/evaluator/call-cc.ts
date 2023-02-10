@@ -12,8 +12,8 @@ import type { IEvaluator, Evaluator, Cont } from './index'
 export class CallCCEvaluator implements IEvaluator {
   constructor(private evaluator: Evaluator) {}
 
-  public matches(): boolean {
-    return false
+  public matches(tag: string): boolean {
+    return tag === 'call-with-current-continuation'
   }
 
   public evaluate(node: BaseData, env: Env, cont: Cont): BaseData {
