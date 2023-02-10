@@ -44,7 +44,7 @@ export class SchemeExp extends BaseData {
  * 占位数据结构：符号
  */
 export class SchemeSym extends BaseData {
-  constructor(public body: string) {
+  constructor(public tag: string) {
     super()
   }
 

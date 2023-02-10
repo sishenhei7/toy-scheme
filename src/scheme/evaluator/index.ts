@@ -45,9 +45,9 @@ export class Evaluator {
       return res
     }
 
-    if (SchemeSym.matches(node) && node.body) {
+    if (SchemeSym.matches(node)) {
       for (const evaluator of this.evaluators) {
-        if (evaluator.matches(node.body)) {
+        if (evaluator.matches(node.tag)) {
           return evaluator.evaluate(node, env, cont)
         }
       }
