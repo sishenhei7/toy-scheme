@@ -19,4 +19,10 @@ export class BeginEvaluator implements IEvaluator {
   public evaluate(node: BaseData, env: Env, cont: Cont): BaseData {
     return node
   }
+
+  private getCont(node: BaseData, env: Env, cont: Cont) {
+    return (val: BaseData) => {
+
+    }
+  }
 }

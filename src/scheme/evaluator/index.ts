@@ -7,6 +7,7 @@ import { CondEvaluator } from './cond'
 import { CallCCEvaluator } from './call-cc'
 import { SetEvaluator } from './set'
 import { BeginEvaluator } from './begin'
+import { VariableEvaluator } from './variable'
 
 export type Cont = (node: BaseData) => BaseData
 
@@ -27,7 +28,9 @@ export class Evaluator {
       new CondEvaluator(this),
       new CallCCEvaluator(this),
       new SetEvaluator(this),
-      new BeginEvaluator(this)
+      new BeginEvaluator(this),
+      // 需要放在最下面
+      new VariableEvaluator()
     ]
   }
 
