@@ -27,7 +27,7 @@ export class BeginEvaluator implements IEvaluator {
       currentNode = currentNode.next
     }
 
-    assert(res, 'Syntax error: begin clause evaluate error!')
+    assert(res, 'Error: begin clause evaluate error!')
     return res
   }
 }

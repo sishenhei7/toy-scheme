@@ -20,27 +20,24 @@ export class CondEvaluator implements IEvaluator {
 
   public evaluate(node: SchemeExp, env: Env, cont: Cont): BaseData {
     let currentNode = node.body
-    let res = null
 
     while (currentNode) {
       const predict = this.getPredicate(currentNode)
 
       if (SchemeSym.matches(predict) && predict.tag === 'else') {
-        res = this.evaluator.evaluate(this.getValue(currentNode), env, cont)
-        break
+        return this.evaluator.evaluate(this.getValue(currentNode), env, cont)
       }
 
       const predictValue = this.evaluator.evaluate(predict, env, cont)
       if (SchemeBoolean.isTrue(predictValue)) {
-        res = this.evaluator.evaluate(this.getValue(currentNode), env, cont)
-        break
+        return this.evaluator.evaluate(this.getValue(currentNode), env, cont)
       }
 
       currentNode = currentNode.next
     }
 
-    assert(res, 'Syntax error: cond clause evaluate error!')
-    return res
+    assert(true, 'Error: cond clause evaluate error!')
+    return null as never
   }
 
   private getPredicate(node: BaseData | null): BaseData {
