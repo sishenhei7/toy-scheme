@@ -10,4 +10,4 @@ toy scheme interpreter written by typescript and rust
 2. 支持 continuation
 3. 支持断点、单步、调用栈展示
 4. 支持执行代码高亮
-5. 分别用 typescript 和 rust 写 2 个版本，并比较各自的性能
+5. 用 typescript 和 rust 各写 1 个版本，并比较各自的性能
