@@ -2,7 +2,7 @@
  * 数据结构：
  * 占位数据: 表达式、符号
  * 简单数据：number、string、boolean、quote
- * 复杂数据：暂时还没有
+ * 复杂数据：暂时还没有（continuation是一等公民应该怎么弄呢）
  */
 import { type TokenItem, TokenType } from './token'
 import { assert } from '../utils'
