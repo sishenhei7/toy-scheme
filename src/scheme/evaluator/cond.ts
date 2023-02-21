@@ -24,10 +24,12 @@ export class CondEvaluator implements IEvaluator {
     while (currentNode) {
       const predict = this.getPredicate(currentNode)
 
+      // 匹配 else 语句
       if (SchemeSym.matches(predict) && predict.tag === 'else') {
         return this.evaluator.evaluate(this.getValue(currentNode), env, cont)
       }
 
+      // 匹配第一个成功的 predict
       const predictValue = this.evaluator.evaluate(predict, env, cont)
       if (SchemeBoolean.isTrue(predictValue)) {
         return this.evaluator.evaluate(this.getValue(currentNode), env, cont)

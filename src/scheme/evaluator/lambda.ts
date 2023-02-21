@@ -16,4 +16,12 @@ export class LambdaEvaluator implements IEvaluator {
   public evaluate(node: BaseData, env: Env, cont: Cont): BaseData {
     return node
   }
+
+  // private getArgs(node: BaseData) {
+
+  // }
+
+  // private getBody(node: BaseData) {
+
+  // }
 }

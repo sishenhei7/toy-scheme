@@ -38,10 +38,12 @@ export class Evaluator {
     // 暂不支持()这样空语句的形式
     assert(node, `Evaluating error: unexpected ${node}`)
 
+    // 去掉 expression 两边的括号
     if (SchemeExp.matches(node)) {
       return this.evaluate(node.body, env, cont)
     }
 
+    // expression的第一个token
     if (SchemeSym.matches(node)) {
       for (const evaluator of this.evaluators) {
         if (evaluator.matches(node.tag)) {

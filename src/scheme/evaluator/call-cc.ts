@@ -3,7 +3,7 @@ import type { Env } from '../env'
 import type { IEvaluator, Evaluator, Cont } from './index'
 
 /**
- * 语法：
+ * 语法（后面加一个 lambda 语句）：
  * (call-with-current-continuation
  *    (lambda (resume-here)
  *      (set! control-state resume-here)

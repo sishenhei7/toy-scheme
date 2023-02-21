@@ -17,13 +17,15 @@ export class Env {
     return this.parentEnv.get(key)
   }
 
-  public set(key: string, value: any): void {
+  public set(key: string, value: BaseData): BaseData {
     if (this.obj.has(key)) {
       this.obj.set(key, value)
+      return value
     }
 
     assert(this.parentEnv, `${key} is not defined!`)
     this.parentEnv.set(key, value)
+    return value
   }
 
   public define(key: string, value: any): void {
