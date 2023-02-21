@@ -1,7 +1,7 @@
-import { type BaseData, SchemeSym } from '../parser/data'
+import { type BaseData, type Cont, SchemeSym } from '../parser/data'
 import type { Env } from '../env'
 import { assert } from '../utils'
-import type { IEvaluator, Evaluator, Cont } from './index'
+import type { IEvaluator, Evaluator } from './index'
 
 /**
  * 语法：

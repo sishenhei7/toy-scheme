@@ -1,4 +1,4 @@
-import { type BaseData, SchemeExp, SchemeSym } from '../parser/data'
+import { type BaseData, type Cont, SchemeExp, SchemeSym } from '../parser/data'
 import type { Env } from '../env'
 import { assert } from '../utils'
 import { IfEvaluator } from './if'
@@ -8,8 +8,6 @@ import { CallCCEvaluator } from './call-cc'
 import { SetEvaluator } from './set'
 import { BeginEvaluator } from './begin'
 import { VariableEvaluator } from './variable'
-
-export type Cont = (node: BaseData) => BaseData
 
 export interface IEvaluator {
   matches(tag: string): boolean

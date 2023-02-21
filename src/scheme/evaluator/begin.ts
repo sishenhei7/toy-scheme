@@ -1,6 +1,6 @@
-import type { BaseData, SchemeExp } from '../parser/data'
+import type { BaseData, SchemeExp,Cont } from '../parser/data'
 import type { Env } from '../env'
-import type { IEvaluator, Evaluator, Cont } from './index'
+import type { IEvaluator, Evaluator } from './index'
 import { assert } from '../utils'
 
 /**

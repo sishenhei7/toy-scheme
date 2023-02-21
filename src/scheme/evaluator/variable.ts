@@ -1,6 +1,6 @@
-import type { BaseData, SchemeSym } from '../parser/data'
+import type { BaseData, SchemeSym, Cont } from '../parser/data'
 import type { Env } from '../env'
-import type { IEvaluator, Evaluator, Cont } from './index'
+import type { IEvaluator } from './index'
 
 /**
  * 语法(直接是一个变量)：

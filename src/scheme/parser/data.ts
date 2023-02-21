@@ -3,6 +3,7 @@
  * 占位数据: 表达式、符号
  * 简单数据：number、string、boolean、quote
  * 复杂数据：暂时还没有（continuation是一等公民应该怎么弄呢）
+ * 其它数据：continuation、function
  */
 import { type TokenItem, TokenType } from './token'
 import { assert } from '../utils'
@@ -120,6 +121,18 @@ export class SchemeQuote extends BaseData {
 //     return item instanceof SchemeNil
 //   }
 // }
+
+/**
+ * 其它数据结构：continuation 是一等公民
+ */
+export type Cont = (node: BaseData) => BaseData
+
+/**
+ * 其它数据结构：function 是一等公民
+ */
+export class SchemeFunction {
+
+}
 
 /**
  * 把一段 token 数组解析成 data 单链表
