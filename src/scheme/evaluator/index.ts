@@ -8,6 +8,7 @@ import { CallCCEvaluator } from './call-cc'
 import { SetEvaluator } from './set'
 import { BeginEvaluator } from './begin'
 import { VariableEvaluator } from './variable'
+import { FunctionEvaluator } from './function'
 
 export interface IEvaluator {
   matches(tag: string): boolean
@@ -27,6 +28,7 @@ export class Evaluator {
       new CallCCEvaluator(this),
       new SetEvaluator(this),
       new BeginEvaluator(this),
+      new FunctionEvaluator(this),
       // 需要放在最下面
       new VariableEvaluator()
     ]

@@ -131,8 +131,15 @@ export type Cont = (node: BaseData) => BaseData
  * 其它数据结构：function 是一等公民
  */
 export class SchemeFunction {
+  constructor(public args: BaseData, public body: BaseData) { }
 
+  static matches(item: any): item is SchemeFunction {
+    return item instanceof SchemeFunction
+  }
 }
+
+// cont、function 都是一等公民？
+export type SchemeData = BaseData | Cont | SchemeFunction
 
 /**
  * 把一段 token 数组解析成 data 单链表
