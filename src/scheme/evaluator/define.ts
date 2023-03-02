@@ -1,4 +1,4 @@
-import type { BaseData, Cont } from '../parser/data'
+import { type SchemeData, type BaseData, type Cont, SchemeSym } from '../parser/data'
 import type { Env } from '../env'
 import type { IEvaluator, Evaluator } from './index'
 
@@ -13,11 +13,11 @@ import type { IEvaluator, Evaluator } from './index'
 export class DefineEvaluator implements IEvaluator {
   constructor(private evaluator: Evaluator) {}
 
-  public matches(tag: string): boolean {
-    return tag === 'define'
+  public matches(node: SchemeData): boolean {
+    return SchemeSym.matches(node) && node.tag === 'define'
   }
 
-  public evaluate(node: BaseData, env: Env, cont: Cont): BaseData {
+  public evaluate(node: BaseData, env: Env, cont: Cont): SchemeData {
     return node
   }
 }

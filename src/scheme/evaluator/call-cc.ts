@@ -1,4 +1,4 @@
-import type { BaseData, Cont } from '../parser/data'
+import { type SchemeData, type Cont, SchemeSym } from '../parser/data'
 import type { Env } from '../env'
 import type { IEvaluator, Evaluator } from './index'
 
@@ -12,11 +12,11 @@ import type { IEvaluator, Evaluator } from './index'
 export class CallCCEvaluator implements IEvaluator {
   constructor(private evaluator: Evaluator) {}
 
-  public matches(tag: string): boolean {
-    return tag === 'call-with-current-continuation'
+  public matches(node: SchemeData): boolean {
+    return SchemeSym.matches(node) && node.tag === 'call-with-current-continuation'
   }
 
-  public evaluate(node: BaseData, env: Env, cont: Cont): BaseData {
+  public evaluate(node: SchemeData, env: Env, cont: Cont): SchemeData {
     return node
   }
 }

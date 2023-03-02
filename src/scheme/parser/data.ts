@@ -31,7 +31,7 @@ export class SchemeExp extends BaseData {
     super()
   }
 
-  static matches(item: BaseData): item is SchemeExp {
+  static matches(item: SchemeData): item is SchemeExp {
     return item instanceof SchemeExp
   }
 }
@@ -44,7 +44,7 @@ export class SchemeSym extends BaseData {
     super()
   }
 
-  static matches(item: BaseData): item is SchemeSym {
+  static matches(item: SchemeData): item is SchemeSym {
     return item instanceof SchemeSym
   }
 }
@@ -57,7 +57,7 @@ export class SchemeNumber extends BaseData {
     super()
   }
 
-  static matches(item: BaseData): item is SchemeNumber {
+  static matches(item: SchemeData): item is SchemeNumber {
     return item instanceof SchemeNumber
   }
 }
@@ -70,7 +70,7 @@ export class SchemeString extends BaseData {
     super()
   }
 
-  static matches(item: BaseData): item is SchemeString {
+  static matches(item: SchemeData): item is SchemeString {
     return item instanceof SchemeString
   }
 }
@@ -83,11 +83,11 @@ export class SchemeBoolean extends BaseData {
     super()
   }
 
-  static matches(item: BaseData): item is SchemeBoolean {
+  static matches(item: SchemeData): item is SchemeBoolean {
     return item instanceof SchemeBoolean
   }
 
-  static isTrue(item: BaseData): boolean {
+  static isTrue(item: SchemeData): boolean {
     return SchemeBoolean.matches(item) && item.value
   }
 }
@@ -100,7 +100,7 @@ export class SchemeQuote extends BaseData {
     super()
   }
 
-  static matches(item: BaseData): item is SchemeQuote {
+  static matches(item: SchemeData): item is SchemeQuote {
     return item instanceof SchemeQuote
   }
 }
@@ -125,13 +125,13 @@ export class SchemeQuote extends BaseData {
 /**
  * 其它数据结构：continuation 是一等公民
  */
-export type Cont = (node: BaseData) => BaseData
+export type Cont = (node: SchemeData) => SchemeData
 
 /**
  * 其它数据结构：function 是一等公民
  */
 export class SchemeFunction {
-  constructor(public args: BaseData, public body: BaseData) { }
+  constructor(public args: SchemeData, public body: SchemeData) { }
 
   static matches(item: any): item is SchemeFunction {
     return item instanceof SchemeFunction

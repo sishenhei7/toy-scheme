@@ -1,4 +1,4 @@
-import type { BaseData, SchemeSym, Cont } from '../parser/data'
+import type { SchemeSym, Cont } from '../parser/data'
 import type { Env } from '../env'
 import type { IEvaluator } from './index'
 
@@ -13,7 +13,7 @@ export class VariableEvaluator implements IEvaluator {
     return true
   }
 
-  public evaluate(node: SchemeSym, env: Env, cont: Cont): BaseData {
+  public evaluate(node: SchemeSym, env: Env, cont: Cont): SchemeData {
     return cont(env.get(node.tag))
   }
 }

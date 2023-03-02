@@ -1,4 +1,4 @@
-import { type BaseData, type Cont, SchemeBoolean } from '../parser/data'
+import { type BaseData, type Cont, type SchemeData, SchemeBoolean } from '../parser/data'
 import type { Env } from '../env'
 import { assert } from '../utils'
 import type { IEvaluator, Evaluator } from './index'
@@ -14,12 +14,12 @@ export class IfEvaluator implements IEvaluator {
     return tag === 'if'
   }
 
-  public evaluate(node: BaseData, env: Env, cont: Cont): BaseData {
+  public evaluate(node: BaseData, env: Env, cont: Cont): SchemeData {
     return this.evaluator.evaluate(this.getPredicate(node), env, this.getCont(node, env, cont))
   }
 
   private getCont(node: BaseData, env: Env, cont: Cont): Cont {
-    return (val: BaseData) =>
+    return (val: SchemeData) =>
       SchemeBoolean.isTrue(val)
         ? this.evaluator.evaluate(this.getThen(node), env, cont)
         : this.evaluator.evaluate(this.getElse(node), env, cont)

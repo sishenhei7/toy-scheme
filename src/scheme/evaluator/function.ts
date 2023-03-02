@@ -11,7 +11,7 @@ import type { IEvaluator, Evaluator } from './index'
 export class FunctionEvaluator implements IEvaluator {
   constructor(private evaluator: Evaluator) { }
 
-  public evaluate(node: BaseData, env: Env, cont: Cont): BaseData {
+  public evaluate(node: BaseData, env: Env, cont: Cont): SchemeData {
     return node
   }
 }

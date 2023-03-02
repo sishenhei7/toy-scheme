@@ -1,4 +1,4 @@
-import type { BaseData, Cont } from '../parser/data'
+import type { BaseData, Cont, SchemeData } from '../parser/data'
 import type { Env } from '../env'
 import type { IEvaluator, Evaluator } from './index'
 
@@ -23,7 +23,7 @@ export class LetEvaluator implements IEvaluator {
     return this.isLet(tag) || this.isLetStar(tag) || this.isLetRec(tag)
   }
 
-  public evaluate(node: BaseData, env: Env, cont: Cont): BaseData {
+  public evaluate(node: BaseData, env: Env, cont: Cont): SchemeData {
     return node
   }
 

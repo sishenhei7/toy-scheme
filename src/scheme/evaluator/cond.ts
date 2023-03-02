@@ -1,4 +1,4 @@
-import { SchemeBoolean, SchemeSym, type BaseData, type SchemeExp, type Cont } from '../parser/data'
+import { SchemeBoolean, SchemeSym, type BaseData, type SchemeExp, type Cont, type SchemeData } from '../parser/data'
 import type { Env } from '../env'
 import type { IEvaluator, Evaluator } from './index'
 import { assert } from '../utils'
@@ -14,11 +14,11 @@ import { assert } from '../utils'
 export class CondEvaluator implements IEvaluator {
   constructor(private evaluator: Evaluator) {}
 
-  public matches(tag: string): boolean {
-    return tag === 'cond'
+  public matches(node: SchemeData): boolean {
+    return SchemeSym.matches(node) && node.tag === 'cond'
   }
 
-  public evaluate(node: SchemeExp, env: Env, cont: Cont): BaseData {
+  public evaluate(node: SchemeExp, env: Env, cont: Cont): SchemeData {
     let currentNode = node.body
 
     while (currentNode) {

@@ -1,4 +1,4 @@
-import type { BaseData } from './parser/data'
+import type { SchemeData } from './parser/data'
 import { assert } from './utils'
 
 export class StackFrame {}
@@ -8,7 +8,7 @@ export class Env {
 
   constructor(private parentEnv: Env | null = null, private stackFrame: StackFrame | null = null) {}
 
-  public get(key: string): BaseData {
+  public get(key: string): SchemeData {
     if (this.obj.has(key)) {
       return this.obj.get(key)
     }
@@ -17,7 +17,7 @@ export class Env {
     return this.parentEnv.get(key)
   }
 
-  public set(key: string, value: BaseData): BaseData {
+  public set(key: string, value: SchemeData): SchemeData {
     if (this.obj.has(key)) {
       this.obj.set(key, value)
       return value

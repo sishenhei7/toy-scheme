@@ -1,4 +1,4 @@
-import type { BaseData, SchemeExp,Cont } from '../parser/data'
+import { type SchemeData, type SchemeExp, type Cont, SchemeSym } from '../parser/data'
 import type { Env } from '../env'
 import type { IEvaluator, Evaluator } from './index'
 import { assert } from '../utils'
@@ -13,11 +13,11 @@ import { assert } from '../utils'
 export class BeginEvaluator implements IEvaluator {
   constructor(private evaluator: Evaluator) {}
 
-  public matches(tag: string): boolean {
-    return tag === 'begin'
+  public matches(node: SchemeData): boolean {
+    return SchemeSym.matches(node) && node.tag === 'begin'
   }
 
-  public evaluate(node: SchemeExp, env: Env, cont: Cont): BaseData {
+  public evaluate(node: SchemeExp, env: Env, cont: Cont): SchemeData {
     let currentNode = node.body
     assert(currentNode, 'Syntax error: begin followed no clause!')
 
