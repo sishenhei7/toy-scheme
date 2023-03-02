@@ -1,4 +1,4 @@
-import { type SchemeData, type Cont, SchemeFunction } from '../parser/data'
+import { type SchemeData, type Cont, type SchemeSym, SchemeFunction } from '../parser/data'
 import type { Env } from '../env'
 import type { IEvaluator, Evaluator } from './index'
 
@@ -9,9 +9,15 @@ import type { IEvaluator, Evaluator } from './index'
  */
 
 export class FunctionEvaluator implements IEvaluator {
-  constructor(private evaluator: Evaluator) { }
+  constructor(private evaluator: Evaluator) {}
 
-  public evaluate(node: BaseData, env: Env, cont: Cont): SchemeData {
+  public matches(tag: string, env: Env): boolean {
+    return SchemeFunction.matches(env.get(tag))
+  }
+
+  public evaluate(node: SchemeSym, env: Env, cont: Cont): SchemeData {
+    // TODO: ts-error
+    // @ts-expect-error
     return node
   }
 }

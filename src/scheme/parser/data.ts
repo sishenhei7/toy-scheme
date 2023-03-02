@@ -19,19 +19,19 @@ export class ILocation {
   }
 }
 
-export class BaseData extends ILocation {
-  next: BaseData | null = null
+export class NodeData extends ILocation {
+  next: NodeData | null = null
 }
 
 /**
  * 占位数据结构：表达式
  */
-export class SchemeExp extends BaseData {
-  constructor(public body: BaseData | null) {
+export class SchemeExp extends NodeData {
+  constructor(public body: NodeData | null) {
     super()
   }
 
-  static matches(item: SchemeData): item is SchemeExp {
+  static matches(item: NodeData): item is SchemeExp {
     return item instanceof SchemeExp
   }
 }
@@ -39,12 +39,12 @@ export class SchemeExp extends BaseData {
 /**
  * 占位数据结构：符号
  */
-export class SchemeSym extends BaseData {
+export class SchemeSym extends NodeData {
   constructor(public tag: string) {
     super()
   }
 
-  static matches(item: SchemeData): item is SchemeSym {
+  static matches(item: NodeData): item is SchemeSym {
     return item instanceof SchemeSym
   }
 }
@@ -52,7 +52,7 @@ export class SchemeSym extends BaseData {
 /**
  * 基础数据结构：number
  */
-export class SchemeNumber extends BaseData {
+export class SchemeNumber extends NodeData {
   constructor(public value: number) {
     super()
   }
@@ -65,7 +65,7 @@ export class SchemeNumber extends BaseData {
 /**
  * 基础数据结构：string
  */
-export class SchemeString extends BaseData {
+export class SchemeString extends NodeData {
   constructor(public value: string) {
     super()
   }
@@ -78,7 +78,7 @@ export class SchemeString extends BaseData {
 /**
  * 基础数据结构：boolean
  */
-export class SchemeBoolean extends BaseData {
+export class SchemeBoolean extends NodeData {
   constructor(public value: boolean) {
     super()
   }
@@ -95,7 +95,7 @@ export class SchemeBoolean extends BaseData {
 /**
  * 基础数据结构：quote
  */
-export class SchemeQuote extends BaseData {
+export class SchemeQuote extends NodeData {
   constructor(public value: string) {
     super()
   }
@@ -108,16 +108,16 @@ export class SchemeQuote extends BaseData {
 /**
  * 基础数据结构：nil (因为scheme里面并没有nil，所以这里不引入nil)
  */
-// export class SchemeNil extends BaseData {
+// export class SchemeNil extends NodeData {
 //   constructor(private value = null) {
 //     super()
 //   }
 
-//   static matches(item: BaseData): item is SchemeNil {
+//   static matches(item: NodeData): item is SchemeNil {
 //     return item instanceof SchemeNil
 //   }
 
-//   static isNil(item: BaseData): item is SchemeNil {
+//   static isNil(item: NodeData): item is SchemeNil {
 //     return item instanceof SchemeNil
 //   }
 // }
@@ -139,24 +139,25 @@ export class SchemeFunction {
 }
 
 // cont、function 都是一等公民？
+export type BaseData = SchemeNumber | SchemeString | SchemeBoolean | SchemeQuote
 export type SchemeData = BaseData | Cont | SchemeFunction
 
 /**
  * 把一段 token 数组解析成 data 单链表
  * Todo: 是否需要一个指向 parent 的指针？
  */
-export function getParser(tokenList: TokenItem[]): () => BaseData | null {
+export function getParser(tokenList: TokenItem[]): () => NodeData | null {
   let tokenCursor = 0
   const rParenEndList: number[] = []
 
   function parseTokenList(): ReturnType<ReturnType<typeof getParser>> {
-    let last: BaseData | null = null
-    let first: BaseData | null = null
+    let last: NodeData | null = null
+    let first: NodeData | null = null
     let shouldEnd = false
 
     while (!shouldEnd && tokenList.length && tokenCursor < tokenList.length) {
       const { type, value, start, end } = tokenList[tokenCursor++]
-      let currentData: BaseData | null = null
+      let currentData: NodeData | null = null
 
       switch (type) {
         case TokenType.Boolean:

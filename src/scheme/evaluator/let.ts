@@ -1,4 +1,4 @@
-import type { BaseData, Cont, SchemeData } from '../parser/data'
+import type { Cont, SchemeData, SchemeSym } from '../parser/data'
 import type { Env } from '../env'
 import type { IEvaluator, Evaluator } from './index'
 
@@ -23,7 +23,9 @@ export class LetEvaluator implements IEvaluator {
     return this.isLet(tag) || this.isLetStar(tag) || this.isLetRec(tag)
   }
 
-  public evaluate(node: BaseData, env: Env, cont: Cont): SchemeData {
+  public evaluate(node: SchemeSym, env: Env, cont: Cont): SchemeData {
+    // TODO: ts-error
+    // @ts-expect-error
     return node
   }
 

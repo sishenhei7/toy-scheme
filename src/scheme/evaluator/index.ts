@@ -1,4 +1,4 @@
-import { type BaseData, type Cont, type SchemeData, SchemeExp, SchemeSym } from '../parser/data'
+import { type NodeData, type Cont, type SchemeData, SchemeExp, SchemeSym } from '../parser/data'
 import type { Env } from '../env'
 import { assert } from '../utils'
 import { IfEvaluator } from './if'
@@ -11,8 +11,8 @@ import { VariableEvaluator } from './variable'
 import { FunctionEvaluator } from './function'
 
 export interface IEvaluator {
-  matches(node: SchemeData): boolean
-  evaluate(node: BaseData, env: Env, cont: Cont): SchemeData
+  matches(tag: string, env?: Env): boolean
+  evaluate(node: SchemeSym, env: Env, cont: Cont): SchemeData
 }
 
 export class Evaluator {
@@ -34,7 +34,7 @@ export class Evaluator {
     ]
   }
 
-  public evaluate(node: BaseData | null, env: Env, cont: Cont): SchemeData {
+  public evaluate(node: NodeData | null, env: Env, cont: Cont): SchemeData {
     // 暂不支持()这样空语句的形式
     assert(node, `Evaluating error: unexpected ${node}`)
 
@@ -46,12 +46,12 @@ export class Evaluator {
     // expression的第一个token
     if (SchemeSym.matches(node)) {
       for (const evaluator of this.evaluators) {
-        if (evaluator.matches(node.tag)) {
+        if (evaluator.matches(node.tag, env)) {
           return evaluator.evaluate(node, env, cont)
         }
       }
     }
 
-    return node
+    return node as never
   }
 }

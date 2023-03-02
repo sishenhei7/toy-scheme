@@ -1,4 +1,4 @@
-import type { SchemeSym, Cont } from '../parser/data'
+import { type SchemeSym, type Cont, type SchemeData, SchemeNumber, SchemeString, SchemeBoolean, SchemeQuote } from '../parser/data'
 import type { Env } from '../env'
 import type { IEvaluator } from './index'
 
@@ -9,8 +9,12 @@ import type { IEvaluator } from './index'
 export class VariableEvaluator implements IEvaluator {
   constructor() { }
 
-  public matches(): boolean {
-    return true
+  public matches(tag: string, env: Env): boolean {
+    const value = env.get(tag)
+    return SchemeNumber.matches(value)
+      || SchemeString.matches(value)
+      || SchemeBoolean.matches(value)
+      || SchemeQuote.matches(value)
   }
 
   public evaluate(node: SchemeSym, env: Env, cont: Cont): SchemeData {

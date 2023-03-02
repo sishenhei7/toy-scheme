@@ -1,4 +1,4 @@
-import { SchemeBoolean, SchemeSym, type BaseData, type SchemeExp, type Cont, type SchemeData } from '../parser/data'
+import { SchemeBoolean, SchemeSym, type NodeData, SchemeExp, type Cont, type SchemeData } from '../parser/data'
 import type { Env } from '../env'
 import type { IEvaluator, Evaluator } from './index'
 import { assert } from '../utils'
@@ -14,12 +14,12 @@ import { assert } from '../utils'
 export class CondEvaluator implements IEvaluator {
   constructor(private evaluator: Evaluator) {}
 
-  public matches(node: SchemeData): boolean {
-    return SchemeSym.matches(node) && node.tag === 'cond'
+  public matches(tag: string): boolean {
+    return tag === 'cond'
   }
 
-  public evaluate(node: SchemeExp, env: Env, cont: Cont): SchemeData {
-    let currentNode = node.body
+  public evaluate(node: SchemeSym, env: Env, cont: Cont): SchemeData {
+    let currentNode = node.next
 
     while (currentNode) {
       const predict = this.getPredicate(currentNode)
@@ -42,13 +42,15 @@ export class CondEvaluator implements IEvaluator {
     return null as never
   }
 
-  private getPredicate(node: BaseData | null): BaseData {
-    assert(node, 'Syntax error: cond clause need predicate clause!')
-    return node
+  private getPredicate(node: NodeData): NodeData {
+    assert(SchemeExp.matches(node), 'Syntax error: cond clause should have brackets!')
+    assert(node?.body, 'Syntax error: cond clause need predicate clause!')
+    return node.body
   }
 
-  private getValue(node: BaseData | null): BaseData {
-    assert(node?.next, 'Syntax error: cond clause need value clause!')
-    return node.next
+  private getValue(node: NodeData): NodeData {
+    assert(SchemeExp.matches(node), 'Syntax error: cond clause should have brackets!')
+    assert(node?.body?.next, 'Syntax error: cond clause need value clause!')
+    return node.body.next
   }
 }

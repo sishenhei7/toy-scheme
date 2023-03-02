@@ -1,4 +1,4 @@
-import type { BaseData, Cont, SchemeData } from '../parser/data'
+import type { Cont, SchemeData, SchemeSym } from '../parser/data'
 import type { Env } from '../env'
 import type { IEvaluator, Evaluator } from './index'
 
@@ -13,7 +13,9 @@ export class LambdaEvaluator implements IEvaluator {
     return tag === 'lambda'
   }
 
-  public evaluate(node: BaseData, env: Env, cont: Cont): SchemeData {
+  public evaluate(node: SchemeSym, env: Env, cont: Cont): SchemeData {
+    // TODO: ts-error
+    // @ts-expect-error
     return node
   }
 
