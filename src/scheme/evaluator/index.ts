@@ -7,8 +7,8 @@ import { CondEvaluator } from './cond'
 import { CallCCEvaluator } from './call-cc'
 import { SetEvaluator } from './set'
 import { BeginEvaluator } from './begin'
+import { ProcEvaluator } from './proc'
 import { VariableEvaluator } from './variable'
-import { FunctionEvaluator } from './function'
 
 export interface IEvaluator {
   matches(tag: string, env?: Env): boolean
@@ -28,8 +28,7 @@ export class Evaluator {
       new CallCCEvaluator(this),
       new SetEvaluator(this),
       new BeginEvaluator(this),
-      new FunctionEvaluator(this),
-      // 需要放在最下面
+      new ProcEvaluator(this),
       new VariableEvaluator()
     ]
   }
@@ -52,6 +51,7 @@ export class Evaluator {
       }
     }
 
+    assert(true, `Evaluate error: unexpected ${node}`)
     return node as never
   }
 }

@@ -8,7 +8,7 @@ import type { IEvaluator, Evaluator } from './index'
  * (vhello "Hello world")
  */
 
-export class FunctionEvaluator implements IEvaluator {
+export class ProcEvaluator implements IEvaluator {
   constructor(private evaluator: Evaluator) {}
 
   public matches(tag: string, env: Env): boolean {
