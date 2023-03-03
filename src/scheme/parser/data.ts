@@ -139,7 +139,7 @@ export class SchemeProc {
     public envClosure: Env
   ) { }
 
-  static matches(item: any): item is SchemeProc {
+  static matches(item: SchemeData): item is SchemeProc {
     return item instanceof SchemeProc
   }
 }
