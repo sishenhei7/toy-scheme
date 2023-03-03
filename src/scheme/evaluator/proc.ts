@@ -1,4 +1,4 @@
-import { type SchemeData, type Cont, type SchemeSym, SchemeProc, NodeData } from '../parser/data';
+import { type SchemeData, type Cont, SchemeSym, SchemeProc, NodeData } from '../parser/data';
 import { Env, StackFrame } from '../env'
 import type { IEvaluator, Evaluator } from './index'
 import { assert } from '../utils'
@@ -35,8 +35,14 @@ export class ProcEvaluator implements IEvaluator {
   }
 
   private evaluateArgs(params: NodeData | null, args: NodeData | null, env: Env): void {
-    while (NodeData) {
+    while (params && args) {
+      assert(SchemeSym.matches(params), 'Proc params evaluate error!')
 
+      const value = this.evaluator.evaluate(args, env, x => x)
+      env.set(params.tag, value)
+      params = params.next
+      args = args.next
     }
+    assert(!params && !args, 'Proc params and args do not match!')
   }
 }
