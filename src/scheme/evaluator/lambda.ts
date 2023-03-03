@@ -1,6 +1,7 @@
-import type { Cont, SchemeData, SchemeSym } from '../parser/data'
+import { type Cont, type SchemeData, SchemeSym, SchemeExp, SchemeProc } from '../parser/data'
 import type { Env } from '../env'
 import type { IEvaluator, Evaluator } from './index'
+import { assert } from '../utils'
 
 /**
  * 语法：
@@ -14,16 +15,10 @@ export class LambdaEvaluator implements IEvaluator {
   }
 
   public evaluate(node: SchemeSym, env: Env, cont: Cont): SchemeData {
-    // TODO: ts-error
-    // @ts-expect-error
-    return node
+    assert(node.next && node.next.next, 'Lambda evaluting error: should follow 2 expressions!')
+    const params = SchemeExp.matches(node.next) ? node.next.body : node.next
+    const body = SchemeExp.matches(node.next.next) ? node.next.next.body : node.next.next
+    assert(body, 'Lambda evaluting error: body should exist!')
+    return new SchemeProc('<<lambda>>', params, body, env)
   }
-
-  // private getArgs(node: BaseData) {
-
-  // }
-
-  // private getBody(node: BaseData) {
-
-  // }
 }

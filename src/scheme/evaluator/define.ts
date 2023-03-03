@@ -35,6 +35,7 @@ export class DefineEvaluator implements IEvaluator {
       const name = varNode.body.tag
       const params = varNode.body.next
       const body = bodyNode.body
+      assert(body, 'Define evaluting error: proc body should exist!')
       return env.set(name, new SchemeProc(name, params, body, env))
     }
 

@@ -134,7 +134,7 @@ export type Cont = (node: SchemeData) => SchemeData
 export class SchemeProc {
   constructor(
     public name: string,
-    public params: SchemeSym | null,
+    public params: NodeData | null,
     public body: NodeData,
     public envClosure: Env
   ) { }
