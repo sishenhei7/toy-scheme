@@ -3,10 +3,10 @@
  * 占位数据: 表达式、符号
  * 简单数据：number、string、boolean、quote
  * 复杂数据：暂时还没有（continuation是一等公民应该怎么弄呢）
- * 其它数据：continuation、function
+ * 其它数据：continuation、proc
  */
 import { type TokenItem, TokenType } from './token'
-import { StackFrame, Env } from '../env'
+import type { Env } from '../env'
 import { assert } from '../utils'
 
 export class ILocation {
@@ -129,31 +129,24 @@ export class SchemeQuote extends NodeData {
 export type Cont = (node: SchemeData) => SchemeData
 
 /**
- * 其它数据结构：function 是一等公民
+ * 其它数据结构：proc 是一等公民
  */
-export class SchemeFunction {
+export class SchemeProc {
   constructor(
     public name: string,
-    private params: NodeData,
-    private body: NodeData,
-    private envClosure: Env
+    public params: SchemeSym | null,
+    public body: NodeData,
+    public envClosure: Env
   ) { }
 
-  static matches(item: any): item is SchemeFunction {
-    return item instanceof SchemeFunction
-  }
-
-  static apply(args: NodeData, parentStackFrame: StackFrame, cont: Cont): SchemeData {
-    // 1.建立env，连接parentStackFrame
-    // 2.解析args到env里面去
-    // 3.执行body
-    // 4.把结果返回给cont
+  static matches(item: any): item is SchemeProc {
+    return item instanceof SchemeProc
   }
 }
 
-// cont、function 都是一等公民？
+// cont、proc 都是一等公民？
 export type BaseData = SchemeNumber | SchemeString | SchemeBoolean | SchemeQuote
-export type SchemeData = BaseData | Cont | SchemeFunction
+export type SchemeData = BaseData | Cont | SchemeProc
 
 /**
  * 把一段 token 数组解析成 data 单链表

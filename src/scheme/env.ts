@@ -2,9 +2,9 @@ import type { SchemeData } from './parser/data'
 import { assert } from './utils'
 
 export class StackFrame {
-  constructor(private parentStackFrame: StackFrame) {}
+  constructor(private parentStackFrame: StackFrame | null) {}
 
-  public getParent(): StackFrame {
+  public getParent(): StackFrame | null {
     return this.parentStackFrame
   }
 }
