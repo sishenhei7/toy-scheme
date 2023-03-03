@@ -1,11 +1,13 @@
-import type { Cont, SchemeData, SchemeSym } from '../parser/data'
-import type { Env } from '../env'
+import { NodeData, SchemeExp, type Cont, type SchemeData, SchemeSym } from '../parser/data'
+import { Env } from '../env'
 import type { IEvaluator, Evaluator } from './index'
+import { assert } from '../utils'
 
 /**
  * 语法：
  * 1.let 表达式：
- * (let binds body)
+ * (let ((i 1) (j 2))
+ *    (+ i j))
  * 2.let* 表达式(可以在定义中引用之前定义的变量)：
  * (let* ((i 1) (j (+ i 2)))
  *    (* i j))
@@ -24,9 +26,13 @@ export class LetEvaluator implements IEvaluator {
   }
 
   public evaluate(node: SchemeSym, env: Env, cont: Cont): SchemeData {
-    // TODO: ts-error
-    // @ts-expect-error
-    return node
+    assert(node.next && node.next.next, 'Let evaluting error: should follow 2 expressions!')
+    const defination = node.next
+    const body = node.next.next
+    const newEnv = new Env(env)
+    assert(SchemeExp.matches(defination), 'Let evaluting error: should follow SchemeExp!')
+    this.evaluateDefination(defination.body, env)
+    return this.evaluator.evaluate(body, newEnv, cont)
   }
 
   private isLet(tag: string) {
@@ -37,5 +43,13 @@ export class LetEvaluator implements IEvaluator {
   }
   private isLetRec(tag: string) {
     return tag === 'letrec'
+  }
+  private evaluateDefination(node: NodeData | null, env: Env): void {
+    while (node && SchemeExp.matches(node) && node.body) {
+      assert(SchemeSym.matches(node.body), 'Let evaluting error: defs should be SchemeSym!')
+      const varNode = node.body
+      env.set(varNode.tag, this.evaluator.evaluate(varNode.next, env, x => x))
+      node = node.next
+    }
   }
 }
