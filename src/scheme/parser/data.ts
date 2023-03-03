@@ -6,6 +6,7 @@
  * 其它数据：continuation、function
  */
 import { type TokenItem, TokenType } from './token'
+import { StackFrame, Env } from '../env'
 import { assert } from '../utils'
 
 export class ILocation {
@@ -131,10 +132,22 @@ export type Cont = (node: SchemeData) => SchemeData
  * 其它数据结构：function 是一等公民
  */
 export class SchemeFunction {
-  constructor(public args: SchemeData, public body: SchemeData) { }
+  constructor(
+    public name: string,
+    private params: NodeData,
+    private body: NodeData,
+    private envClosure: Env
+  ) { }
 
   static matches(item: any): item is SchemeFunction {
     return item instanceof SchemeFunction
+  }
+
+  static apply(args: NodeData, parentStackFrame: StackFrame, cont: Cont): SchemeData {
+    // 1.建立env，连接parentStackFrame
+    // 2.解析args到env里面去
+    // 3.执行body
+    // 4.把结果返回给cont
   }
 }
 
