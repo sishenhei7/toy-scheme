@@ -45,6 +45,10 @@ export class SchemeSym extends NodeData {
     super()
   }
 
+  toString(): string {
+    return this.tag
+  }
+
   static matches(item: NodeData): item is SchemeSym {
     return item instanceof SchemeSym
   }
@@ -56,6 +60,10 @@ export class SchemeSym extends NodeData {
 export class SchemeNumber extends NodeData {
   constructor(public value: number) {
     super()
+  }
+
+  toString(): string {
+    return String(this.value)
   }
 
   static matches(item: SchemeData): item is SchemeNumber {
@@ -71,6 +79,10 @@ export class SchemeString extends NodeData {
     super()
   }
 
+  toString(): string {
+    return this.value
+  }
+
   static matches(item: SchemeData): item is SchemeString {
     return item instanceof SchemeString
   }
@@ -82,6 +94,10 @@ export class SchemeString extends NodeData {
 export class SchemeBoolean extends NodeData {
   constructor(public value: boolean) {
     super()
+  }
+
+  toString(): string {
+    return String(this.value)
   }
 
   static matches(item: SchemeData): item is SchemeBoolean {
@@ -99,6 +115,10 @@ export class SchemeBoolean extends NodeData {
 export class SchemeQuote extends NodeData {
   constructor(public value: string) {
     super()
+  }
+
+  toString(): string {
+    return this.value
   }
 
   static matches(item: SchemeData): item is SchemeQuote {
@@ -129,6 +149,11 @@ export class SchemeQuote extends NodeData {
 export class SchemeList {
   constructor(private car: NodeData, private cdr: NodeData) {}
 
+  toString(): string {
+    return ''
+    // return String(this.value)
+  }
+
   static isNil() {
 
   }
@@ -150,6 +175,10 @@ export class SchemeProc {
     public body: NodeData,
     public envClosure: Env
   ) { }
+
+  toString(): string {
+    return '<<function>>'
+  }
 
   static matches(item: SchemeData): item is SchemeProc {
     return item instanceof SchemeProc
