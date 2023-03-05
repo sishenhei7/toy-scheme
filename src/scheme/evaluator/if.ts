@@ -7,7 +7,7 @@ import type { IEvaluator, Evaluator } from './index'
  * 语法：
  * (if predicate then_value else_value)
  */
-export class IfEvaluator implements IEvaluator {
+export default class IfEvaluator implements IEvaluator {
   constructor(private evaluator: Evaluator) {}
 
   public matches(tag: string): boolean {

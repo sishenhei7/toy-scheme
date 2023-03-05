@@ -40,12 +40,14 @@ export class Env {
       return value
     }
 
-    assert(this.parentEnv, `${key} is not defined!`)
+    assert(this.parentEnv, `${key} is not defined in parent env!`)
     this.parentEnv.set(key, value)
     return value
   }
 
-  public define(key: string, value: any): void {
+  public define(key: string, value: SchemeData): SchemeData {
+    assert(!this.obj.has(key), `${key} is already defined in this env!`)
     this.obj.set(key, value)
+    return value
   }
 }

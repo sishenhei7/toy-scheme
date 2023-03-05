@@ -7,7 +7,7 @@ import { assert } from '../utils'
  * 语法：
  * (lambda (a b c) (+ a b c))
  */
-export class LambdaEvaluator implements IEvaluator {
+export default class LambdaEvaluator implements IEvaluator {
   constructor(private evaluator: Evaluator) {}
 
   public matches(tag: string): boolean {

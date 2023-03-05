@@ -9,7 +9,7 @@ import { assert } from '../utils'
  * (vhello "Hello world")
  */
 
-export class ProcEvaluator implements IEvaluator {
+export default class ProcEvaluator implements IEvaluator {
   constructor(private evaluator: Evaluator) {}
 
   public matches(tag: string, env: Env): boolean {
@@ -39,7 +39,7 @@ export class ProcEvaluator implements IEvaluator {
       assert(SchemeSym.matches(params), 'Proc params evaluate error!')
 
       const value = this.evaluator.evaluate(args, env, x => x)
-      env.set(params.tag, value)
+      env.define(params.tag, value)
       params = params.next
       args = args.next
     }

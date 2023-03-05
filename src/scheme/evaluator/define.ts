@@ -11,7 +11,7 @@ import { assert } from '../utils'
  * (define (hello name) (string-append "Hello " name "!"))
  */
 
-export class DefineEvaluator implements IEvaluator {
+export default class DefineEvaluator implements IEvaluator {
   constructor(private evaluator: Evaluator) {}
 
   public matches(tag: string): boolean {
@@ -26,7 +26,7 @@ export class DefineEvaluator implements IEvaluator {
 
     // 定义变量或者函数
     if (SchemeSym.matches(varNode)) {
-      return env.set(varNode.tag, this.evaluator.evaluate(bodyNode, env, cont))
+      return env.define(varNode.tag, this.evaluator.evaluate(bodyNode, env, cont))
     }
 
     // 定义函数
@@ -36,7 +36,7 @@ export class DefineEvaluator implements IEvaluator {
       const params = varNode.body.next
       const body = bodyNode.body
       assert(body, 'Define evaluting error: proc body should exist!')
-      return env.set(name, new SchemeProc(name, params, body, env))
+      return env.define(name, new SchemeProc(name, params, body, env))
     }
 
     assert(true, 'Error: define clause evaluate error!')

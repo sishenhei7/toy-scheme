@@ -6,7 +6,7 @@ import type { IEvaluator } from './index'
  * 语法(直接是一个变量，有可能是一个函数，或者continuation)：
  * x
  */
-export class VariableEvaluator implements IEvaluator {
+export default class VariableEvaluator implements IEvaluator {
   constructor() { }
 
   public matches(tag: string, env: Env): boolean {

@@ -2,7 +2,7 @@
  * 数据结构：
  * 占位数据: 表达式、符号
  * 简单数据：number、string、boolean、quote
- * 复杂数据：暂时还没有（continuation是一等公民应该怎么弄呢）
+ * 复杂数据：列表
  * 其它数据：continuation、proc
  */
 import { type TokenItem, TokenType } from './token'
@@ -122,6 +122,18 @@ export class SchemeQuote extends NodeData {
 //     return item instanceof SchemeNil
 //   }
 // }
+
+/**
+ * 复杂数据结构：列表
+ */
+export class SchemeList {
+  constructor(private car: NodeData, private cdr: NodeData) {}
+
+  static isNil() {
+
+  }
+}
+
 
 /**
  * 其它数据结构：continuation 是一等公民

@@ -9,7 +9,7 @@ import type { IEvaluator, Evaluator } from './index'
  *      (set! control-state resume-here)
  *      (return element)))
  */
-export class CallCCEvaluator implements IEvaluator {
+export default class CallCCEvaluator implements IEvaluator {
   constructor(private evaluator: Evaluator) {}
 
   public matches(tag: string): boolean {

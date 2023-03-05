@@ -7,7 +7,7 @@ import type { IEvaluator, Evaluator } from './index'
  * 语法：
  * (set! var (* var 10))
  */
-export class SetEvaluator implements IEvaluator {
+export default class SetEvaluator implements IEvaluator {
   constructor(private evaluator: Evaluator) {}
 
   public matches(tag: string): boolean {

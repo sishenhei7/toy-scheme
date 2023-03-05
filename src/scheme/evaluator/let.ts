@@ -18,7 +18,7 @@ import { assert } from '../utils'
  *    (iter (cdr ls0) (+ (car ls0) n))))))
  *  (iter ls 0))
  */
-export class LetEvaluator implements IEvaluator {
+export default class LetEvaluator implements IEvaluator {
   constructor(private evaluator: Evaluator) {}
 
   public matches(tag: string): boolean {
@@ -48,7 +48,7 @@ export class LetEvaluator implements IEvaluator {
     while (node && SchemeExp.matches(node) && node.body) {
       assert(SchemeSym.matches(node.body), 'Let evaluting error: defs should be SchemeSym!')
       const varNode = node.body
-      env.set(varNode.tag, this.evaluator.evaluate(varNode.next, env, x => x))
+      env.define(varNode.tag, this.evaluator.evaluate(varNode.next, env, x => x))
       node = node.next
     }
   }

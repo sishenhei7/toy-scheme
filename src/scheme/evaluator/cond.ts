@@ -11,7 +11,7 @@ import { assert } from '../utils'
  *     (else        clauses_else))
  */
 
-export class CondEvaluator implements IEvaluator {
+export default class CondEvaluator implements IEvaluator {
   constructor(private evaluator: Evaluator) {}
 
   public matches(tag: string): boolean {

@@ -10,7 +10,7 @@ import { assert } from '../utils'
  *    (set! amount n)
  *    amout)
  */
-export class BeginEvaluator implements IEvaluator {
+export default class BeginEvaluator implements IEvaluator {
   constructor(private evaluator: Evaluator) {}
 
   public matches(tag: string): boolean {
