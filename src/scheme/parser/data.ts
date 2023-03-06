@@ -144,18 +144,39 @@ export class SchemeQuote extends NodeData {
 // }
 
 /**
- * 复杂数据结构：列表
+ * 复杂数据结构：列表(列表里面没有 nil 这个数据结构，实现起来太麻烦)
  */
 export class SchemeList {
-  constructor(private car: NodeData, private cdr: NodeData) {}
+  constructor(private _car: SchemeData, private _cdr: SchemeData) {}
 
-  toString(): string {
+  public car(): SchemeData {
+    return this._car
+  }
+
+  public cdr(): SchemeData {
+    return this._cdr
+  }
+
+  public setCar(item: SchemeData): void {
+    this._car = item
+  }
+
+  public setCdr(item: SchemeData): void {
+    this._cdr = item
+  }
+
+  static matches(item: SchemeData): item is SchemeList {
+    return item instanceof SchemeList
+  }
+
+  public toString(): string {
+    // TODO
     return ''
     // return String(this.value)
   }
 
-  static isNil() {
-
+  static isNil(item: SchemeData): SchemeBoolean {
+    return SchemeQuote.matches(item) && item.value === "'()" ? new SchemeBoolean(true) : new SchemeBoolean(false)
   }
 }
 
@@ -187,7 +208,7 @@ export class SchemeProc {
 
 // cont、proc 都是一等公民？
 export type BaseData = SchemeNumber | SchemeString | SchemeBoolean | SchemeQuote
-export type SchemeData = BaseData | Cont | SchemeProc
+export type SchemeData = BaseData | SchemeList | Cont | SchemeProc
 
 /**
  * 把一段 token 数组解析成 data 单链表

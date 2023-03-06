@@ -1,4 +1,4 @@
-import type { SchemeData, Cont, SchemeSym, NodeData } from '../parser/data'
+import { type SchemeData, type Cont, type SchemeSym, type NodeData, SchemeList } from '../parser/data'
 import type { Env } from '../env'
 import type { IEvaluator, Evaluator } from './index'
 
@@ -44,7 +44,7 @@ import type { IEvaluator, Evaluator } from './index'
 // });
 
 interface Callback {
-  (node: NodeData): SchemeData
+  (node: NodeData, env: Env): SchemeData
 }
 
 /**
@@ -56,6 +56,9 @@ export default class BuildInEvaluator implements IEvaluator {
   evaluatorMap: Map<string, Callback> = new Map()
 
   constructor(private evaluator: Evaluator) {
+    this.evaluator = evaluator
+    this.evaluatorMap.set('cons', (args: NodeData, env: Env) => new SchemeList(evaluator.evaluate(args, env, x => x), evaluator.evaluate(args.next, env, x => x)))
+    this.evaluatorMap.set('null?', (args: NodeData, env: Env) => SchemeList.isNil(evaluator.evaluate(args, env, x => x)))
     // this.evaluatorMap.set('display', (args: NodeData) => )
   }
 
