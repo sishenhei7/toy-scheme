@@ -1,6 +1,7 @@
-import { type SchemeData, type Cont, type SchemeSym, type NodeData, SchemeList } from '../parser/data'
+import { type SchemeData, type Cont, type SchemeSym, type NodeData, SchemeList, SchemeBoolean } from '../parser/data';
 import type { Env } from '../env'
 import type { IEvaluator, Evaluator } from './index'
+import { assert } from '../utils'
 
 // makeProc('cons', (args: Sv) => new SvCons(SvCons.car(args), SvCons.cadr(args)));
 // makeProc('null?', (args: Sv) => SvBool.fromBoolean(SvCons.isNil(SvCons.car(args))));
@@ -57,8 +58,11 @@ export default class BuildInEvaluator implements IEvaluator {
 
   constructor(private evaluator: Evaluator) {
     this.evaluator = evaluator
-    this.evaluatorMap.set('cons', (args: NodeData, env: Env) => new SchemeList(evaluator.evaluate(args, env, x => x), evaluator.evaluate(args.next, env, x => x)))
-    this.evaluatorMap.set('null?', (args: NodeData, env: Env) => SchemeList.isNil(evaluator.evaluate(args, env, x => x)))
+    this.evaluatorMap.set('cons', (args: NodeData, env: Env) => SchemeList.cons(evaluator.evaluate(args, env, x => x), evaluator.evaluate(args.next, env, x => x)))
+    this.evaluatorMap.set('null?', (args: NodeData, env: Env) => new SchemeBoolean(SchemeList.isNil(evaluator.evaluate(args, env, x => x))))
+    this.evaluatorMap.set('car', (args: NodeData, env: Env) => SchemeList.cast(evaluator.evaluate(args, env, x => x)).car())
+    this.evaluatorMap.set('cdr', (args: NodeData, env: Env) => SchemeList.cast(evaluator.evaluate(args, env, x => x)).cdr())
+    this.evaluatorMap.set('cadr', (args: NodeData, env: Env) => SchemeList.cast(evaluator.evaluate(args, env, x => x)).cadr())
     // this.evaluatorMap.set('display', (args: NodeData) => )
   }
 

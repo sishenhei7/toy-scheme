@@ -157,6 +157,10 @@ export class SchemeList {
     return this._cdr
   }
 
+  public cadr(): SchemeData {
+    return SchemeList.cast(this._car)._cdr
+  }
+
   public setCar(item: SchemeData): void {
     this._car = item
   }
@@ -175,8 +179,17 @@ export class SchemeList {
     // return String(this.value)
   }
 
-  static isNil(item: SchemeData): SchemeBoolean {
-    return SchemeQuote.matches(item) && item.value === "'()" ? new SchemeBoolean(true) : new SchemeBoolean(false)
+  static cast(item: SchemeData): SchemeList {
+    assert(SchemeList.matches(item), 'Invalid SchemeList!')
+    return item
+  }
+
+  static cons(_car: SchemeData, _cdr: SchemeData): SchemeList {
+    return new SchemeList(_car, _cdr)
+  }
+
+  static isNil(item: SchemeData): boolean {
+    return SchemeQuote.matches(item) && item.value === "'()"
   }
 }
 
