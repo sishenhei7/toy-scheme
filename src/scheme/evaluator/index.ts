@@ -36,7 +36,6 @@ export class Evaluator {
   }
 
   public evaluate(node: NodeData | null, env: Env, cont: Cont): SchemeData {
-    console.log(node)
     // 暂不支持()这样空语句的形式
     assert(node, `Evaluating error: unexpected ${node}`)
 

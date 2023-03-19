@@ -66,6 +66,11 @@ export class SchemeNumber extends NodeData {
     return String(this.value)
   }
 
+  static cast(item: SchemeData): SchemeNumber {
+    assert(SchemeNumber.matches(item), 'Invalid SchemeNumber!')
+    return item
+  }
+
   static matches(item: SchemeData): item is SchemeNumber {
     return item instanceof SchemeNumber
   }
@@ -100,12 +105,17 @@ export class SchemeBoolean extends NodeData {
     return String(this.value)
   }
 
+  static cast(item: SchemeData): SchemeBoolean {
+    assert(SchemeBoolean.matches(item), 'Invalid SchemeBoolean!')
+    return item
+  }
+
   static matches(item: SchemeData): item is SchemeBoolean {
     return item instanceof SchemeBoolean
   }
 
   static isTrue(item: SchemeData): boolean {
-    return SchemeBoolean.matches(item) && item.value
+    return SchemeBoolean.cast(item).value
   }
 }
 
@@ -171,6 +181,22 @@ export class SchemeList {
 
   static matches(item: SchemeData): item is SchemeList {
     return item instanceof SchemeList
+  }
+
+  public getLength(): SchemeNumber {
+    let res = 1
+    let list: SchemeData = this
+    while (list) {
+      res += 1
+
+      if (!SchemeList.matches(list)) {
+        break
+      }
+
+      list = list.cdr()
+    }
+
+    return new SchemeNumber(res)
   }
 
   public toString(): string {
