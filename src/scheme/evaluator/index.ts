@@ -35,6 +35,7 @@ export class Evaluator {
     ]
   }
 
+  // TODO: 添加一个 evaluateList
   public evaluate(node: NodeData | null, env: Env, cont: Cont): SchemeData {
     // 暂不支持()这样空语句的形式
     assert(node, `Evaluating error: unexpected ${node}`)
@@ -59,7 +60,7 @@ export class Evaluator {
       }
     }
 
-    assert(true, `Evaluate error: unexpected ${node}`)
-    return node as never
+    // TODO: refine
+    return node as SchemeData
   }
 }

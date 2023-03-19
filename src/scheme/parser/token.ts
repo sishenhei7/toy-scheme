@@ -5,24 +5,24 @@ export enum TokenType {
   Quote,
   LParen,
   RParen,
-  Symbol,
   Number,
   String,
-  WhiteSpace,
   Boolean,
-  Comment
+  WhiteSpace,
+  Comment,
+  Symbol
 }
 
 export const tokenRegexList: [TokenType, RegExp][] = [
   [TokenType.Quote, /^'\S+/],
   [TokenType.LParen, /^\(/],
   [TokenType.RParen, /^\)/],
-  [TokenType.Symbol, /^[^\s()',]+/],
   [TokenType.Number, /^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?/],
   [TokenType.String, /^"([^\\"]+|\\.)*"/],
-  [TokenType.WhiteSpace, /^\s+/],
   [TokenType.Boolean, /^#t|^#f/],
-  [TokenType.Comment, /^;.*/]
+  [TokenType.WhiteSpace, /^\s+/],
+  [TokenType.Comment, /^;.*/],
+  [TokenType.Symbol, /^[^\s()',]+/]
 ]
 
 export class TokenItem extends ILocation {
@@ -69,6 +69,7 @@ export function tokenizer(st: string): TokenItem[] {
         cursor += len
         st = st.substring(len)
         isMatched = true
+        break
       }
     }
 

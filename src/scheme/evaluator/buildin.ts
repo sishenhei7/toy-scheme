@@ -45,7 +45,7 @@ import { assert } from '../utils'
 // });
 
 interface Callback {
-  (node: NodeData, env: Env): unknown
+  (node: NodeData, env: Env): SchemeData
 }
 
 /**
@@ -58,25 +58,27 @@ export default class BuildInEvaluator implements IEvaluator {
 
   constructor(private evaluator: Evaluator) {
     this.evaluator = evaluator
-    this.evaluatorMap.set('cons', this.cons)
-    this.evaluatorMap.set('null?', this.isNull)
-    this.evaluatorMap.set('car', this.car)
-    this.evaluatorMap.set('cdr', this.cdr)
-    this.evaluatorMap.set('cadr', this.cadr)
-    this.evaluatorMap.set('=', this.isEqual)
-    this.evaluatorMap.set('+', this.add)
-    this.evaluatorMap.set('-', this.minus)
-    this.evaluatorMap.set('*', this.multiply)
-    this.evaluatorMap.set('/', this.divide)
-    this.evaluatorMap.set('min', this.min)
-    this.evaluatorMap.set('max', this.max)
-    this.evaluatorMap.set('abs', this.abs)
-    this.evaluatorMap.set('zero?', this.isZero)
-    this.evaluatorMap.set('length', this.length)
-    this.evaluatorMap.set('not', this.not)
-    this.evaluatorMap.set('and', this.and)
-    this.evaluatorMap.set('or', this.or)
-    this.evaluatorMap.set('display', this.display)
+    this.register('cons', this.cons)
+    this.register('null?', this.isNull)
+    this.register('car', this.car)
+    this.register('cdr', this.cdr)
+    this.register('cadr', this.cadr)
+    this.register('=', this.isEqual)
+    this.register('>', this.isMoreThan)
+    this.register('<', this.isLessThan)
+    this.register('+', this.add)
+    this.register('-', this.minus)
+    this.register('*', this.multiply)
+    this.register('/', this.divide)
+    this.register('min', this.min)
+    this.register('max', this.max)
+    this.register('abs', this.abs)
+    this.register('zero?', this.isZero)
+    this.register('length', this.length)
+    this.register('not', this.not)
+    this.register('and', this.and)
+    this.register('or', this.or)
+    this.register('display', this.display)
   }
 
   public matches(tag: string): boolean {
@@ -84,112 +86,130 @@ export default class BuildInEvaluator implements IEvaluator {
   }
 
   public evaluate(node: SchemeSym, env: Env, cont: Cont): SchemeData {
-    return cont
+    const evaluator = this.evaluatorMap.get(node.tag)
+    assert(evaluator, 'buildin evaluator evaluates error!')
+    return cont(evaluator(node, env))
   }
 
-  // cons x y
+  private register(name: string, proc: Callback) {
+    this.evaluatorMap.set(name, proc.bind(this))
+  }
+
+  private evaluateFirstSentence(args: NodeData, env: Env): SchemeData {
+    assert(args.next, 'buildin evaluator evaluates error: should have first sentence!')
+    return this.evaluator.evaluate(args.next, env, x => x)
+  }
+
+  private evaluateSecondSentence(args: NodeData, env: Env): SchemeData {
+    assert(args?.next?.next, 'buildin evaluator evaluates error: should have second sentence!')
+    return this.evaluator.evaluate(args.next.next, env, x => x)
+  }
+
   private cons(args: NodeData, env: Env) {
-    const first = this.evaluator.evaluate(args, env, x => x)
-    const second = this.evaluator.evaluate(args.next, env, x => x)
-    return SchemeList.cons(first, second)
+    return SchemeList.cons(
+      this.evaluateFirstSentence(args, env),
+      this.evaluateSecondSentence(args, env)
+    )
   }
 
   private isNull(args: NodeData, env: Env) {
-    const first = this.evaluator.evaluate(args, env, x => x)
-    return new SchemeBoolean(SchemeList.isNil(first))
+    return new SchemeBoolean(SchemeList.isNil(this.evaluateFirstSentence(args, env)))
   }
 
   private car(args: NodeData, env: Env) {
-    const first = this.evaluator.evaluate(args, env, x => x)
-    return SchemeList.cast(first).car()
+    return SchemeList
+      .cast(this.evaluateFirstSentence(args, env))
+      .car()
   }
 
   private cdr(args: NodeData, env: Env) {
-    const first = this.evaluator.evaluate(args, env, x => x)
-    return SchemeList.cast(first).cdr()
+    return SchemeList
+      .cast(this.evaluateFirstSentence(args, env))
+      .cdr()
   }
 
   private cadr(args: NodeData, env: Env) {
-    const first = this.evaluator.evaluate(args, env, x => x)
-    return SchemeList.cast(first).cadr()
+    return SchemeList
+      .cast(this.evaluateFirstSentence(args, env))
+      .cadr()
   }
 
   private isEqual(args: NodeData, env: Env) {
-    const first = this.evaluator.evaluate(args, env, x => x)
-    const second = this.evaluator.evaluate(args.next, env, x => x)
+    const first = this.evaluateFirstSentence(args, env)
+    const second = this.evaluateSecondSentence(args, env)
     return new SchemeBoolean(SchemeNumber.cast(first).value === SchemeNumber.cast(second).value)
   }
 
   private isLessThan(args: NodeData, env: Env) {
-    const first = this.evaluator.evaluate(args, env, x => x)
-    const second = this.evaluator.evaluate(args.next, env, x => x)
+    const first = this.evaluateFirstSentence(args, env)
+    const second = this.evaluateSecondSentence(args, env)
     return new SchemeBoolean(SchemeNumber.cast(first).value < SchemeNumber.cast(second).value)
   }
 
   private isMoreThan(args: NodeData, env: Env) {
-    const first = this.evaluator.evaluate(args, env, x => x)
-    const second = this.evaluator.evaluate(args.next, env, x => x)
+    const first = this.evaluateFirstSentence(args, env)
+    const second = this.evaluateSecondSentence(args, env)
     return new SchemeBoolean(SchemeNumber.cast(first).value > SchemeNumber.cast(second).value)
   }
 
   private add(args: NodeData, env: Env) {
-    const first = this.evaluator.evaluate(args, env, x => x)
-    const second = this.evaluator.evaluate(args.next, env, x => x)
+    const first = this.evaluateFirstSentence(args, env)
+    const second = this.evaluateSecondSentence(args, env)
     return new SchemeNumber(SchemeNumber.cast(first).value + SchemeNumber.cast(second).value)
   }
 
   private minus(args: NodeData, env: Env) {
-    const first = this.evaluator.evaluate(args, env, x => x)
-    const second = this.evaluator.evaluate(args.next, env, x => x)
+    const first = this.evaluateFirstSentence(args, env)
+    const second = this.evaluateSecondSentence(args, env)
     return new SchemeNumber(SchemeNumber.cast(first).value - SchemeNumber.cast(second).value)
   }
 
   private multiply(args: NodeData, env: Env) {
-    const first = this.evaluator.evaluate(args, env, x => x)
-    const second = this.evaluator.evaluate(args.next, env, x => x)
+    const first = this.evaluateFirstSentence(args, env)
+    const second = this.evaluateSecondSentence(args, env)
     return new SchemeNumber(SchemeNumber.cast(first).value * SchemeNumber.cast(second).value)
   }
 
   private divide(args: NodeData, env: Env) {
-    const first = this.evaluator.evaluate(args, env, x => x)
-    const second = this.evaluator.evaluate(args.next, env, x => x)
+    const first = this.evaluateFirstSentence(args, env)
+    const second = this.evaluateSecondSentence(args, env)
     return new SchemeNumber(SchemeNumber.cast(first).value / SchemeNumber.cast(second).value)
   }
 
   private min(args: NodeData, env: Env) {
-    const first = this.evaluator.evaluate(args, env, x => x)
-    const second = this.evaluator.evaluate(args.next, env, x => x)
+    const first = this.evaluateFirstSentence(args, env)
+    const second = this.evaluateSecondSentence(args, env)
     return new SchemeNumber(Math.min(SchemeNumber.cast(first).value, SchemeNumber.cast(second).value))
   }
 
   private max(args: NodeData, env: Env) {
-    const first = this.evaluator.evaluate(args, env, x => x)
-    const second = this.evaluator.evaluate(args.next, env, x => x)
+    const first = this.evaluateFirstSentence(args, env)
+    const second = this.evaluateSecondSentence(args, env)
     return new SchemeNumber(Math.max(SchemeNumber.cast(first).value, SchemeNumber.cast(second).value))
   }
 
   private abs(args: NodeData, env: Env) {
-    const first = this.evaluator.evaluate(args, env, x => x)
+    const first = this.evaluateFirstSentence(args, env)
     return new SchemeNumber(Math.abs(SchemeNumber.cast(first).value))
   }
 
   private isZero(args: NodeData, env: Env) {
-    const first = this.evaluator.evaluate(args, env, x => x)
+    const first = this.evaluateFirstSentence(args, env)
     return new SchemeBoolean(SchemeNumber.cast(first).value === 0)
   }
 
   private length(args: NodeData, env: Env) {
-    const first = this.evaluator.evaluate(args, env, x => x)
+    const first = this.evaluateFirstSentence(args, env)
     return SchemeList.cast(first).getLength()
   }
 
   private not(args: NodeData, env: Env) {
-    const first = this.evaluator.evaluate(args, env, x => x)
+    const first = this.evaluateFirstSentence(args, env)
     return new SchemeBoolean(!SchemeBoolean.cast(first).value)
   }
 
   private and(args: NodeData, env: Env) {
-    let node: NodeData | null = args
+    let node: NodeData | null = args.next
 
     while (node) {
       const value = this.evaluator.evaluate(node, env, x => x)
@@ -203,7 +223,7 @@ export default class BuildInEvaluator implements IEvaluator {
   }
 
   private or(args: NodeData, env: Env) {
-    let node: NodeData | null = args
+    let node: NodeData | null = args.next
 
     while (node) {
       const value = this.evaluator.evaluate(node, env, x => x)
@@ -216,8 +236,8 @@ export default class BuildInEvaluator implements IEvaluator {
     return new SchemeBoolean(false)
   }
 
-  private display(args: NodeData) {
-    console.log('display', args)
-    return args.toString()
+  private display(args: NodeData, env: Env) {
+    const first = this.evaluateFirstSentence(args, env)
+    return first
   }
 }
