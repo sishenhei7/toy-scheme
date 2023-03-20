@@ -31,17 +31,17 @@ export default class ProcEvaluator implements IEvaluator {
 
     const parentEnv = proc.envClosure // 词法作用域
     const parentStackframe = parentEnv?.getStackFrame() || null
-    const newEnv = new Env(parentEnv, new StackFrame(parentStackframe))
-    this.evaluateArgs(proc.params, node.next, env)
+    const newEnv = new Env(parentEnv, new StackFrame(parentStackframe)) // shade
+    this.evaluateArgs(proc.params, node.next, env, newEnv)
     return this.evaluator.evaluateList(proc.body, newEnv, cont)
   }
 
-  private evaluateArgs(params: NodeData | null, args: NodeData | null, env: Env): void {
+  private evaluateArgs(params: NodeData | null, args: NodeData | null, env: Env, newEnv: Env): void {
     while (params && args) {
       assert(SchemeSym.matches(params), 'Proc params evaluate error!')
 
       const value = this.evaluator.evaluate(args, env, x => x)
-      env.define(params.tag, value)
+      newEnv.define(params.tag, value) // 注意这里是 newEnv，不是 env
       params = params.next
       args = args.next
     }
