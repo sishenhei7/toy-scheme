@@ -27,18 +27,18 @@ export default class ProcEvaluator implements IEvaluator {
     const proc = env.get(node.tag)
     assert(SchemeProc.matches(proc), 'Evaluate proc error: not a SchemeProc!')
 
-    const parentEnv = proc.envClosure?.getParent()
+    const parentEnv = proc.envClosure
     const parentStackframe = parentEnv?.getStackFrame() || null
     const newEnv = new Env(parentEnv, new StackFrame(parentStackframe))
     this.evaluateArgs(proc.params, node.next, newEnv)
-    return this.evaluator.evaluate(proc.body, newEnv, cont)
+    return this.evaluator.evaluateList(proc.body, newEnv, cont)
   }
 
   private evaluateArgs(params: NodeData | null, args: NodeData | null, env: Env): void {
     while (params && args) {
       assert(SchemeSym.matches(params), 'Proc params evaluate error!')
 
-      const value = this.evaluator.evaluate(args, env, x => x)
+      const value = this.evaluator.evaluateList(args, env, x => x)
       env.define(params.tag, value)
       params = params.next
       args = args.next

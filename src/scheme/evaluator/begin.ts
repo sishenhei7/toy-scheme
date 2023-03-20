@@ -20,14 +20,6 @@ export default class BeginEvaluator implements IEvaluator {
   public evaluate(node: SchemeSym, env: Env, cont: Cont): SchemeData {
     let currentNode = node.next
     assert(currentNode, 'Syntax error: begin followed no clause!')
-
-    let res = null
-    while (currentNode) {
-      res = this.evaluator.evaluate(currentNode, env, cont)
-      currentNode = currentNode.next
-    }
-
-    assert(res, 'Error: begin clause evaluate error!')
-    return res
+    return this.evaluator.evaluateList(currentNode, env, cont)
   }
 }

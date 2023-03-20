@@ -35,20 +35,13 @@ export class Evaluator {
     ]
   }
 
-  // TODO: 添加一个 evaluateList
   public evaluate(node: NodeData | null, env: Env, cont: Cont): SchemeData {
     // 暂不支持()这样空语句的形式
     assert(node, `Evaluating error: unexpected ${node}`)
 
     // 去掉 expression 两边的括号
-    while (SchemeExp.matches(node)) {
-      const value = this.evaluate(node.body, env, cont)
-
-      if (!node.next) {
-        return value
-      }
-
-      node = node.next
+    if (SchemeExp.matches(node)) {
+      return this.evaluate(node.body, env, cont)
     }
 
     // expression的第一个token
@@ -62,5 +55,14 @@ export class Evaluator {
 
     // TODO: refine
     return node as SchemeData
+  }
+
+  public evaluateList(node: NodeData | null, env: Env, cont: Cont): SchemeData {
+    let res = this.evaluate(node, env, cont)
+    while (node?.next) {
+      res = this.evaluate(node.next, env, cont)
+      node = node.next
+    }
+    return res
   }
 }
