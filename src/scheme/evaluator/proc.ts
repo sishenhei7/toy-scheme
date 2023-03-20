@@ -23,14 +23,16 @@ export default class ProcEvaluator implements IEvaluator {
     // 3.执行body
     // 4.把结果返回给cont
 
-    // env 的作用只是来查找这个 proc
+    // env 的作用：
+    // 1.用来查找这个 proc
+    // 2.用来查找 args 里面的变量
     const proc = env.get(node.tag)
     assert(SchemeProc.matches(proc), 'Evaluate proc error: not a SchemeProc!')
 
-    const parentEnv = proc.envClosure
+    const parentEnv = proc.envClosure // 词法作用域
     const parentStackframe = parentEnv?.getStackFrame() || null
     const newEnv = new Env(parentEnv, new StackFrame(parentStackframe))
-    this.evaluateArgs(proc.params, node.next, newEnv)
+    this.evaluateArgs(proc.params, node.next, env)
     return this.evaluator.evaluateList(proc.body, newEnv, cont)
   }
 
@@ -38,7 +40,7 @@ export default class ProcEvaluator implements IEvaluator {
     while (params && args) {
       assert(SchemeSym.matches(params), 'Proc params evaluate error!')
 
-      const value = this.evaluator.evaluateList(args, env, x => x)
+      const value = this.evaluator.evaluate(args, env, x => x)
       env.define(params.tag, value)
       params = params.next
       args = args.next
