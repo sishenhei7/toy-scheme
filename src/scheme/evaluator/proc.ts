@@ -33,7 +33,8 @@ export default class ProcEvaluator implements IEvaluator {
     const parentStackframe = parentEnv?.getStackFrame() || null
     const newEnv = new Env(parentEnv, new StackFrame(parentStackframe)) // shade
     this.evaluateArgs(proc.params, node.next, env, newEnv)
-    return this.evaluator.evaluateList(proc.body, newEnv, cont)
+    // TODO: 这里不能用 evaluateList，不然会报错，怎么办？
+    return this.evaluator.evaluate(proc.body, newEnv, cont)
   }
 
   private evaluateArgs(params: NodeData | null, args: NodeData | null, env: Env, newEnv: Env): void {
