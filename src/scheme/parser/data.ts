@@ -19,36 +19,23 @@ export class ILocation {
   }
 }
 
-export class NodeData extends ILocation {
-  next: NodeData | null = null
+export class SchemeData extends ILocation {
+
 }
 
 /**
- * 占位数据结构：表达式
+ * 基础数据结构：符号
  */
-export class SchemeExp extends NodeData {
-  constructor(public body: NodeData | null) {
+export class SchemeSym extends SchemeData {
+  constructor(public value: string) {
     super()
   }
 
-  static matches(item: NodeData): item is SchemeExp {
-    return item instanceof SchemeExp
-  }
-}
-
-/**
- * 占位数据结构：符号
- */
-export class SchemeSym extends NodeData {
-  constructor(public tag: string) {
-    super()
+  public toString(): string {
+    return this.value
   }
 
-  toString(): string {
-    return this.tag
-  }
-
-  static matches(item: NodeData): item is SchemeSym {
+  static matches(item: SchemeData): item is SchemeSym {
     return item instanceof SchemeSym
   }
 }
@@ -56,12 +43,12 @@ export class SchemeSym extends NodeData {
 /**
  * 基础数据结构：number
  */
-export class SchemeNumber extends NodeData {
+export class SchemeNumber extends SchemeData {
   constructor(public value: number) {
     super()
   }
 
-  toString(): string {
+  public toString(): string {
     return String(this.value)
   }
 
@@ -78,12 +65,12 @@ export class SchemeNumber extends NodeData {
 /**
  * 基础数据结构：string
  */
-export class SchemeString extends NodeData {
+export class SchemeString extends SchemeData {
   constructor(public value: string) {
     super()
   }
 
-  toString(): string {
+  public toString(): string {
     return this.value
   }
 
@@ -95,12 +82,12 @@ export class SchemeString extends NodeData {
 /**
  * 基础数据结构：boolean
  */
-export class SchemeBoolean extends NodeData {
+export class SchemeBoolean extends SchemeData {
   constructor(public value: boolean) {
     super()
   }
 
-  toString(): string {
+  public toString(): string {
     return String(this.value)
   }
 
@@ -121,12 +108,12 @@ export class SchemeBoolean extends NodeData {
 /**
  * 基础数据结构：quote
  */
-export class SchemeQuote extends NodeData {
+export class SchemeQuote extends SchemeData {
   constructor(public value: string) {
     super()
   }
 
-  toString(): string {
+  public toString(): string {
     return this.value
   }
 
@@ -136,27 +123,25 @@ export class SchemeQuote extends NodeData {
 }
 
 /**
- * 基础数据结构：nil (因为scheme里面并没有nil，所以这里不引入nil)
+ * Nil，仅用在空数组里面
  */
-// export class SchemeNil extends NodeData {
-//   constructor(private value = null) {
-//     super()
-//   }
+export class SchemeNil extends SchemeData {
+  public toString(): string {
+    return '()'
+  }
 
-//   static matches(item: NodeData): item is SchemeNil {
-//     return item instanceof SchemeNil
-//   }
-
-//   static isNil(item: NodeData): item is SchemeNil {
-//     return item instanceof SchemeNil
-//   }
-// }
+  static isNil(item: SchemeData): item is SchemeNil {
+    return item instanceof SchemeNil
+  }
+}
 
 /**
- * 复杂数据结构：列表(列表里面没有 nil 这个数据结构，实现起来太麻烦)
+ * 复杂数据结构：列表
  */
-export class SchemeList {
-  constructor(private _car: SchemeData, private _cdr: SchemeData) {}
+export class SchemeList extends SchemeData {
+  constructor(private _car: SchemeData, private _cdr: SchemeData) {
+    super()
+  }
 
   public car(): SchemeData {
     return this._car
@@ -212,21 +197,18 @@ export class SchemeList {
   static cons(_car: SchemeData, _cdr: SchemeData): SchemeList {
     return new SchemeList(_car, _cdr)
   }
-
-  static isNil(item: SchemeData): boolean {
-    return SchemeQuote.matches(item) && item.value === "'()"
-  }
 }
 
 
 /**
  * 其它数据结构：continuation 是一等公民
  */
-type ContinuationFunc = (node: SchemeData) => SchemeData
-export class Continuation {
+export class Continuation extends SchemeData {
   static Identity = new Continuation(x => x)
 
-  constructor(private f: ContinuationFunc) {}
+  constructor(private f: (node: SchemeData) => SchemeData) {
+    super()
+  }
 
   public call(node: SchemeData): SchemeData {
     return this.f(node)
@@ -237,15 +219,17 @@ export class Continuation {
 /**
  * 其它数据结构：proc 是一等公民
  */
-export class SchemeProc {
+export class SchemeProc extends SchemeData {
   constructor(
     public name: string,
-    public params: NodeData | null,
-    public body: NodeData,
+    public params: SchemeData | null,
+    public body: SchemeData,
     public envClosure: Env
-  ) { }
+  ) {
+    super()
+  }
 
-  toString(): string {
+  public toString(): string {
     return '<<function>>'
   }
 
@@ -254,26 +238,22 @@ export class SchemeProc {
   }
 }
 
-// cont、proc 都是一等公民？
-export type BaseData = SchemeNumber | SchemeString | SchemeBoolean | SchemeQuote
-export type SchemeData = BaseData | SchemeList | Continuation | SchemeProc
-
 /**
  * 把一段 token 数组解析成 data 单链表
  * Todo: 是否需要一个指向 parent 的指针？
  */
-export function getParser(tokenList: TokenItem[]): () => NodeData | null {
+export function getParser(tokenList: TokenItem[]): () => SchemeData | null {
   let tokenCursor = 0
   const rParenEndList: number[] = []
 
   function parseTokenList(): ReturnType<ReturnType<typeof getParser>> {
-    let last: NodeData | null = null
-    let first: NodeData | null = null
+    let last: SchemeData | null = null
+    let first: SchemeData | null = null
     let shouldEnd = false
 
     while (!shouldEnd && tokenList.length && tokenCursor < tokenList.length) {
       const { type, value, start, end } = tokenList[tokenCursor++]
-      let currentData: NodeData | null = null
+      let currentData: SchemeData | null = null
 
       switch (type) {
         case TokenType.Boolean:
