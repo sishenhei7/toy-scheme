@@ -1,4 +1,4 @@
-import { type SchemeData, type Cont, SchemeSym, SchemeExp, SchemeProc } from '../parser/data'
+import { type SchemeData, type Continuation, SchemeSym, SchemeExp, SchemeProc } from '../parser/data'
 import type { Env } from '../env'
 import type { IEvaluator, Evaluator } from './index'
 import { assert } from '../utils'
@@ -18,7 +18,7 @@ export default class DefineEvaluator implements IEvaluator {
     return tag === 'define'
   }
 
-  public evaluate(node: SchemeSym, env: Env, cont: Cont): SchemeData {
+  public evaluate(node: SchemeSym, env: Env, cont: Continuation): SchemeData {
     assert(!!node.next && !!node.next.next, 'Define evaluating error: args must be two!')
 
     const varNode = node.next

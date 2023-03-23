@@ -1,9 +1,8 @@
 /**
  * 数据结构：
- * 占位数据: 表达式、符号
- * 简单数据：number、string、boolean、quote
- * 复杂数据：列表
- * 其它数据：continuation、proc
+ * 简单数据：number、string、boolean、quote、symbol
+ * 复杂数据：list
+ * 其它数据：cont、proc
  */
 import { type TokenItem, TokenType } from './token'
 import type { Env } from '../env'
@@ -223,7 +222,17 @@ export class SchemeList {
 /**
  * 其它数据结构：continuation 是一等公民
  */
-export type Cont = (node: SchemeData) => SchemeData
+type ContinuationFunc = (node: SchemeData) => SchemeData
+export class Continuation {
+  static Identity = new Continuation(x => x)
+
+  constructor(private f: ContinuationFunc) {}
+
+  public call(node: SchemeData): SchemeData {
+    return this.f(node)
+  }
+}
+
 
 /**
  * 其它数据结构：proc 是一等公民
@@ -247,7 +256,7 @@ export class SchemeProc {
 
 // cont、proc 都是一等公民？
 export type BaseData = SchemeNumber | SchemeString | SchemeBoolean | SchemeQuote
-export type SchemeData = BaseData | SchemeList | Cont | SchemeProc
+export type SchemeData = BaseData | SchemeList | Continuation | SchemeProc
 
 /**
  * 把一段 token 数组解析成 data 单链表
@@ -286,6 +295,7 @@ export function getParser(tokenList: TokenItem[]): () => NodeData | null {
           currentData = new SchemeExp(parseTokenList())
 
           // 使用上次右括号的 end 来更新此节点的 end
+          console.log(first, last)
           assert(rParenEndList.length > 0, 'Parsing error: too many left paren')
           currentData.setLocationInfo(start, rParenEndList.pop()!)
 

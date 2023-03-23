@@ -1,4 +1,4 @@
-import { type NodeData, type Cont, type SchemeData, SchemeSym } from '../parser/data'
+import { type NodeData, type SchemeData, Continuation, SchemeSym } from '../parser/data'
 import type { Env } from '../env'
 import { assert } from '../utils'
 import type { IEvaluator, Evaluator } from './index'
@@ -14,11 +14,15 @@ export default class SetEvaluator implements IEvaluator {
     return tag === 'set!'
   }
 
-  public evaluate(node: SchemeSym, env: Env, cont: Cont): SchemeData {
-    return this.evaluator.evaluate(this.getValue(node), env, (val: SchemeData) => {
-      env.set(this.getVar(node), val)
-      return cont(val)
-    })
+  public evaluate(node: SchemeSym, env: Env, cont: Continuation): SchemeData {
+    return this.evaluator.evaluate(
+      this.getValue(node),
+      env,
+      new Continuation((val: SchemeData) => {
+        env.set(this.getVar(node), val)
+        return cont.call(val)
+      })
+    )
   }
 
   private getVar(node: SchemeSym): string {

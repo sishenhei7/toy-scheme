@@ -1,4 +1,4 @@
-import { type SchemeData, type Cont, type SchemeSym, type NodeData, SchemeList, SchemeBoolean, SchemeNumber } from '../parser/data';
+import { type SchemeData, Continuation, type SchemeSym, type NodeData, SchemeList, SchemeBoolean, SchemeNumber } from '../parser/data';
 import type { Env } from '../env'
 import type { IEvaluator, Evaluator } from './index'
 import { assert } from '../utils'
@@ -57,10 +57,10 @@ export default class BuildInEvaluator implements IEvaluator {
     return this.evaluatorMap.has(tag)
   }
 
-  public evaluate(node: SchemeSym, env: Env, cont: Cont): SchemeData {
+  public evaluate(node: SchemeSym, env: Env, cont: Continuation): SchemeData {
     const evaluator = this.evaluatorMap.get(node.tag)
     assert(evaluator, 'buildin evaluator evaluates error!')
-    return cont(evaluator(node, env))
+    return cont.call(evaluator(node, env))
   }
 
   private register(name: string, proc: Callback) {
@@ -69,12 +69,12 @@ export default class BuildInEvaluator implements IEvaluator {
 
   private evaluateFirstSentence(args: NodeData, env: Env): SchemeData {
     assert(args.next, 'buildin evaluator evaluates error: should have first sentence!')
-    return this.evaluator.evaluate(args.next, env, x => x)
+    return this.evaluator.evaluate(args.next, env)
   }
 
   private evaluateSecondSentence(args: NodeData, env: Env): SchemeData {
     assert(args?.next?.next, 'buildin evaluator evaluates error: should have second sentence!')
-    return this.evaluator.evaluate(args.next.next, env, x => x)
+    return this.evaluator.evaluate(args.next.next, env)
   }
 
   private cons(args: NodeData, env: Env) {
@@ -184,7 +184,7 @@ export default class BuildInEvaluator implements IEvaluator {
     let node: NodeData | null = args.next
 
     while (node) {
-      const value = this.evaluator.evaluate(node, env, x => x)
+      const value = this.evaluator.evaluate(node, env)
       if (!SchemeBoolean.isTrue(value)) {
         return new SchemeBoolean(false)
       }
@@ -198,7 +198,7 @@ export default class BuildInEvaluator implements IEvaluator {
     let node: NodeData | null = args.next
 
     while (node) {
-      const value = this.evaluator.evaluate(node, env, x => x)
+      const value = this.evaluator.evaluate(node, env)
       if (SchemeBoolean.isTrue(value)) {
         return new SchemeBoolean(true)
       }

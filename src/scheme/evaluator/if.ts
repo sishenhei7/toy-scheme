@@ -1,4 +1,4 @@
-import { type NodeData, type Cont, type SchemeData, SchemeBoolean, SchemeSym } from '../parser/data'
+import { type NodeData, type SchemeData, Continuation, SchemeBoolean, SchemeSym } from '../parser/data'
 import type { Env } from '../env'
 import { assert } from '../utils'
 import type { IEvaluator, Evaluator } from './index'
@@ -14,15 +14,18 @@ export default class IfEvaluator implements IEvaluator {
     return tag === 'if'
   }
 
-  public evaluate(node: SchemeSym, env: Env, cont: Cont): SchemeData {
+  public evaluate(node: SchemeSym, env: Env, cont: Continuation): SchemeData {
     return this.evaluator.evaluate(this.getPredicate(node), env, this.getCont(node, env, cont))
   }
 
-  private getCont(node: SchemeSym, env: Env, cont: Cont): Cont {
-    return (val: SchemeData) =>
-      SchemeBoolean.isTrue(val)
-        ? this.evaluator.evaluate(this.getThen(node), env, cont)
-        : this.evaluator.evaluate(this.getElse(node), env, cont)
+  private getCont(node: SchemeSym, env: Env, cont: Continuation): Continuation {
+    return new Continuation(
+      (val: SchemeData) =>
+        SchemeBoolean.isTrue(val)
+          ? this.evaluator.evaluate(this.getThen(node), env, cont)
+          : this.evaluator.evaluate(this.getElse(node), env, cont)
+    )
+
   }
 
   private getPredicate(node: SchemeSym): NodeData {

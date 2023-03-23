@@ -1,4 +1,4 @@
-import { type SchemeData, type Cont, SchemeSym, SchemeProc, NodeData } from '../parser/data';
+import { type SchemeData, Continuation, SchemeSym, SchemeProc, NodeData } from '../parser/data';
 import { Env, StackFrame } from '../env'
 import type { IEvaluator, Evaluator } from './index'
 import { assert } from '../utils'
@@ -16,7 +16,7 @@ export default class ProcEvaluator implements IEvaluator {
     return SchemeProc.matches(env.get(tag))
   }
 
-  public evaluate(node: SchemeSym, env: Env, cont: Cont): SchemeData {
+  public evaluate(node: SchemeSym, env: Env, cont: Continuation): SchemeData {
     // 流程：
     // 1.建立env，连接parentStackFrame
     // 2.解析args到env里面去
@@ -41,7 +41,7 @@ export default class ProcEvaluator implements IEvaluator {
     while (params && args) {
       assert(SchemeSym.matches(params), 'Proc params evaluate error!')
 
-      const value = this.evaluator.evaluate(args, env, x => x)
+      const value = this.evaluator.evaluate(args, env)
       newEnv.define(params.tag, value) // 注意这里是 newEnv，不是 env
       params = params.next
       args = args.next

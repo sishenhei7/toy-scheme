@@ -1,4 +1,4 @@
-import { NodeData, SchemeExp, type Cont, type SchemeData, SchemeSym } from '../parser/data'
+import { NodeData, SchemeExp, Continuation, type SchemeData, SchemeSym } from '../parser/data'
 import { Env } from '../env'
 import type { IEvaluator, Evaluator } from './index'
 import { assert } from '../utils'
@@ -25,7 +25,7 @@ export default class LetEvaluator implements IEvaluator {
     return this.isLet(tag) || this.isLetStar(tag) || this.isLetRec(tag)
   }
 
-  public evaluate(node: SchemeSym, env: Env, cont: Cont): SchemeData {
+  public evaluate(node: SchemeSym, env: Env, cont: Continuation): SchemeData {
     assert(node.next && node.next.next, 'Let evaluting error: should follow 2 expressions!')
     const defination = node.next
     const body = node.next.next
@@ -48,7 +48,7 @@ export default class LetEvaluator implements IEvaluator {
     while (node && SchemeExp.matches(node) && node.body) {
       assert(SchemeSym.matches(node.body), 'Let evaluting error: defs should be SchemeSym!')
       const varNode = node.body
-      env.define(varNode.tag, this.evaluator.evaluate(varNode.next, env, x => x))
+      env.define(varNode.tag, this.evaluator.evaluate(varNode.next, env))
       node = node.next
     }
   }

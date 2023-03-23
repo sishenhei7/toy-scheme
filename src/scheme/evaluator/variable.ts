@@ -1,4 +1,4 @@
-import { type SchemeSym, type Cont, type SchemeData, SchemeNumber, SchemeString, SchemeBoolean, SchemeQuote } from '../parser/data'
+import { type SchemeSym, type Continuation, type SchemeData, SchemeNumber, SchemeString, SchemeBoolean, SchemeQuote } from '../parser/data'
 import type { Env } from '../env'
 import type { IEvaluator } from './index'
 
@@ -17,7 +17,7 @@ export default class VariableEvaluator implements IEvaluator {
       || SchemeQuote.matches(value)
   }
 
-  public evaluate(node: SchemeSym, env: Env, cont: Cont): SchemeData {
-    return cont(env.get(node.tag))
+  public evaluate(node: SchemeSym, env: Env, cont: Continuation): SchemeData {
+    return cont.call(env.get(node.tag))
   }
 }
