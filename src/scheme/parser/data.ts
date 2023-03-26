@@ -130,6 +130,10 @@ export class SchemeNil extends SchemeData {
     return '()'
   }
 
+  static matches(item: SchemeData): item is SchemeNil {
+    return item instanceof SchemeNil
+  }
+
   static isNil(item: SchemeData): item is SchemeNil {
     return item instanceof SchemeNil
   }
@@ -139,7 +143,11 @@ export class SchemeNil extends SchemeData {
  * 复杂数据结构：列表
  */
 export class SchemeList extends SchemeData {
-  constructor(private _car: SchemeData, private _cdr: SchemeData) {
+  constructor(
+    private _car: SchemeData = new SchemeNil(),
+    private _cdr: SchemeData = new SchemeNil(),
+    public isQuote: boolean = false
+  ) {
     super()
   }
 
@@ -163,30 +171,50 @@ export class SchemeList extends SchemeData {
     this._cdr = item
   }
 
-  static matches(item: SchemeData): item is SchemeList {
-    return item instanceof SchemeList
+  public setQuote(value: boolean = true): SchemeList {
+    this.isQuote = value
+    return this
+  }
+
+  private getLengthBase(): number {
+    if (SchemeNil.matches(this.car())) {
+      return 0
+    }
+
+    if (SchemeNil.matches(this.cdr())) {
+      return 1
+    }
+
+    return 1 + SchemeList.cast(this.cdr()).getLengthBase()
   }
 
   public getLength(): SchemeNumber {
-    let res = 1
-    let list: SchemeData = this
-    while (list) {
-      res += 1
-
-      if (!SchemeList.matches(list)) {
-        break
-      }
-
-      list = list.cdr()
-    }
-
-    return new SchemeNumber(res)
+    return new SchemeNumber(this.getLengthBase())
   }
 
   public toString(): string {
     // TODO
     return ''
     // return String(this.value)
+  }
+
+  static buildFromArray(args: SchemeData[]): SchemeList {
+    let res = new SchemeList()
+    let current = res
+    for (const data of args) {
+      if (SchemeNil.matches(current.car())) {
+        current._car = data
+      } else {
+        const next = new SchemeList(data)
+        current._cdr = next
+        current = next
+      }
+    }
+    return res
+  }
+
+  static matches(item: SchemeData): item is SchemeList {
+    return item instanceof SchemeList
   }
 
   static cast(item: SchemeData): SchemeList {
@@ -239,63 +267,45 @@ export class SchemeProc extends SchemeData {
 }
 
 /**
- * 把一段 token 数组解析成 data 单链表
- * Todo: 是否需要一个指向 parent 的指针？
+ * 解析数据结构
  */
-export function getParser(tokenList: TokenItem[]): () => SchemeData | null {
+export default function parseToken(tokenList: TokenItem[]): SchemeList {
   let tokenCursor = 0
-  const rParenEndList: number[] = []
 
-  function parseTokenList(): ReturnType<ReturnType<typeof getParser>> {
-    let last: SchemeData | null = null
-    let first: SchemeData | null = null
-    let shouldEnd = false
-
-    while (!shouldEnd && tokenList.length && tokenCursor < tokenList.length) {
+  function parseTokenList(): SchemeData[] {
+    let list: SchemeData[] = []
+    while (tokenList.length && tokenCursor < tokenList.length) {
       const { type, value, start, end } = tokenList[tokenCursor++]
-      let currentData: SchemeData | null = null
-
       switch (type) {
         case TokenType.Boolean:
-          currentData = new SchemeBoolean(value === '#f').setLocationInfo(start, end)
+          list.push(new SchemeBoolean(value === '#f').setLocationInfo(start, end))
           break
         case TokenType.Number:
-          currentData = new SchemeNumber(Number(value)).setLocationInfo(start, end)
+          list.push(new SchemeNumber(Number(value)).setLocationInfo(start, end))
           break
         case TokenType.String:
-          currentData = new SchemeString(value).setLocationInfo(start, end)
+          list.push(new SchemeString(value).setLocationInfo(start, end))
           break
         case TokenType.Quote:
-          currentData = new SchemeQuote(value).setLocationInfo(start, end)
+          list.push(SchemeList.buildFromArray(parseTokenList()).setQuote().setLocationInfo(start, end))
           break
         case TokenType.Symbol:
-          currentData = new SchemeSym(value).setLocationInfo(start, end)
+          list.push(new SchemeSym(value).setLocationInfo(start, end))
           break
         case TokenType.LParen:
-          currentData = new SchemeExp(parseTokenList())
-
-          // 使用上次右括号的 end 来更新此节点的 end
-          console.log(first, last)
-          assert(rParenEndList.length > 0, 'Parsing error: too many left paren')
-          currentData.setLocationInfo(start, rParenEndList.pop()!)
-
+          list.push(SchemeList.buildFromArray(parseTokenList()).setLocationInfo(start, end))
           break
         case TokenType.RParen:
-          // 右括号不新建节点，储存 end，并终止此次循环
-          rParenEndList.push(end)
-          shouldEnd = true
-          break
+          return list
         default:
+          assert(true, `Parsing Error: Unexpected TokenType: ${type}`)
           break
       }
-
-      !first && (first = currentData)
-      last && (last.next = currentData)
-      last = currentData
     }
 
-    return first
+    assert(true, 'Parsing Error: right paren is less than left paren')
+    return null as never
   }
 
-  return parseTokenList
+  return SchemeList.buildFromArray(parseTokenList())
 }

@@ -14,7 +14,7 @@ export enum TokenType {
 }
 
 export const tokenRegexList: [TokenType, RegExp][] = [
-  [TokenType.Quote, /^'\S+/],
+  [TokenType.Quote, /^'\(?/],
   [TokenType.LParen, /^\(/],
   [TokenType.RParen, /^\)/],
   [TokenType.Number, /^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?/],
@@ -50,7 +50,7 @@ export class TokenItem extends ILocation {
 /**
  * 把一段 string 解析成一个 token 数组
  */
-export function tokenizer(st: string): TokenItem[] {
+export default function tokenize(st: string): TokenItem[] {
   let cursor = 0
   const stack = []
 

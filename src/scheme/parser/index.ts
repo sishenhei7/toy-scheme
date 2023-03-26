@@ -3,11 +3,11 @@
  * 注意：为了更好地扩展性，这里不涉及任何 let、define 等语法，这些语法在后面处理
  */
 
-import { tokenizer } from './token'
-import { getParser } from './data'
+import tokenize from './token'
+import parseToken from './data'
 
-export function parse(st: string): ReturnType<ReturnType<typeof getParser>> {
-  const tokenList = tokenizer(st).filter((token) => !token.isIgnoreToken())
+export function parse(st: string): ReturnType<typeof parseToken> {
+  const tokenList = tokenize(st).filter((token) => !token.isIgnoreToken())
   console.log(tokenList)
-  return getParser(tokenList)()
+  return parseToken(tokenList)
 }
