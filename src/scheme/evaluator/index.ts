@@ -1,4 +1,4 @@
-import { type NodeData, type SchemeData, Continuation, SchemeExp, SchemeSym } from '../parser/data'
+import { type SchemeData, Continuation, SchemeList, SchemeSym } from '../parser/data'
 import type { Env } from '../env'
 import { assert } from '../utils'
 import BuildInEvaluator from './buildin'
@@ -12,8 +12,8 @@ import ProcEvaluator from './proc'
 import VariableEvaluator from './variable'
 
 export interface IEvaluator {
-  matches(tag: string, env?: Env): boolean
-  evaluate(node: SchemeSym, env: Env, cont: Continuation): SchemeData
+  matches(value: string, env?: Env): boolean
+  evaluate(node: SchemeData, env: Env, cont: Continuation): SchemeData
 }
 
 export class Evaluator {
@@ -35,33 +35,34 @@ export class Evaluator {
     ]
   }
 
-  public evaluate(node: NodeData | null, env: Env, cont: Continuation = Continuation.Identity): SchemeData {
-    // 暂不支持()这样空语句的形式
+  public evaluate(node: SchemeData, env: Env, cont: Continuation = Continuation.Identity): SchemeData {
     assert(node, `Evaluating error: unexpected ${node}`)
 
-    // 去掉 expression 两边的括号
-    if (SchemeExp.matches(node)) {
-      return this.evaluate(node.body, env, cont)
-    }
+    // is a sentence
+    if (SchemeList.matches(node) && node.shouldEval) {
+      const peek = node.car()
 
-    // expression的第一个token
-    if (SchemeSym.matches(node)) {
-      for (const evaluator of this.evaluators) {
-        if (evaluator.matches(node.tag, env)) {
-          return evaluator.evaluate(node, env, cont)
+      // evaluator
+      if (SchemeSym.matches(peek)) {
+        for (const evaluator of this.evaluators) {
+          if (evaluator.matches(peek.value, env)) {
+            return evaluator.evaluate(node, env, cont)
+          }
         }
       }
+
+      // list
+      return this.evaluateList(node, env, cont)
     }
 
-    // TODO: refine
+    // is a SchemeData
     return node as SchemeData
   }
 
-  public evaluateList(node: NodeData | null, env: Env, cont: Continuation = Continuation.Identity): SchemeData {
-    let res = this.evaluate(node, env, cont)
-    while (node?.next) {
-      res = this.evaluate(node.next, env, cont)
-      node = node.next
+  public evaluateList(node: SchemeList, env: Env, cont: Continuation = Continuation.Identity): SchemeData {
+    let res = this.evaluate(node.car(), env, cont)
+    if (!SchemeList.isNil(node.cdr())) {
+      res = this.evaluateList(SchemeList.cast(node.cdr()), env, cont)
     }
     return res
   }

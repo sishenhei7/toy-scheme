@@ -1,4 +1,4 @@
-import { type Continuation, type SchemeData, SchemeSym, SchemeExp, SchemeProc } from '../parser/data'
+import { type Continuation, type SchemeData, SchemeList, SchemeProc } from '../parser/data'
 import type { Env } from '../env'
 import type { IEvaluator, Evaluator } from './index'
 import { assert } from '../utils'
@@ -14,11 +14,7 @@ export default class LambdaEvaluator implements IEvaluator {
     return tag === 'lambda'
   }
 
-  public evaluate(node: SchemeSym, env: Env, cont: Continuation): SchemeData {
-    assert(node.next && node.next.next, 'Lambda evaluting error: should follow 2 expressions!')
-    const params = SchemeExp.matches(node.next) ? node.next.body : node.next
-    const body = SchemeExp.matches(node.next.next) ? node.next.next.body : node.next.next
-    assert(body, 'Lambda evaluting error: body should exist!')
-    return new SchemeProc('<<lambda>>', params, body, env)
+  public evaluate(node: SchemeList, env: Env, cont: Continuation): SchemeData {
+    return new SchemeProc('<<lambda>>', SchemeList.cast(node.cadr()), node.caddr(), env)
   }
 }

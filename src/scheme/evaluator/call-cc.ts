@@ -1,4 +1,4 @@
-import type { SchemeData, Continuation, SchemeSym } from '../parser/data'
+import type { SchemeData, Continuation, SchemeList } from '../parser/data'
 import type { Env } from '../env'
 import type { IEvaluator, Evaluator } from './index'
 
@@ -12,11 +12,11 @@ import type { IEvaluator, Evaluator } from './index'
 export default class CallCCEvaluator implements IEvaluator {
   constructor(private evaluator: Evaluator) {}
 
-  public matches(tag: string): boolean {
-    return tag === 'call-with-current-continuation'
+  public matches(value: string): boolean {
+    return value === 'call-with-current-continuation'
   }
 
-  public evaluate(node: SchemeSym, env: Env, cont: Continuation): SchemeData {
+  public evaluate(node: SchemeList, env: Env, cont: Continuation): SchemeData {
     return cont
   }
 }

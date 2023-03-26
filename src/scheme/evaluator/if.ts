@@ -1,6 +1,5 @@
-import { type NodeData, type SchemeData, Continuation, SchemeBoolean, SchemeSym } from '../parser/data'
+import { type SchemeData, SchemeList, Continuation, SchemeBoolean } from '../parser/data'
 import type { Env } from '../env'
-import { assert } from '../utils'
 import type { IEvaluator, Evaluator } from './index'
 
 /**
@@ -14,32 +13,17 @@ export default class IfEvaluator implements IEvaluator {
     return tag === 'if'
   }
 
-  public evaluate(node: SchemeSym, env: Env, cont: Continuation): SchemeData {
-    return this.evaluator.evaluate(this.getPredicate(node), env, this.getCont(node, env, cont))
+  public evaluate(node: SchemeList, env: Env, cont: Continuation): SchemeData {
+    return this.evaluator.evaluate(node.cadr(), env, this.getCont(node, env, cont))
   }
 
-  private getCont(node: SchemeSym, env: Env, cont: Continuation): Continuation {
+  private getCont(node: SchemeList, env: Env, cont: Continuation): Continuation {
     return new Continuation(
       (val: SchemeData) =>
         SchemeBoolean.isTrue(val)
-          ? this.evaluator.evaluate(this.getThen(node), env, cont)
-          : this.evaluator.evaluate(this.getElse(node), env, cont)
+          ? this.evaluator.evaluate(node.caddr(), env, cont)
+          : this.evaluator.evaluate(node.cadddr(), env, cont)
     )
 
-  }
-
-  private getPredicate(node: SchemeSym): NodeData {
-    assert(node?.next, 'Syntax error: if clause need predicate clause!')
-    return node.next
-  }
-
-  private getThen(node: SchemeSym): NodeData {
-    assert(node?.next?.next, 'Syntax error: if clause need then clause!')
-    return node.next.next
-  }
-
-  private getElse(node: SchemeSym): NodeData {
-    assert(node?.next?.next?.next, 'Syntax error: if clause need else clause!')
-    return node.next.next.next
   }
 }

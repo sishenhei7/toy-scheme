@@ -1,4 +1,4 @@
-import { SchemeBoolean, SchemeSym, type NodeData, SchemeExp, type Continuation, type SchemeData } from '../parser/data'
+import { SchemeBoolean, SchemeList, SchemeSym, type Continuation, type SchemeData } from '../parser/data'
 import type { Env } from '../env'
 import type { IEvaluator, Evaluator } from './index'
 import { assert } from '../utils'
@@ -14,43 +14,28 @@ import { assert } from '../utils'
 export default class CondEvaluator implements IEvaluator {
   constructor(private evaluator: Evaluator) {}
 
-  public matches(tag: string): boolean {
-    return tag === 'cond'
+  public matches(value: string): boolean {
+    return value === 'cond'
   }
 
-  public evaluate(node: SchemeSym, env: Env, cont: Continuation): SchemeData {
-    let currentNode = node.next
-
-    while (currentNode) {
-      const predict = this.getPredicate(currentNode)
+  public evaluate(node: SchemeList, env: Env, cont: Continuation): SchemeData {
+    let currentNode: SchemeList
+    while (!SchemeList.isNil(currentNode = node.cdr())) {
+      const predictNode = currentNode.car()
 
       // 匹配 else 语句
-      if (SchemeSym.matches(predict) && predict.tag === 'else') {
-        return this.evaluator.evaluate(this.getValue(currentNode), env, cont)
+      if (SchemeSym.cast(predictNode).value === 'else') {
+        return this.evaluator.evaluate(currentNode.cdr(), env, cont)
       }
 
       // 匹配第一个成功的 predict
-      const predictValue = this.evaluator.evaluate(predict, env, cont)
+      const predictValue = this.evaluator.evaluate(predictNode, env)
       if (SchemeBoolean.isTrue(predictValue)) {
-        return this.evaluator.evaluate(this.getValue(currentNode), env, cont)
+        return this.evaluator.evaluate(currentNode.cdr(), env, cont)
       }
-
-      currentNode = currentNode.next
     }
 
-    assert(true, 'Error: cond clause evaluate error!')
+    assert(true, 'Error: at least one cond clause is required!')
     return null as never
-  }
-
-  private getPredicate(node: NodeData): NodeData {
-    assert(SchemeExp.matches(node), 'Syntax error: cond clause should have brackets!')
-    assert(node?.body, 'Syntax error: cond clause need predicate clause!')
-    return node.body
-  }
-
-  private getValue(node: NodeData): NodeData {
-    assert(SchemeExp.matches(node), 'Syntax error: cond clause should have brackets!')
-    assert(node?.body?.next, 'Syntax error: cond clause need value clause!')
-    return node.body.next
   }
 }

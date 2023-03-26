@@ -1,7 +1,6 @@
-import type { SchemeData, Continuation, SchemeSym } from '../parser/data'
+import type { SchemeData, Continuation, SchemeList } from '../parser/data'
 import type { Env } from '../env'
 import type { IEvaluator, Evaluator } from './index'
-import { assert } from '../utils'
 
 /**
  * 语法：
@@ -13,13 +12,11 @@ import { assert } from '../utils'
 export default class BeginEvaluator implements IEvaluator {
   constructor(private evaluator: Evaluator) {}
 
-  public matches(tag: string): boolean {
-    return tag === 'begin'
+  public matches(value: string): boolean {
+    return value === 'begin'
   }
 
-  public evaluate(node: SchemeSym, env: Env, cont: Continuation): SchemeData {
-    let currentNode = node.next
-    assert(currentNode, 'Syntax error: begin followed no clause!')
-    return this.evaluator.evaluateList(currentNode, env, cont)
+  public evaluate(node: SchemeList, env: Env, cont: Continuation): SchemeData {
+    return this.evaluator.evaluateList(node.cdr(), env, cont)
   }
 }

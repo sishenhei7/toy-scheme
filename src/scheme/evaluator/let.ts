@@ -1,4 +1,4 @@
-import { NodeData, SchemeExp, Continuation, type SchemeData, SchemeSym } from '../parser/data'
+import { SchemeList, Continuation, type SchemeData, SchemeSym } from '../parser/data'
 import { Env } from '../env'
 import type { IEvaluator, Evaluator } from './index'
 import { assert } from '../utils'
@@ -21,18 +21,13 @@ import { assert } from '../utils'
 export default class LetEvaluator implements IEvaluator {
   constructor(private evaluator: Evaluator) {}
 
-  public matches(tag: string): boolean {
-    return this.isLet(tag) || this.isLetStar(tag) || this.isLetRec(tag)
+  public matches(value: string): boolean {
+    return this.isLet(value) || this.isLetStar(value) || this.isLetRec(value)
   }
 
-  public evaluate(node: SchemeSym, env: Env, cont: Continuation): SchemeData {
-    assert(node.next && node.next.next, 'Let evaluting error: should follow 2 expressions!')
-    const defination = node.next
-    const body = node.next.next
-    const newEnv = new Env(env)
-    assert(SchemeExp.matches(defination), 'Let evaluting error: should follow SchemeExp!')
-    this.evaluateDefination(defination.body, env)
-    return this.evaluator.evaluate(body, newEnv, cont)
+  public evaluate(node: SchemeList, env: Env, cont: Continuation): SchemeData {
+    this.evaluateDefination(SchemeList.cast(node.cadr()), env)
+    return this.evaluator.evaluate(node.caddr(), new Env(env), cont)
   }
 
   private isLet(tag: string) {
@@ -44,12 +39,12 @@ export default class LetEvaluator implements IEvaluator {
   private isLetRec(tag: string) {
     return tag === 'letrec'
   }
-  private evaluateDefination(node: NodeData | null, env: Env): void {
-    while (node && SchemeExp.matches(node) && node.body) {
-      assert(SchemeSym.matches(node.body), 'Let evaluting error: defs should be SchemeSym!')
-      const varNode = node.body
-      env.define(varNode.tag, this.evaluator.evaluate(varNode.next, env))
-      node = node.next
+  private evaluateDefination(node: SchemeList, env: Env): void {
+    while (SchemeList.matches(node.car()) && !SchemeList.isNil(node.car())) {
+      const defination = SchemeList.cast(node.car())
+      const varNode = SchemeSym.cast(defination.car())
+      env.define(varNode.value, this.evaluator.evaluate(defination.cdr(), env))
+      node = node.cdr()
     }
   }
 }
