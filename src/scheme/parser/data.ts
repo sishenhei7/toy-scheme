@@ -31,7 +31,7 @@ export class SchemeSym extends SchemeData {
     super()
   }
 
-  public toString(): string {
+  public toStringBase(): string {
     return this.value
   }
 
@@ -53,7 +53,7 @@ export class SchemeNumber extends SchemeData {
     super()
   }
 
-  public toString(): string {
+  public toStringBase(): string {
     return String(this.value)
   }
 
@@ -75,7 +75,7 @@ export class SchemeString extends SchemeData {
     super()
   }
 
-  public toString(): string {
+  public toStringBase(): string {
     return this.value
   }
 
@@ -97,7 +97,7 @@ export class SchemeBoolean extends SchemeData {
     super()
   }
 
-  public toString(): string {
+  public toStringBase(): string {
     return String(this.value)
   }
 
@@ -186,7 +186,7 @@ export class SchemeList extends SchemeData {
     return new SchemeNumber(this.getLengthBase())
   }
 
-  public toString(): string {
+  public toStringBase(): string {
     if (SchemeList.isNil(this)) {
       return "'()"
     }
@@ -206,7 +206,6 @@ export class SchemeList extends SchemeData {
   static buildFromArray(args: SchemeData[]): SchemeList {
     let res = SchemeList.Nil
     let current = res
-    console.log(args)
     for (const arg of args) {
       if (SchemeList.isNil(current)) {
         current.setCar(arg)
@@ -219,8 +218,8 @@ export class SchemeList extends SchemeData {
     return res
   }
 
-  static isNil(item: SchemeData): boolean {
-    return SchemeList.cast(item) === SchemeList.Nil
+  static isNil(item: SchemeList): boolean {
+    return item._car === null && item._cdr === null
   }
 
   static matches(item: SchemeData): item is SchemeList {
@@ -233,13 +232,13 @@ export class SchemeList extends SchemeData {
   }
 
   static cons(car: SchemeData, cdr: SchemeData): SchemeList {
+    let carList = SchemeList.buildOne(car)
     const cdrList = SchemeList.buildOne(cdr)
 
-    if (SchemeList.isNil(car)) {
+    if (SchemeList.isNil(carList)) {
       return cdrList
     }
 
-    let carList = SchemeList.buildOne(car)
     while (!SchemeList.isNil(carList.cdr())) {
       carList = carList.cdr()
     }
@@ -280,7 +279,7 @@ export class SchemeProc extends SchemeData {
     super()
   }
 
-  public toString(): string {
+  public toStringBase(): string {
     return '<<function>>'
   }
 
@@ -323,7 +322,7 @@ export default function parseToken(tokenList: TokenItem[]): SchemeList {
       }
     }
 
-    assert(false, 'Parsing Error: right paren is less than left paren')
+    return list
   }
 
   return SchemeList.buildFromArray(parseTokenList())
