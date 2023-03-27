@@ -43,6 +43,6 @@ export default class ProcEvaluator implements IEvaluator {
       params = params.cdr()
       args = args.cdr()
     }
-    assert(!params && !args, 'Proc params and args do not match!')
+    assert(SchemeList.isNil(params) && SchemeList.isNil(args), 'Proc params and args do not match!')
   }
 }

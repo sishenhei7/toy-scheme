@@ -19,12 +19,12 @@ export default class CondEvaluator implements IEvaluator {
   }
 
   public evaluate(node: SchemeList, env: Env, cont: Continuation): SchemeData {
-    let currentNode: SchemeList
-    while (!SchemeList.isNil(currentNode = node.cdr())) {
+    while (!SchemeList.isNil(node = node.cdr())) {
+      const currentNode = SchemeList.cast(node.car())
       const predictNode = currentNode.car()
 
       // 匹配 else 语句
-      if (SchemeSym.cast(predictNode).value === 'else') {
+      if (SchemeSym.matches(predictNode) && predictNode.value === 'else') {
         return this.evaluator.evaluate(currentNode.cdr(), env, cont)
       }
 

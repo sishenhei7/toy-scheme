@@ -1,7 +1,6 @@
 import { type Continuation, type SchemeData, SchemeList, SchemeProc } from '../parser/data'
 import type { Env } from '../env'
 import type { IEvaluator, Evaluator } from './index'
-import { assert } from '../utils'
 
 /**
  * 语法：
@@ -10,8 +9,8 @@ import { assert } from '../utils'
 export default class LambdaEvaluator implements IEvaluator {
   constructor(private evaluator: Evaluator) {}
 
-  public matches(tag: string): boolean {
-    return tag === 'lambda'
+  public matches(value: string): boolean {
+    return value === 'lambda'
   }
 
   public evaluate(node: SchemeList, env: Env, cont: Continuation): SchemeData {

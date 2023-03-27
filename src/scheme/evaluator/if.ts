@@ -9,8 +9,8 @@ import type { IEvaluator, Evaluator } from './index'
 export default class IfEvaluator implements IEvaluator {
   constructor(private evaluator: Evaluator) {}
 
-  public matches(tag: string): boolean {
-    return tag === 'if'
+  public matches(value: string): boolean {
+    return value === 'if'
   }
 
   public evaluate(node: SchemeList, env: Env, cont: Continuation): SchemeData {

@@ -20,7 +20,7 @@ export default class DefineEvaluator implements IEvaluator {
 
   public evaluate(node: SchemeList, env: Env, cont: Continuation): SchemeData {
     const varNode = node.cadr()
-    const bodyNode = node.caddr()
+    const bodyNode = node.cddr()
 
     // 定义变量或者函数
     if (SchemeSym.matches(varNode)) {

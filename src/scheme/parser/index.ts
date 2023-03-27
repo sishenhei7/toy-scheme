@@ -8,6 +8,5 @@ import parseToken from './data'
 
 export function parse(st: string): ReturnType<typeof parseToken> {
   const tokenList = tokenize(st).filter((token) => !token.isIgnoreToken())
-  console.log(tokenList)
   return parseToken(tokenList)
 }

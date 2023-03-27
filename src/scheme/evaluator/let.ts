@@ -30,18 +30,19 @@ export default class LetEvaluator implements IEvaluator {
     return this.evaluator.evaluate(node.caddr(), new Env(env), cont)
   }
 
-  private isLet(tag: string) {
-    return tag === 'let'
+  private isLet(value: string): boolean {
+    return value === 'let'
   }
-  private isLetStar(tag: string) {
-    return tag === 'let*'
+  private isLetStar(value: string): boolean {
+    return value === 'let*'
   }
-  private isLetRec(tag: string) {
-    return tag === 'letrec'
+  private isLetRec(value: string): boolean {
+    return value === 'letrec'
   }
   private evaluateDefination(node: SchemeList, env: Env): void {
-    while (SchemeList.matches(node.car()) && !SchemeList.isNil(node.car())) {
-      const defination = SchemeList.cast(node.car())
+    const car = node.car()
+    while (SchemeList.matches(car) && !SchemeList.isNil(car)) {
+      const defination = SchemeList.cast(car)
       const varNode = SchemeSym.cast(defination.car())
       env.define(varNode.value, this.evaluator.evaluate(defination.cdr(), env))
       node = node.cdr()

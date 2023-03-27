@@ -121,7 +121,6 @@ export class SchemeBoolean extends SchemeData {
  */
 export class SchemeList extends SchemeData {
   public shouldEval: boolean = true
-  static Nil = new SchemeList(null, null)
 
   constructor(
     private _car: SchemeData | null,
@@ -131,7 +130,7 @@ export class SchemeList extends SchemeData {
   }
 
   public cdr(): SchemeList {
-    return this._cdr || SchemeList.Nil
+    return this._cdr || SchemeList.buildSchemeNil()
   }
 
   public cddr(): SchemeList {
@@ -195,22 +194,26 @@ export class SchemeList extends SchemeData {
     return ''
   }
 
+  static buildSchemeNil(): SchemeList {
+    return new SchemeList(null, null)
+  }
+
   static buildOne(arg: SchemeData): SchemeList {
     return SchemeList.matches(arg) ? arg : SchemeList.buildFromAtom(arg)
   }
 
   static buildFromAtom(arg: Exclude<SchemeData, SchemeList>): SchemeList {
-    return new SchemeList(arg, SchemeList.Nil)
+    return new SchemeList(arg, SchemeList.buildSchemeNil())
   }
 
   static buildFromArray(args: SchemeData[]): SchemeList {
-    let res = SchemeList.Nil
+    let res = SchemeList.buildSchemeNil()
     let current = res
     for (const arg of args) {
       if (SchemeList.isNil(current)) {
         current.setCar(arg)
       } else {
-        const next = SchemeList.buildOne(arg)
+        const next = SchemeList.buildFromAtom(arg)
         current.setCdr(next)
         current = next
       }
