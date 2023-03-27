@@ -57,5 +57,5 @@ export default `
     (display "Valid positions for " n " queens:\n")
     (build-all-solutions n))
 
-(queens 8)
+(queens 4)
 `

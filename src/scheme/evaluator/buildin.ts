@@ -205,6 +205,7 @@ export default class BuildInEvaluator implements IEvaluator {
 
   private display(node: SchemeList, env: Env): SchemeData {
     const first = this.evaluateFirstArgs(node, env)
+    console.log(first.toString())
     return first
   }
 }
