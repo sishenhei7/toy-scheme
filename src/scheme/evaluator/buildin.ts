@@ -82,8 +82,9 @@ export default class BuildInEvaluator implements IEvaluator {
     )
   }
 
-  private isNull(node: SchemeList): SchemeBoolean {
-    return new SchemeBoolean(SchemeList.isNil(node))
+  private isNull(node: SchemeList, env: Env): SchemeBoolean {
+    const first = this.evaluateFirstArgs(node, env)
+    return new SchemeBoolean(SchemeList.isNil(SchemeList.cast(first)))
   }
 
   private car(node: SchemeList, env: Env): SchemeData {

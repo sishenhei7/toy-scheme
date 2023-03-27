@@ -14,6 +14,6 @@ export default class LambdaEvaluator implements IEvaluator {
   }
 
   public evaluate(node: SchemeList, env: Env, cont: Continuation): SchemeData {
-    return new SchemeProc('<<lambda>>', SchemeList.cast(node.cadr()), node.caddr(), env)
+    return cont.call(new SchemeProc('<<lambda>>', SchemeList.cast(node.cadr()), node.caddr(), env))
   }
 }

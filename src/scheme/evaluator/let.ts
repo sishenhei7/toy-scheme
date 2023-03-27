@@ -43,7 +43,7 @@ export default class LetEvaluator implements IEvaluator {
     while (!SchemeList.isNil(node)) {
       const defination = SchemeList.cast(node.car())
       const varNode = SchemeSym.cast(defination.car())
-      env.define(varNode.value, this.evaluator.evaluate(defination.cdr(), env))
+      this.evaluator.evaluate(defination.cdr(), env, new Continuation(value => env.define(varNode.value, value)))
       node = node.cdr()
     }
   }
