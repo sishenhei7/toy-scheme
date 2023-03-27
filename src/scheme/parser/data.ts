@@ -98,7 +98,7 @@ export class SchemeBoolean extends SchemeData {
   }
 
   public toString(): string {
-    return String(this.value)
+    return this.value ? '#t' : '#f'
   }
 
   static matches(item: SchemeData): item is SchemeBoolean {
@@ -186,12 +186,13 @@ export class SchemeList extends SchemeData {
   }
 
   public toString(): string {
-    if (SchemeList.isNil(this)) {
-      return "'()"
+    let res = ''
+    let current: SchemeList = this
+    while (!SchemeList.isNil(current)) {
+      res += ' ' + current.car().toString()
+      current = current.cdr()
     }
-
-    // TODO
-    return ''
+    return `(${res.trim()})`
   }
 
   static buildSchemeNil(): SchemeList {
@@ -297,7 +298,7 @@ export default function parseToken(tokenList: TokenItem[]): SchemeList {
       const { type, value, start, end } = tokenList[tokenCursor++]
       switch (type) {
         case TokenType.Boolean:
-          list.push(new SchemeBoolean(value === '#f').setLocationInfo(start, end))
+          list.push(new SchemeBoolean(value === '#t').setLocationInfo(start, end))
           break
         case TokenType.Number:
           list.push(new SchemeNumber(Number(value)).setLocationInfo(start, end))
