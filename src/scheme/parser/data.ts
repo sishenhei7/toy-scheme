@@ -31,7 +31,7 @@ export class SchemeSym extends SchemeData {
     super()
   }
 
-  public toStringBase(): string {
+  public toString(): string {
     return this.value
   }
 
@@ -53,7 +53,7 @@ export class SchemeNumber extends SchemeData {
     super()
   }
 
-  public toStringBase(): string {
+  public toString(): string {
     return String(this.value)
   }
 
@@ -75,7 +75,7 @@ export class SchemeString extends SchemeData {
     super()
   }
 
-  public toStringBase(): string {
+  public toString(): string {
     return this.value
   }
 
@@ -97,7 +97,7 @@ export class SchemeBoolean extends SchemeData {
     super()
   }
 
-  public toStringBase(): string {
+  public toString(): string {
     return String(this.value)
   }
 
@@ -142,7 +142,7 @@ export class SchemeList extends SchemeData {
   }
 
   public car(): SchemeData {
-    assert(this._car, `Car error: ${this} is nil!`)
+    assert(this._car, `car error: caller is nil!`)
     return this._car
   }
 
@@ -185,7 +185,7 @@ export class SchemeList extends SchemeData {
     return new SchemeNumber(this.getLengthBase())
   }
 
-  public toStringBase(): string {
+  public toString(): string {
     if (SchemeList.isNil(this)) {
       return "'()"
     }
@@ -207,16 +207,12 @@ export class SchemeList extends SchemeData {
   }
 
   static buildFromArray(args: SchemeData[]): SchemeList {
+    const len = args.length
     let res = SchemeList.buildSchemeNil()
-    let current = res
-    for (const arg of args) {
-      if (SchemeList.isNil(current)) {
-        current.setCar(arg)
-      } else {
-        const next = SchemeList.buildFromAtom(arg)
-        current.setCdr(next)
-        current = next
-      }
+    for (let i = len - 1; i >= 0; i -= 1) {
+      const node = SchemeList.buildFromAtom(args[i])
+      node.setCdr(res)
+      res = node
     }
     return res
   }
@@ -282,7 +278,7 @@ export class SchemeProc extends SchemeData {
     super()
   }
 
-  public toStringBase(): string {
+  public toString(): string {
     return '<<function>>'
   }
 

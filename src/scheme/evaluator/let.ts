@@ -40,9 +40,8 @@ export default class LetEvaluator implements IEvaluator {
     return value === 'letrec'
   }
   private evaluateDefination(node: SchemeList, env: Env): void {
-    const car = node.car()
-    while (SchemeList.matches(car) && !SchemeList.isNil(car)) {
-      const defination = SchemeList.cast(car)
+    while (!SchemeList.isNil(node)) {
+      const defination = SchemeList.cast(node.car())
       const varNode = SchemeSym.cast(defination.car())
       env.define(varNode.value, this.evaluator.evaluate(defination.cdr(), env))
       node = node.cdr()
