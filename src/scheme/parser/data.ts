@@ -206,6 +206,7 @@ export class SchemeList extends SchemeData {
   static buildFromArray(args: SchemeData[]): SchemeList {
     let res = SchemeList.Nil
     let current = res
+    console.log(args)
     for (const arg of args) {
       if (SchemeList.isNil(current)) {
         current.setCar(arg)
@@ -293,6 +294,7 @@ export default function parseToken(tokenList: TokenItem[]): SchemeList {
 
   function parseTokenList(): SchemeData[] {
     let list: SchemeData[] = []
+
     while (tokenList.length && tokenCursor < tokenList.length) {
       const { type, value, start, end } = tokenList[tokenCursor++]
       switch (type) {
@@ -317,13 +319,11 @@ export default function parseToken(tokenList: TokenItem[]): SchemeList {
         case TokenType.RParen:
           return list
         default:
-          assert(true, `Parsing Error: Unexpected TokenType: ${type}`)
-          break
+          assert(false, `Parsing Error: Unexpected TokenType: ${type}`)
       }
     }
 
-    assert(true, 'Parsing Error: right paren is less than left paren')
-    return null as never
+    assert(false, 'Parsing Error: right paren is less than left paren')
   }
 
   return SchemeList.buildFromArray(parseTokenList())

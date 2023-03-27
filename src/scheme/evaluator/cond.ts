@@ -35,7 +35,6 @@ export default class CondEvaluator implements IEvaluator {
       }
     }
 
-    assert(true, 'Error: at least one cond clause is required!')
-    return null as never
+    assert(false, 'Error: at least one cond clause is required!')
   }
 }

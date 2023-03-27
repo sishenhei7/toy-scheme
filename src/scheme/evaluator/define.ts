@@ -33,7 +33,6 @@ export default class DefineEvaluator implements IEvaluator {
       return env.define(name, new SchemeProc(name, varNode.cdr(), bodyNode, env))
     }
 
-    assert(true, 'Error: define clause evaluate error!')
-    return null as never
+    assert(false, 'Error: define clause evaluate error!')
   }
 }
