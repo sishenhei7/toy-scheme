@@ -57,5 +57,6 @@ export default `
     (display "Valid positions for " n " queens:\n")
     (build-all-solutions n))
 
-(queens 4)
+(queens 8)
+; TODO: 这里 8 改成 9 之后会爆栈，以后解决一下
 `

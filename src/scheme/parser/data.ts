@@ -231,18 +231,10 @@ export class SchemeList extends SchemeData {
     return item
   }
 
+  // 注意：cons 不需要遍历到 car 的末尾，它是一个 O(1) 的操作
+  // 而且，cons 不能改变 car
   static cons(car: SchemeData, cdr: SchemeData): SchemeList {
-    let carList = SchemeList.buildOne(car)
-    const cdrList = SchemeList.buildOne(cdr)
-
-    if (SchemeList.isNil(carList)) {
-      return cdrList
-    }
-
-    while (!SchemeList.isNil(carList.cdr())) {
-      carList = carList.cdr()
-    }
-    return carList.setCdr(cdrList)
+    return new SchemeList(car, SchemeList.buildOne(cdr))
   }
 }
 
