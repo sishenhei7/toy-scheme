@@ -70,7 +70,6 @@ export class Evaluator {
       if (SchemeList.isNil(node.cdr())) {
         return cont.call(data)
       }
-
       return this.evaluate(node.cdr(), env, cont)
     }))
   }
