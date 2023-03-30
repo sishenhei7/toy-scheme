@@ -241,19 +241,23 @@ export class SchemeList extends SchemeData {
 /**
  * 其它数据结构：continuation 是一等公民
  */
-export class Continuation extends SchemeData {
-  static Identity = new Continuation(x => x)
+export class SchemeCont extends SchemeData {
+  static Identity = new SchemeCont(x => x)
 
   constructor(private f: (node: SchemeData) => SchemeData) {
     super()
+  }
+
+  public toString(): string {
+    return '<<continuation>>'
   }
 
   public call(node: SchemeData): SchemeData {
     return this.f(node)
   }
 
-  static matches(item: SchemeData): item is Continuation {
-    return item instanceof Continuation
+  static matches(item: SchemeData): item is SchemeCont {
+    return item instanceof SchemeCont
   }
 }
 

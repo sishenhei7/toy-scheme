@@ -1,4 +1,4 @@
-import { SchemeList, Continuation, type SchemeData, SchemeSym } from '../parser/data'
+import { SchemeList, SchemeCont, type SchemeData, SchemeSym } from '../parser/data'
 import { Env } from '../env'
 import type { IEvaluator, Evaluator } from './index'
 import { assert } from '../utils'
@@ -25,7 +25,7 @@ export default class LetEvaluator implements IEvaluator {
     return this.isLet(value) || this.isLetStar(value) || this.isLetRec(value)
   }
 
-  public evaluate(node: SchemeList, env: Env, cont: Continuation): SchemeData {
+  public evaluate(node: SchemeList, env: Env, cont: SchemeCont): SchemeData {
     this.evaluateDefination(SchemeList.cast(node.cadr()), env)
     return this.evaluator.evaluate(node.caddr(), new Env(env), cont)
   }
@@ -43,7 +43,7 @@ export default class LetEvaluator implements IEvaluator {
     while (!SchemeList.isNil(node)) {
       const defination = SchemeList.cast(node.car())
       const varNode = SchemeSym.cast(defination.car())
-      this.evaluator.evaluate(defination.cdr(), env, new Continuation(value => env.define(varNode.value, value)))
+      this.evaluator.evaluate(defination.cdr(), env, new SchemeCont(value => env.define(varNode.value, value)))
       node = node.cdr()
     }
   }

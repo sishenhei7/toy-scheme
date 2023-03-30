@@ -1,4 +1,4 @@
-import { type SchemeData, type Continuation, SchemeSym, SchemeList, SchemeProc } from '../parser/data'
+import { type SchemeData, SchemeCont, SchemeSym, SchemeList, SchemeProc } from '../parser/data'
 import type { Env } from '../env'
 import type { IEvaluator, Evaluator } from './index'
 import { assert } from '../utils'
@@ -18,19 +18,24 @@ export default class DefineEvaluator implements IEvaluator {
     return value === 'define'
   }
 
-  public evaluate(node: SchemeList, env: Env, cont: Continuation): SchemeData {
+  public evaluate(node: SchemeList, env: Env, cont: SchemeCont): SchemeData {
     const varNode = node.cadr()
     const bodyNode = node.cddr()
 
     // 定义变量或者函数
     if (SchemeSym.matches(varNode)) {
-      return env.define(varNode.value, this.evaluator.evaluate(bodyNode, env, cont))
+      return this.evaluator.evaluate(bodyNode, env, new SchemeCont((data: SchemeData) => {
+        env.define(varNode.value, data)
+        return cont.call(data)
+      }))
     }
 
     // 定义函数
     if (SchemeList.matches(varNode)) {
       const name = SchemeSym.cast(varNode.car()).value
-      return env.define(name, new SchemeProc(name, varNode.cdr(), bodyNode, env))
+      const proc = new SchemeProc(name, varNode.cdr(), bodyNode, env)
+      env.define(name, proc)
+      return cont.call(proc)
     }
 
     assert(false, 'Error: define clause evaluate error!')

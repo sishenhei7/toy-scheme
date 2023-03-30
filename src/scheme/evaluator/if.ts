@@ -1,4 +1,4 @@
-import { type SchemeData, SchemeList, Continuation, SchemeBoolean } from '../parser/data'
+import { type SchemeData, SchemeList, SchemeCont, SchemeBoolean } from '../parser/data'
 import type { Env } from '../env'
 import type { IEvaluator, Evaluator } from './index'
 
@@ -13,12 +13,12 @@ export default class IfEvaluator implements IEvaluator {
     return value === 'if'
   }
 
-  public evaluate(node: SchemeList, env: Env, cont: Continuation): SchemeData {
+  public evaluate(node: SchemeList, env: Env, cont: SchemeCont): SchemeData {
     return this.evaluator.evaluate(node.cadr(), env, this.getCont(node, env, cont))
   }
 
-  private getCont(node: SchemeList, env: Env, cont: Continuation): Continuation {
-    return new Continuation(
+  private getCont(node: SchemeList, env: Env, cont: SchemeCont): SchemeCont {
+    return new SchemeCont(
       (val: SchemeData) =>
         SchemeBoolean.isTrue(val)
           ? this.evaluator.evaluate(node.caddr(), env, cont)

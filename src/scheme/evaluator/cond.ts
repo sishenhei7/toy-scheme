@@ -1,4 +1,4 @@
-import { SchemeBoolean, SchemeList, SchemeSym, type Continuation, type SchemeData } from '../parser/data'
+import { SchemeBoolean, SchemeList, SchemeSym, type SchemeCont, type SchemeData } from '../parser/data'
 import type { Env } from '../env'
 import type { IEvaluator, Evaluator } from './index'
 import { assert } from '../utils'
@@ -18,7 +18,7 @@ export default class CondEvaluator implements IEvaluator {
     return value === 'cond'
   }
 
-  public evaluate(node: SchemeList, env: Env, cont: Continuation): SchemeData {
+  public evaluate(node: SchemeList, env: Env, cont: SchemeCont): SchemeData {
     while (!SchemeList.isNil(node = node.cdr())) {
       const currentNode = SchemeList.cast(node.car())
       const predictNode = currentNode.car()

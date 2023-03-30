@@ -1,4 +1,4 @@
-import { type SchemeData, Continuation, SchemeSym, SchemeList, SchemeBoolean, SchemeNumber } from '../parser/data';
+import { type SchemeData, SchemeCont, SchemeSym, SchemeList, SchemeBoolean, SchemeNumber } from '../parser/data';
 import type { Env } from '../env'
 import type { IEvaluator, Evaluator } from './index'
 import { assert } from '../utils'
@@ -57,7 +57,7 @@ export default class BuildInEvaluator implements IEvaluator {
     return this.evaluatorMap.has(value)
   }
 
-  public evaluate(node: SchemeList, env: Env, cont: Continuation): SchemeData {
+  public evaluate(node: SchemeList, env: Env, cont: SchemeCont): SchemeData {
     const evaluator = this.evaluatorMap.get(SchemeSym.cast(node.car()).value)
     assert(evaluator, 'buildin evaluator evaluates error!')
     return cont.call(evaluator(node, env))

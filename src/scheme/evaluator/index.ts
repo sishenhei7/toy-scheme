@@ -1,4 +1,4 @@
-import { type SchemeData, Continuation, SchemeList, SchemeSym } from '../parser/data'
+import { type SchemeData, SchemeCont, SchemeList, SchemeSym, SchemeProc } from '../parser/data'
 import type { Env } from '../env'
 import BuildInEvaluator from './buildin'
 import LetEvaluator from './let'
@@ -13,7 +13,7 @@ import ProcEvaluator from './proc'
 
 export interface IEvaluator {
   matches(value: string, env?: Env): boolean
-  evaluate(node: SchemeData, env: Env, cont: Continuation): SchemeData
+  evaluate(node: SchemeData, env: Env, cont: SchemeCont): SchemeData
 }
 
 export class Evaluator {
@@ -36,7 +36,7 @@ export class Evaluator {
     ]
   }
 
-  public evaluate(node: SchemeData, env: Env, cont: Continuation = Continuation.Identity): SchemeData {
+  public evaluate(node: SchemeData, env: Env, cont: SchemeCont = SchemeCont.Identity): SchemeData {
     // is a sentence
     if (SchemeList.matches(node) && node.shouldEval) {
       const peek = node.car()
@@ -49,6 +49,11 @@ export class Evaluator {
         }
       }
 
+      // 当节点是 SchemeCont 的时候，丢弃当前的 cont，直接执行 SchemeCont
+      if (SchemeCont.matches(peek) && !SchemeList.isNil(node.cdr())) {
+        return peek.call(this.evaluate(node.cadr(), env))
+      }
+
       return this.evaluateList(node, env, cont)
     }
 
@@ -59,11 +64,14 @@ export class Evaluator {
     return cont.call(node)
   }
 
-  public evaluateList(node: SchemeList, env: Env, cont: Continuation = Continuation.Identity): SchemeData {
-    let res = this.evaluate(node.car(), env, cont)
-    if (!SchemeList.isNil(node.cdr())) {
-      res = this.evaluateList(SchemeList.cast(node.cdr()), env, cont)
-    }
-    return res
+  // 这里很重要，下一个语句是通过上一个语句的cont进行执行的！
+  public evaluateList(node: SchemeList, env: Env, cont: SchemeCont = SchemeCont.Identity): SchemeData {
+    return this.evaluate(node.car(), env, new SchemeCont((data: SchemeData) => {
+      if (SchemeList.isNil(node.cdr())) {
+        return cont.call(data)
+      }
+
+      return this.evaluate(node.cdr(), env, cont)
+    }))
   }
 }
