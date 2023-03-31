@@ -32,19 +32,25 @@ export default class ProcEvaluator implements IEvaluator {
     // 3.执行body
     // 4.把结果返回给cont
     const parentEnv = proc.envClosure // 词法作用域
-    const parentStackframe = parentEnv.getStackFrame()
-    const newEnv = new Env(parentEnv, new StackFrame(parentStackframe)) // shade
-    this.evaluateArgs(proc.params, args, env, newEnv)
-    return this.evaluator.evaluate(proc.body, newEnv, cont)
+    const newEnv = new Env(parentEnv, new StackFrame(parentEnv.getStackFrame())) // shade
+    return this.evaluateArgs(
+      proc.params,
+      args,
+      env,
+      newEnv,
+      new SchemeCont((_: SchemeData) => this.evaluator.evaluate(proc.body, newEnv, cont))
+    )
   }
 
-  private evaluateArgs(params: SchemeList, args: SchemeList, env: Env, newEnv: Env): void {
-    while (!SchemeList.isNil(params) && !SchemeList.isNil(args)) {
-      const value = this.evaluator.evaluate(args.car(), env)
-      newEnv.define(SchemeSym.cast(params.car()).value, value) // 注意这里是 newEnv，不是 env
-      params = params.cdr()
-      args = args.cdr()
+  private evaluateArgs(params: SchemeList, args: SchemeList, env: Env, newEnv: Env, cont: SchemeCont): SchemeData {
+    if (!SchemeList.isNil(params)) {
+      assert(!SchemeList.isNil(args), 'Proc params and args do not match!')
+      return this.evaluator.evaluate(args.car(), env, new SchemeCont((data: SchemeData) => {
+        const name = SchemeSym.cast(params.car()).value
+        newEnv.define(name, data)
+        return this.evaluateArgs(params.cdr(), args.cdr(), env, newEnv, cont)
+      }))
     }
-    assert(SchemeList.isNil(params) && SchemeList.isNil(args), 'Proc params and args do not match!')
+    return cont.call(SchemeList.buildSchemeNil())
   }
 }

@@ -1,7 +1,7 @@
 import { parse } from './parser'
 import { Evaluator } from './evaluator'
 import { Env } from './env'
-import program from './programs/return-with-callcc'
+import program from './programs/n-queues'
 
 export function test() {
   const evaluator = new Evaluator()

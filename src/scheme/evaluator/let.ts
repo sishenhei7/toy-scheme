@@ -26,8 +26,10 @@ export default class LetEvaluator implements IEvaluator {
   }
 
   public evaluate(node: SchemeList, env: Env, cont: SchemeCont): SchemeData {
-    this.evaluateDefination(SchemeList.cast(node.cadr()), env)
-    return this.evaluator.evaluate(node.caddr(), new Env(env), cont)
+    return this.evaluateDefination(
+      SchemeList.cast(node.cadr()),
+      env,
+      new SchemeCont((_: SchemeData) => this.evaluator.evaluate(node.caddr(), new Env(env), cont)))
   }
 
   private isLet(value: string): boolean {
@@ -39,12 +41,20 @@ export default class LetEvaluator implements IEvaluator {
   private isLetRec(value: string): boolean {
     return value === 'letrec'
   }
-  private evaluateDefination(node: SchemeList, env: Env): void {
-    while (!SchemeList.isNil(node)) {
+  private evaluateDefination(node: SchemeList, env: Env, cont: SchemeCont): SchemeData {
+    // console.log(1111, node, !SchemeList.isNil(node))
+    if (!SchemeList.isNil(node)) {
       const defination = SchemeList.cast(node.car())
-      const varNode = SchemeSym.cast(defination.car())
-      this.evaluator.evaluate(defination.cdr(), env, new SchemeCont(value => env.define(varNode.value, value)))
-      node = node.cdr()
+      const name = SchemeSym.cast(defination.car()).value
+      const body = defination.cdr()
+      return this.evaluator.evaluate(body, env, new SchemeCont((data: SchemeData) => {
+        env.define(name, data)
+        // console.log(2222, name, data, node.cdr())
+        return this.evaluateDefination(node.cdr(), env, cont)
+      }))
     }
+
+    // 这里是不是应该这样？
+    return cont.call(SchemeList.buildSchemeNil())
   }
 }

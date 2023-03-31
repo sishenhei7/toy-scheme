@@ -14,16 +14,10 @@ export default class IfEvaluator implements IEvaluator {
   }
 
   public evaluate(node: SchemeList, env: Env, cont: SchemeCont): SchemeData {
-    return this.evaluator.evaluate(node.cadr(), env, this.getCont(node, env, cont))
-  }
-
-  private getCont(node: SchemeList, env: Env, cont: SchemeCont): SchemeCont {
-    return new SchemeCont(
-      (val: SchemeData) =>
-        SchemeBoolean.isTrue(val)
-          ? this.evaluator.evaluate(node.caddr(), env, cont)
-          : this.evaluator.evaluate(node.cadddr(), env, cont)
-    )
-
+    return this.evaluator.evaluate(node.cadr(), env, new SchemeCont(
+      (data: SchemeData) => SchemeBoolean.isTrue(data)
+        ? this.evaluator.evaluate(node.caddr(), env, cont)
+        : this.evaluator.evaluate(node.cadddr(), env, cont)
+    ))
   }
 }
