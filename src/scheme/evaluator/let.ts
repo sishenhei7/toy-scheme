@@ -1,7 +1,6 @@
 import { SchemeList, SchemeCont, type SchemeData, SchemeSym } from '../parser/data'
-import { Env } from '../env'
+import { Env, StackFrame } from '../env'
 import type { IEvaluator, Evaluator } from './index'
-import { assert } from '../utils'
 
 /**
  * 语法：
@@ -26,10 +25,11 @@ export default class LetEvaluator implements IEvaluator {
   }
 
   public evaluate(node: SchemeList, env: Env, cont: SchemeCont): SchemeData {
+    const newEnv = new Env(env, new StackFrame(env.getStackFrame()))
     return this.evaluateDefination(
       SchemeList.cast(node.cadr()),
-      env,
-      new SchemeCont((_: SchemeData) => this.evaluator.evaluate(node.caddr(), new Env(env), cont)))
+      newEnv,
+      new SchemeCont((_: SchemeData) => this.evaluator.evaluate(node.caddr(), newEnv, cont)))
   }
 
   private isLet(value: string): boolean {
@@ -42,18 +42,15 @@ export default class LetEvaluator implements IEvaluator {
     return value === 'letrec'
   }
   private evaluateDefination(node: SchemeList, env: Env, cont: SchemeCont): SchemeData {
-    // console.log(1111, node, !SchemeList.isNil(node))
     if (!SchemeList.isNil(node)) {
       const defination = SchemeList.cast(node.car())
       const name = SchemeSym.cast(defination.car()).value
       const body = defination.cdr()
       return this.evaluator.evaluate(body, env, new SchemeCont((data: SchemeData) => {
         env.define(name, data)
-        // console.log(2222, name, data, node.cdr())
         return this.evaluateDefination(node.cdr(), env, cont)
       }))
     }
-
     // 这里是不是应该这样？
     return cont.call(SchemeList.buildSchemeNil())
   }
