@@ -73,4 +73,9 @@ export class Evaluator {
       return this.evaluate(node.cdr(), env, cont)
     }))
   }
+
+  // TODO: 缺少一个 application 的语法
+  public evaluateApplication(node: SchemeList, env: Env, cont: SchemeCont = SchemeCont.Identity) {
+
+  }
 }
