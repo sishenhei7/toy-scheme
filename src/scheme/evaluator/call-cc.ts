@@ -1,4 +1,4 @@
-import { type SchemeData, SchemeCont, SchemeList, SchemeProc, SchemeSym } from '../parser/data'
+import { type Cont, type SchemeData, SchemeCont, SchemeList, SchemeProc, SchemeSym } from '../parser/data'
 import { Env, StackFrame } from '../env'
 import type { IEvaluator, Evaluator } from './index'
 import ProcEvaluator from './proc'
@@ -18,8 +18,8 @@ export default class CallCCEvaluator implements IEvaluator {
     return value === 'call-with-current-continuation'
   }
 
-  public evaluate(node: SchemeList, env: Env, cont: SchemeCont): SchemeData {
-    return this.evaluator.evaluate(node.cadr(), env, new SchemeCont((proc: SchemeData) => {
+  public evaluate(node: SchemeList, env: Env, cont: Cont): SchemeData {
+    return this.evaluator.evaluate(node.cadr(), env, (proc: SchemeData) => {
       assert(SchemeProc.matches(proc), 'callcc args evaluate eror!')
       const newEnv = new Env(env, new StackFrame(env.getStackFrame()))
       const virtualName = 'callcc'
@@ -29,13 +29,13 @@ export default class CallCCEvaluator implements IEvaluator {
       ])
       newEnv.define(virtualName, proc)
       return this.evaluator.evaluate(virtualNode, newEnv, cont)
-    }))
+    })
   }
 
-  private buildEscapedProc(env: Env, cont: SchemeCont): SchemeProc {
+  private buildEscapedProc(env: Env, cont: Cont): SchemeProc {
     const paramName = '(escaped-proc-param)'
     const params = SchemeList.buildFromAtom(new SchemeSym(paramName))
-    const body = SchemeList.buildFromArray([cont, new SchemeSym(paramName)])
+    const body = SchemeList.buildFromArray([cont as any, new SchemeSym(paramName)])
     return new SchemeProc('<<captured contiuation>>', params, body, env)
   }
 }

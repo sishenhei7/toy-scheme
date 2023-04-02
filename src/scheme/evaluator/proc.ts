@@ -1,4 +1,4 @@
-import { type SchemeData, SchemeCont, SchemeSym, SchemeProc, SchemeList } from '../parser/data';
+import { type Cont, type SchemeData, SchemeCont, SchemeSym, SchemeProc, SchemeList } from '../parser/data';
 import { Env, StackFrame } from '../env'
 import type { IEvaluator, Evaluator } from './index'
 import { assert } from '../utils'
@@ -16,7 +16,7 @@ export default class ProcEvaluator implements IEvaluator {
     return SchemeProc.matches(env.get(value))
   }
 
-  public evaluate(node: SchemeList, env: Env, cont: SchemeCont): SchemeData {
+  public evaluate(node: SchemeList, env: Env, cont: Cont): SchemeData {
     // env 的作用：
     // 1.用来查找这个 proc
     // 2.用来查找 args 里面的变量
@@ -25,7 +25,7 @@ export default class ProcEvaluator implements IEvaluator {
     return this.evaluateProc(proc, node.cdr(), env, cont)
   }
 
-  public evaluateProc(proc: SchemeProc, args: SchemeList, env: Env, cont: SchemeCont) {
+  public evaluateProc(proc: SchemeProc, args: SchemeList, env: Env, cont: Cont) {
     // 流程：
     // 1.建立env，连接parentStackFrame
     // 2.解析args到env里面去
@@ -38,19 +38,19 @@ export default class ProcEvaluator implements IEvaluator {
       args,
       env,
       newEnv,
-      new SchemeCont((_: SchemeData) => this.evaluator.evaluate(proc.body, newEnv, cont))
+      (_: SchemeData) => this.evaluator.evaluate(proc.body, newEnv, cont)
     )
   }
 
-  private evaluateArgs(params: SchemeList, args: SchemeList, env: Env, newEnv: Env, cont: SchemeCont): SchemeData {
+  private evaluateArgs(params: SchemeList, args: SchemeList, env: Env, newEnv: Env, cont: Cont): SchemeData {
     if (!SchemeList.isNil(params)) {
       assert(!SchemeList.isNil(args), 'Proc params and args do not match!')
-      return this.evaluator.evaluate(args.car(), env, new SchemeCont((data: SchemeData) => {
+      return this.evaluator.evaluate(args.car(), env, (data: SchemeData) => {
         const name = SchemeSym.cast(params.car()).value
         newEnv.define(name, data)
         return this.evaluateArgs(params.cdr(), args.cdr(), env, newEnv, cont)
-      }))
+      })
     }
-    return cont.call(SchemeList.buildSchemeNil())
+    return new SchemeCont(cont, SchemeList.buildSchemeNil())
   }
 }

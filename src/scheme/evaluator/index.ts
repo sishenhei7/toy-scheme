@@ -1,4 +1,4 @@
-import { type SchemeData, SchemeCont, SchemeList, SchemeSym, SchemeProc } from '../parser/data'
+import { type Cont, type SchemeData, SchemeCont, SchemeList, SchemeSym, SchemeProc } from '../parser/data'
 import type { Env } from '../env'
 import BuildInEvaluator from './buildin'
 import LetEvaluator from './let'
@@ -13,7 +13,7 @@ import ProcEvaluator from './proc'
 
 export interface IEvaluator {
   matches(value: string, env?: Env): boolean
-  evaluate(node: SchemeData, env: Env, cont: SchemeCont): SchemeData
+  evaluate(node: SchemeData, env: Env, cont: Cont): SchemeData
 }
 
 export class Evaluator {
@@ -36,7 +36,14 @@ export class Evaluator {
     ]
   }
 
-  public evaluate(node: SchemeData, env: Env, cont: SchemeCont = SchemeCont.Identity): SchemeData {
+  public evaluateSchemeCont(node: SchemeCont) {
+    while (SchemeCont.matches(node)) {
+      // console.log(111111, node)
+      node = node.call() as any
+    }
+  }
+
+  public evaluate(node: SchemeData, env: Env, cont: Cont = SchemeCont.Identity): SchemeData {
     // is a sentence
     if (SchemeList.matches(node) && node.shouldEval) {
       const peek = node.car()
@@ -50,32 +57,32 @@ export class Evaluator {
       }
 
       // 当节点是 SchemeCont 的时候，丢弃当前的 cont，直接执行 SchemeCont
-      if (SchemeCont.matches(peek) && !SchemeList.isNil(node.cdr())) {
-        return peek.call(this.evaluate(node.cadr(), env))
+      if (typeof peek === 'function' && !SchemeList.isNil(node.cdr())) {
+        return this.evaluate(node.cadr(), env, peek)
       }
 
       return this.evaluateList(node, env, cont)
     }
 
     if (SchemeSym.matches(node)) {
-      return cont.call(env.get(node.value))
+      return new SchemeCont(cont, env.get(node.value))
     }
 
-    return cont.call(node)
+    return new SchemeCont(cont, node)
   }
 
   // 这里很重要，下一个语句是通过上一个语句的cont进行执行的！
-  public evaluateList(node: SchemeList, env: Env, cont: SchemeCont = SchemeCont.Identity): SchemeData {
-    return this.evaluate(node.car(), env, new SchemeCont((data: SchemeData) => {
+  public evaluateList(node: SchemeList, env: Env, cont: Cont = SchemeCont.Identity): SchemeData {
+    return this.evaluate(node.car(), env, (data: SchemeData) => {
       if (SchemeList.isNil(node.cdr())) {
-        return cont.call(data)
+        return new SchemeCont(cont, data)
       }
       return this.evaluate(node.cdr(), env, cont)
-    }))
+    })
   }
 
   // TODO: 缺少一个 application 的语法
-  public evaluateApplication(node: SchemeList, env: Env, cont: SchemeCont = SchemeCont.Identity) {
+  // public evaluateApplication(node: SchemeList, env: Env, cont: SchemeCont = SchemeCont.Identity) {
 
-  }
+  // }
 }

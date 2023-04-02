@@ -241,10 +241,11 @@ export class SchemeList extends SchemeData {
 /**
  * 其它数据结构：continuation 是一等公民
  */
+export type Cont = (node: SchemeData) => SchemeData
 export class SchemeCont extends SchemeData {
-  static Identity = new SchemeCont(x => x)
+  static Identity: Cont = x => x
 
-  constructor(private f: (node: SchemeData) => SchemeData) {
+  constructor(private f: Cont, private value: SchemeData) {
     super()
   }
 
@@ -252,8 +253,8 @@ export class SchemeCont extends SchemeData {
     return '<<continuation>>'
   }
 
-  public call(node: SchemeData): SchemeData {
-    return this.f(node)
+  public call(): SchemeData {
+    return this.f(this.value)
   }
 
   static matches(item: SchemeData): item is SchemeCont {

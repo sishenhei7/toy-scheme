@@ -1,4 +1,4 @@
-import { type SchemeData, SchemeCont, SchemeSym, SchemeList, SchemeBoolean, SchemeNumber } from '../parser/data';
+import { type Cont, type SchemeData, SchemeCont, SchemeSym, SchemeList, SchemeBoolean, SchemeNumber } from '../parser/data';
 import type { Env } from '../env'
 import type { IEvaluator, Evaluator } from './index'
 import { assert } from '../utils'
@@ -17,7 +17,7 @@ import { assert } from '../utils'
 // });
 
 interface Callback {
-  (node: SchemeList, env: Env): SchemeData
+  (node: SchemeList, env: Env, cont: Cont): SchemeData
 }
 
 /**
@@ -49,7 +49,7 @@ export default class BuildInEvaluator implements IEvaluator {
     this.register('length', this.length)
     this.register('not', this.not)
     this.register('and', this.and)
-    this.register('or', this.or)
+    // this.register('or', this.or)
     this.register('display', this.display)
   }
 
@@ -57,155 +57,190 @@ export default class BuildInEvaluator implements IEvaluator {
     return this.evaluatorMap.has(value)
   }
 
-  public evaluate(node: SchemeList, env: Env, cont: SchemeCont): SchemeData {
+  public evaluate(node: SchemeList, env: Env, cont: Cont): SchemeData {
     const evaluator = this.evaluatorMap.get(SchemeSym.cast(node.car()).value)
     assert(evaluator, 'buildin evaluator evaluates error!')
-    return cont.call(evaluator(node, env))
+    return evaluator(node, env, cont)
   }
 
   private register(name: string, proc: Callback): void {
     this.evaluatorMap.set(name, proc.bind(this))
   }
 
-  private evaluateFirstArgs(node: SchemeList, env: Env): SchemeData {
-    return this.evaluator.evaluate(node.cadr(), env)
+  // TODO: 这里变成 cont 的形式
+  private evaluateFirstArgs(node: SchemeList, env: Env, cont: Cont): SchemeData {
+    return this.evaluator.evaluate(node.cadr(), env, cont)
   }
 
-  private evaluateSecondArgs(node: SchemeList, env: Env): SchemeData {
-    return this.evaluator.evaluate(node.caddr(), env)
+  private evaluateSecondArgs(node: SchemeList, env: Env, cont: Cont): SchemeData {
+    return this.evaluator.evaluate(node.caddr(), env, cont)
   }
 
-  private cons(node: SchemeList, env: Env): SchemeList {
-    return SchemeList.cons(
-      this.evaluateFirstArgs(node, env),
-      this.evaluateSecondArgs(node, env)
-    )
+  private cons(node: SchemeList, env: Env, cont: Cont): SchemeData {
+    return this.evaluateFirstArgs(node, env, (first: SchemeData) => {
+      return this.evaluateSecondArgs(node, env, (second: SchemeData) => {
+        return new SchemeCont(cont, SchemeList.cons(first, second))
+      })
+    })
   }
 
-  private isNull(node: SchemeList, env: Env): SchemeBoolean {
-    const first = this.evaluateFirstArgs(node, env)
-    return new SchemeBoolean(SchemeList.isNil(SchemeList.cast(first)))
+  private isNull(node: SchemeList, env: Env, cont: Cont): SchemeData {
+    return this.evaluateFirstArgs(node, env, (first: SchemeData) => {
+      return new SchemeCont(cont, new SchemeBoolean(SchemeList.isNil(SchemeList.cast(first))))
+    })
   }
 
-  private car(node: SchemeList, env: Env): SchemeData {
-    return SchemeList
-      .cast(this.evaluateFirstArgs(node, env))
-      .car()
+  private car(node: SchemeList, env: Env, cont: Cont): SchemeData {
+    return this.evaluateFirstArgs(node, env, (first: SchemeData) => {
+      return new SchemeCont(cont, SchemeList.cast(first).car())
+    })
   }
 
-  private cdr(node: SchemeList, env: Env): SchemeList {
-    return SchemeList
-      .cast(this.evaluateFirstArgs(node, env))
-      .cdr()
+  private cdr(node: SchemeList, env: Env, cont: Cont): SchemeData {
+    return this.evaluateFirstArgs(node, env, (first: SchemeData) => {
+      return new SchemeCont(cont, SchemeList.cast(first).cdr())
+    })
   }
 
-  private cadr(node: SchemeList, env: Env): SchemeData {
-    return SchemeList
-      .cast(this.evaluateFirstArgs(node, env))
-      .cadr()
+  private cadr(node: SchemeList, env: Env, cont: Cont): SchemeData {
+    return this.evaluateFirstArgs(node, env, (first: SchemeData) => {
+      return new SchemeCont(cont, SchemeList.cast(first).cadr())
+    })
   }
 
-  private isEqual(node: SchemeList, env: Env): SchemeBoolean {
-    const first = this.evaluateFirstArgs(node, env)
-    const second = this.evaluateSecondArgs(node, env)
-    return new SchemeBoolean(SchemeNumber.cast(first).value === SchemeNumber.cast(second).value)
+  private isEqual(node: SchemeList, env: Env, cont: Cont): SchemeData {
+    return this.evaluateFirstArgs(node, env, (first: SchemeData) => {
+      return this.evaluateSecondArgs(node, env, (second: SchemeData) => {
+        return new SchemeCont(cont, new SchemeBoolean(SchemeNumber.cast(first).value === SchemeNumber.cast(second).value))
+      })
+    })
   }
 
-  private isLessThan(node: SchemeList, env: Env): SchemeBoolean {
-    const first = this.evaluateFirstArgs(node, env)
-    const second = this.evaluateSecondArgs(node, env)
-    return new SchemeBoolean(SchemeNumber.cast(first).value < SchemeNumber.cast(second).value)
+  private isLessThan(node: SchemeList, env: Env, cont: Cont): SchemeData {
+    return this.evaluateFirstArgs(node, env, (first: SchemeData) => {
+      return this.evaluateSecondArgs(node, env, (second: SchemeData) => {
+        return new SchemeCont(cont, new SchemeBoolean(SchemeNumber.cast(first).value < SchemeNumber.cast(second).value))
+      })
+    })
   }
 
-  private isMoreThan(node: SchemeList, env: Env): SchemeBoolean {
-    const first = this.evaluateFirstArgs(node, env)
-    const second = this.evaluateSecondArgs(node, env)
-    return new SchemeBoolean(SchemeNumber.cast(first).value > SchemeNumber.cast(second).value)
+  private isMoreThan(node: SchemeList, env: Env, cont: Cont): SchemeData {
+    return this.evaluateFirstArgs(node, env, (first: SchemeData) => {
+      return this.evaluateSecondArgs(node, env, (second: SchemeData) => {
+        return new SchemeCont(cont, new SchemeBoolean(SchemeNumber.cast(first).value > SchemeNumber.cast(second).value))
+      })
+    })
   }
 
-  private add(node: SchemeList, env: Env): SchemeNumber {
-    const first = this.evaluateFirstArgs(node, env)
-    const second = this.evaluateSecondArgs(node, env)
-    return new SchemeNumber(SchemeNumber.cast(first).value + SchemeNumber.cast(second).value)
+  private add(node: SchemeList, env: Env, cont: Cont): SchemeData {
+    return this.evaluateFirstArgs(node, env, (first: SchemeData) => {
+      return this.evaluateSecondArgs(node, env, (second: SchemeData) => {
+        return new SchemeCont(cont, new SchemeNumber(SchemeNumber.cast(first).value + SchemeNumber.cast(second).value))
+      })
+    })
   }
 
-  private minus(node: SchemeList, env: Env): SchemeNumber {
-    const first = this.evaluateFirstArgs(node, env)
-    const second = this.evaluateSecondArgs(node, env)
-    return new SchemeNumber(SchemeNumber.cast(first).value - SchemeNumber.cast(second).value)
+  private minus(node: SchemeList, env: Env, cont: Cont): SchemeData {
+    return this.evaluateFirstArgs(node, env, (first: SchemeData) => {
+      return this.evaluateSecondArgs(node, env, (second: SchemeData) => {
+        return new SchemeCont(cont, new SchemeNumber(SchemeNumber.cast(first).value - SchemeNumber.cast(second).value))
+      })
+    })
   }
 
-  private multiply(node: SchemeList, env: Env): SchemeNumber {
-    const first = this.evaluateFirstArgs(node, env)
-    const second = this.evaluateSecondArgs(node, env)
-    return new SchemeNumber(SchemeNumber.cast(first).value * SchemeNumber.cast(second).value)
+  private multiply(node: SchemeList, env: Env, cont: Cont): SchemeData {
+    return this.evaluateFirstArgs(node, env, (first: SchemeData) => {
+      return this.evaluateSecondArgs(node, env, (second: SchemeData) => {
+        return new SchemeCont(cont, new SchemeNumber(SchemeNumber.cast(first).value * SchemeNumber.cast(second).value))
+      })
+    })
   }
 
-  private divide(node: SchemeList, env: Env): SchemeNumber {
-    const first = this.evaluateFirstArgs(node, env)
-    const second = this.evaluateSecondArgs(node, env)
-    return new SchemeNumber(SchemeNumber.cast(first).value / SchemeNumber.cast(second).value)
+  private divide(node: SchemeList, env: Env, cont: Cont): SchemeData {
+    return this.evaluateFirstArgs(node, env, (first: SchemeData) => {
+      return this.evaluateSecondArgs(node, env, (second: SchemeData) => {
+        return new SchemeCont(cont, new SchemeNumber(SchemeNumber.cast(first).value / SchemeNumber.cast(second).value))
+      })
+    })
   }
 
-  private min(node: SchemeList, env: Env): SchemeNumber {
-    const first = this.evaluateFirstArgs(node, env)
-    const second = this.evaluateSecondArgs(node, env)
-    return new SchemeNumber(Math.min(SchemeNumber.cast(first).value, SchemeNumber.cast(second).value))
+  private min(node: SchemeList, env: Env, cont: Cont): SchemeData {
+    return this.evaluateFirstArgs(node, env, (first: SchemeData) => {
+      return this.evaluateSecondArgs(node, env, (second: SchemeData) => {
+        return new SchemeCont(cont, new SchemeNumber(Math.min(SchemeNumber.cast(first).value, SchemeNumber.cast(second).value)))
+      })
+    })
   }
 
-  private max(node: SchemeList, env: Env): SchemeNumber {
-    const first = this.evaluateFirstArgs(node, env)
-    const second = this.evaluateSecondArgs(node, env)
-    return new SchemeNumber(Math.max(SchemeNumber.cast(first).value, SchemeNumber.cast(second).value))
+  private max(node: SchemeList, env: Env, cont: Cont): SchemeData {
+    return this.evaluateFirstArgs(node, env, (first: SchemeData) => {
+      return this.evaluateSecondArgs(node, env, (second: SchemeData) => {
+        return new SchemeCont(cont, new SchemeNumber(Math.max(SchemeNumber.cast(first).value, SchemeNumber.cast(second).value)))
+      })
+    })
   }
 
-  private abs(node: SchemeList, env: Env): SchemeNumber {
-    const first = this.evaluateFirstArgs(node, env)
-    return new SchemeNumber(Math.abs(SchemeNumber.cast(first).value))
+  private abs(node: SchemeList, env: Env, cont: Cont): SchemeData {
+    return this.evaluateFirstArgs(node, env, (first: SchemeData) => {
+      return new SchemeCont(cont, new SchemeNumber(Math.abs(SchemeNumber.cast(first).value)))
+    })
   }
 
-  private isZero(node: SchemeList, env: Env): SchemeBoolean {
-    const first = this.evaluateFirstArgs(node, env)
-    return new SchemeBoolean(SchemeNumber.cast(first).value === 0)
+  private isZero(node: SchemeList, env: Env, cont: Cont): SchemeData {
+    return this.evaluateFirstArgs(node, env, (first: SchemeData) => {
+      return new SchemeCont(cont, new SchemeBoolean(SchemeNumber.cast(first).value === 0))
+    })
   }
 
-  private length(node: SchemeList, env: Env): SchemeNumber {
-    const first = this.evaluateFirstArgs(node, env)
-    return SchemeList.cast(first).getLength()
+  private length(node: SchemeList, env: Env, cont: Cont): SchemeData {
+    return this.evaluateFirstArgs(node, env, (first: SchemeData) => {
+      return new SchemeCont(cont, SchemeList.cast(first).getLength())
+    })
   }
 
-  private not(node: SchemeList, env: Env): SchemeBoolean {
-    const first = this.evaluateFirstArgs(node, env)
-    return new SchemeBoolean(!SchemeBoolean.cast(first).value)
+  private not(node: SchemeList, env: Env, cont: Cont): SchemeData {
+    return this.evaluateFirstArgs(node, env, (first: SchemeData) => {
+      return new SchemeCont(cont, new SchemeBoolean(!SchemeBoolean.cast(first).value))
+    })
   }
 
-  private and(node: SchemeList, env: Env): SchemeBoolean {
-    while (!SchemeList.isNil(node.cdr())) {
-      node = node.cdr()
-      const value = this.evaluator.evaluate(node.car(), env)
-      if (!SchemeBoolean.isTrue(value)) {
-        return new SchemeBoolean(false)
-      }
+  private and(node: SchemeList, env: Env, cont: Cont): SchemeData {
+    if (SchemeList.isNil(node.cdr())) {
+      return new SchemeCont(cont, new SchemeBoolean(true))
     }
-
-    return new SchemeBoolean(true)
-  }
-
-  private or(node: SchemeList, env: Env): SchemeBoolean {
-    while (!SchemeList.isNil(node.cdr())) {
-      node = node.cdr()
-      const value = this.evaluator.evaluate(node.car(), env)
-      if (SchemeBoolean.isTrue(value)) {
-        return new SchemeBoolean(true)
+    return this.evaluator.evaluate(node.cadr(), env, (first: SchemeData) => {
+      if (!SchemeBoolean.isTrue(first)) {
+        return new SchemeCont(cont, new SchemeBoolean(false))
       }
-    }
+      return this.and(node.cdr(), env, cont)
+    })
+    // while (!SchemeList.isNil(node.cdr())) {
+    //   node = node.cdr()
+    //   const value = this.evaluator.evaluate(node.car(), env)
+    //   if (!SchemeBoolean.isTrue(value)) {
+    //     return new SchemeBoolean(false)
+    //   }
+    // }
 
-    return new SchemeBoolean(false)
+    // return new SchemeBoolean(true)
   }
 
-  private display(node: SchemeList, env: Env): SchemeData {
-    const first = this.evaluateFirstArgs(node, env)
-    console.log(first.toString())
-    return first
+  // private or(node: SchemeList, env: Env, cont: Cont): SchemeBoolean {
+  //   while (!SchemeList.isNil(node.cdr())) {
+  //     node = node.cdr()
+  //     const value = this.evaluator.evaluate(node.car(), env)
+  //     if (SchemeBoolean.isTrue(value)) {
+  //       return new SchemeBoolean(true)
+  //     }
+  //   }
+
+  //   return new SchemeBoolean(false)
+  // }
+
+  private display(node: SchemeList, env: Env, cont: Cont): SchemeData {
+    return this.evaluateFirstArgs(node, env, (first: SchemeData) => {
+      console.log(first.toString())
+      return new SchemeCont(cont, first)
+    })
   }
 }

@@ -1,4 +1,4 @@
-import { SchemeBoolean, SchemeCont, SchemeList, SchemeSym, type SchemeData } from '../parser/data'
+import { type Cont, SchemeBoolean, SchemeCont, SchemeList, SchemeSym, type SchemeData } from '../parser/data'
 import type { Env } from '../env'
 import type { IEvaluator, Evaluator } from './index'
 import { assert } from '../utils'
@@ -18,11 +18,11 @@ export default class CondEvaluator implements IEvaluator {
     return value === 'cond'
   }
 
-  public evaluate(node: SchemeList, env: Env, cont: SchemeCont): SchemeData {
+  public evaluate(node: SchemeList, env: Env, cont: Cont): SchemeData {
     return this.evaluateConditions(node.cdr(), env, cont)
   }
 
-  private evaluateConditions(node: SchemeList, env: Env, cont: SchemeCont): SchemeData {
+  private evaluateConditions(node: SchemeList, env: Env, cont: Cont): SchemeData {
     if (!SchemeList.isNil(node)) {
       const currentNode = SchemeList.cast(node.car())
       const predictNode = currentNode.car()
@@ -33,12 +33,12 @@ export default class CondEvaluator implements IEvaluator {
       }
 
       // 匹配第一个成功的 predict
-      return this.evaluator.evaluate(predictNode, env, new SchemeCont((data: SchemeData) => {
+      return this.evaluator.evaluate(predictNode, env, (data: SchemeData) => {
         if (SchemeBoolean.isTrue(data)) {
           return this.evaluator.evaluate(currentNode.cdr(), env, cont)
         }
         return this.evaluateConditions(node.cdr(), env, cont)
-      }))
+      })
     }
 
     assert(false, 'Cond error: no predict is matched!')

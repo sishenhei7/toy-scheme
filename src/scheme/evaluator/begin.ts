@@ -1,4 +1,4 @@
-import type { SchemeData, SchemeCont, SchemeList } from '../parser/data'
+import type { SchemeData, SchemeCont, SchemeList, Cont } from '../parser/data'
 import type { Env } from '../env'
 import type { IEvaluator, Evaluator } from './index'
 
@@ -16,7 +16,7 @@ export default class BeginEvaluator implements IEvaluator {
     return value === 'begin'
   }
 
-  public evaluate(node: SchemeList, env: Env, cont: SchemeCont): SchemeData {
+  public evaluate(node: SchemeList, env: Env, cont: Cont): SchemeData {
     return this.evaluator.evaluateList(node.cdr(), env, cont)
   }
 }
