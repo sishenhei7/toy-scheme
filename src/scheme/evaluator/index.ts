@@ -36,7 +36,7 @@ export class Evaluator {
     ]
   }
 
-  public evaluateSchemeCont(node: SchemeCont) {
+  public trampoline(node: SchemeCont) {
     while (SchemeCont.matches(node)) {
       // console.log(111111, node)
       node = node.call() as any

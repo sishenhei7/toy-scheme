@@ -7,5 +7,5 @@ export function test() {
   const evaluator = new Evaluator()
   console.log(evaluator)
   console.log('parse', parse(program).toString())
-  console.log('===', evaluator.evaluateSchemeCont(evaluator.evaluateList(parse(program), new Env()) as any))
+  console.log('===', evaluator.trampoline(evaluator.evaluateList(parse(program), new Env()) as any))
 }
