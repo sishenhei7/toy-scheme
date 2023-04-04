@@ -46,9 +46,6 @@ export class Evaluator {
   }
 
   public evaluate(node: SchemeData, env: Env, cont: SchemeCont = SchemeCont.Identity): Thunk {
-    if (this.step ++ > 500) {
-      debugger
-    }
     if (SchemeList.matches(node) && node.shouldEval) {
       const peek = node.car()
 
@@ -81,10 +78,5 @@ export class Evaluator {
       }
       return this.evaluateList(node.cdr(), env, cont)
     }))
-  }
-
-  // TODO: 缺少一个 application 的语法
-  public evaluateApplication(node: SchemeList, env: Env, cont: SchemeCont = SchemeCont.Identity) {
-
   }
 }
