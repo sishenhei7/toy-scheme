@@ -29,7 +29,7 @@ export default class LetEvaluator implements IEvaluator {
     return this.evaluateDefination(
       SchemeList.cast(node.cadr()),
       newEnv,
-      new SchemeCont((_: SchemeData) => this.evaluator.evaluate(node.caddr(), newEnv, cont)))
+      new SchemeCont((_: SchemeData) => () => this.evaluator.evaluate(node.caddr(), newEnv, cont)))
   }
 
   private isLet(value: string): boolean {
@@ -46,7 +46,7 @@ export default class LetEvaluator implements IEvaluator {
       const defination = SchemeList.cast(node.car())
       const name = SchemeSym.cast(defination.car()).value
       const body = defination.cdr()
-      return this.evaluator.evaluate(body, env, new SchemeCont((data: SchemeData) => {
+      return this.evaluator.evaluate(body, env, new SchemeCont((data: SchemeData) => () => {
         env.define(name, data)
         return this.evaluateDefination(node.cdr(), env, cont)
       }))

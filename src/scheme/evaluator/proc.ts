@@ -38,14 +38,14 @@ export default class ProcEvaluator implements IEvaluator {
       args,
       env,
       newEnv,
-      new SchemeCont((_: SchemeData) => this.evaluator.evaluate(proc.body, newEnv, cont))
+      new SchemeCont((_: SchemeData) => () => this.evaluator.evaluate(proc.body, newEnv, cont))
     )
   }
 
   private evaluateArgs(params: SchemeList, args: SchemeList, env: Env, newEnv: Env, cont: SchemeCont): Thunk {
     if (!SchemeList.isNil(params)) {
       assert(!SchemeList.isNil(args), 'Proc params and args do not match!')
-      return this.evaluator.evaluate(args.car(), env, new SchemeCont((data: SchemeData) => {
+      return this.evaluator.evaluate(args.car(), env, new SchemeCont((data: SchemeData) => () => {
         const name = SchemeSym.cast(params.car()).value
         newEnv.define(name, data)
         return this.evaluateArgs(params.cdr(), args.cdr(), env, newEnv, cont)
