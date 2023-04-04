@@ -1,11 +1,11 @@
 import { parse } from './parser'
 import { Evaluator } from './evaluator'
 import { Env } from './env'
-import program from './programs/return-with-callcc'
+import program from './programs/n-queues'
 
 export function test() {
   const evaluator = new Evaluator()
   console.log(evaluator)
   console.log('parse', parse(program).toString())
-  console.log('===', evaluator.trampoline(evaluator.evaluateList(parse(program), new Env()) as any))
+  console.log('===', evaluator.trampoline(evaluator.evaluateList(parse(program), new Env())))
 }

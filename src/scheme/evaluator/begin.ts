@@ -17,6 +17,6 @@ export default class BeginEvaluator implements IEvaluator {
   }
 
   public evaluate(node: SchemeList, env: Env, cont: SchemeCont): Thunk {
-    return () => this.evaluator.evaluateList(node.cdr(), env, cont)
+    return this.evaluator.evaluateList(node.cdr(), env, cont)
   }
 }

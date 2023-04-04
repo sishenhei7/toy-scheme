@@ -67,7 +67,6 @@ export default class BuildInEvaluator implements IEvaluator {
     this.evaluatorMap.set(name, proc.bind(this))
   }
 
-  // TODO: 这里变成 cont 的形式
   private evaluateFirstArgs(node: SchemeList, env: Env, cont: SchemeCont): Thunk {
     return this.evaluator.evaluate(node.cadr(), env, cont)
   }

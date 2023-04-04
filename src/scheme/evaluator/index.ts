@@ -45,7 +45,6 @@ export class Evaluator {
   }
 
   public evaluate(node: SchemeData, env: Env, cont: SchemeCont = SchemeCont.Identity): Thunk {
-    // is a sentence
     if (SchemeList.matches(node) && node.shouldEval) {
       const peek = node.car()
 
@@ -58,15 +57,15 @@ export class Evaluator {
       }
 
       // 当节点是 SchemeCont 的时候，丢弃当前的 cont，直接执行 SchemeCont
-      if (typeof peek === 'function' && !SchemeList.isNil(node.cdr())) {
+      if (SchemeCont.matches(peek) && !SchemeList.isNil(node.cdr())) {
         return () => this.evaluate(node.cadr(), env, peek)
       }
 
-      return () => this.evaluateList(node, env, cont)
+      return this.evaluateList(node, env, cont)
     }
 
     if (SchemeSym.matches(node)) {
-      return cont.call(node)
+      return cont.call(env.get(node.value))
     }
 
     return cont.call(node)
@@ -74,11 +73,11 @@ export class Evaluator {
 
   // 这里很重要，下一个语句是通过上一个语句的cont进行执行的！
   public evaluateList(node: SchemeList, env: Env, cont: SchemeCont = SchemeCont.Identity): Thunk {
-    return () => this.evaluate(node.car(), env, new SchemeCont((data: SchemeData) => {
+    return this.evaluate(node.car(), env, new SchemeCont((data: SchemeData) => {
       if (SchemeList.isNil(node.cdr())) {
         return cont.call(data)
       }
-      return () => this.evaluate(node.cdr(), env, cont)
+      return this.evaluate(node.cdr(), env, cont)
     }))
   }
 
