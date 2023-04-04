@@ -253,8 +253,9 @@ export class SchemeCont extends SchemeData {
     return '<<continuation>>'
   }
 
+  // 这里返回一个 Thunk 而不是直接计算
   public call(value: SchemeData): Thunk {
-    return this.f(value)
+    return () => this.f(value)
   }
 
   static matches(item: SchemeData): item is SchemeCont {

@@ -73,7 +73,7 @@ export class Evaluator {
 
   // 这里很重要，下一个语句是通过上一个语句的cont进行执行的！
   public evaluateList(node: SchemeList, env: Env, cont: SchemeCont = SchemeCont.Identity): Thunk {
-    return this.evaluate(node.car(), env, new SchemeCont((data: SchemeData) => () => {
+    return this.evaluate(node.car(), env, new SchemeCont((data: SchemeData) => {
       if (SchemeList.isNil(node.cdr())) {
         return cont.call(data)
       }

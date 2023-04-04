@@ -24,7 +24,7 @@ export default class DefineEvaluator implements IEvaluator {
 
     // 定义变量或者函数
     if (SchemeSym.matches(varNode)) {
-      return this.evaluator.evaluate(bodyNode, env, new SchemeCont((data: SchemeData) => () => {
+      return this.evaluator.evaluate(bodyNode, env, new SchemeCont((data: SchemeData) => {
         env.define(varNode.value, data)
         return cont.call(data)
       }))

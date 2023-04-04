@@ -33,7 +33,7 @@ export default class CondEvaluator implements IEvaluator {
       }
 
       // 匹配第一个成功的 predict
-      return this.evaluator.evaluate(predictNode, env, new SchemeCont((data: SchemeData) => () => {
+      return this.evaluator.evaluate(predictNode, env, new SchemeCont((data: SchemeData) => {
         if (SchemeBoolean.isTrue(data)) {
           return this.evaluator.evaluate(currentNode.cdr(), env, cont)
         }

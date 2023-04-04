@@ -49,7 +49,7 @@ export default class BuildInEvaluator implements IEvaluator {
     this.register('length', this.length)
     this.register('not', this.not)
     this.register('and', this.and)
-    // this.register('or', this.or)
+    this.register('or', this.or)
     this.register('display', this.display)
   }
 
@@ -76,129 +76,129 @@ export default class BuildInEvaluator implements IEvaluator {
   }
 
   private cons(node: SchemeList, env: Env, cont: SchemeCont): Thunk {
-    return this.evaluateFirstArgs(node, env, new SchemeCont((first: SchemeData) => () => {
-      return this.evaluateSecondArgs(node, env, new SchemeCont((second: SchemeData) => () => {
+    return this.evaluateFirstArgs(node, env, new SchemeCont((first: SchemeData) => {
+      return this.evaluateSecondArgs(node, env, new SchemeCont((second: SchemeData) => {
         return cont.call(SchemeList.cons(first, second))
       }))
     }))
   }
 
   private isNull(node: SchemeList, env: Env, cont: SchemeCont): Thunk {
-    return this.evaluateFirstArgs(node, env, new SchemeCont((first: SchemeData) => () => {
+    return this.evaluateFirstArgs(node, env, new SchemeCont((first: SchemeData) => {
       return cont.call(new SchemeBoolean(SchemeList.isNil(SchemeList.cast(first))))
     }))
   }
 
   private car(node: SchemeList, env: Env, cont: SchemeCont): Thunk {
-    return this.evaluateFirstArgs(node, env, new SchemeCont((first: SchemeData) => () => {
+    return this.evaluateFirstArgs(node, env, new SchemeCont((first: SchemeData) => {
       return cont.call(SchemeList.cast(first).car())
     }))
   }
 
   private cdr(node: SchemeList, env: Env, cont: SchemeCont): Thunk {
-    return this.evaluateFirstArgs(node, env, new SchemeCont((first: SchemeData) => () => {
+    return this.evaluateFirstArgs(node, env, new SchemeCont((first: SchemeData) => {
       return cont.call(SchemeList.cast(first).cdr())
     }))
   }
 
   private cadr(node: SchemeList, env: Env, cont: SchemeCont): Thunk {
-    return this.evaluateFirstArgs(node, env, new SchemeCont((first: SchemeData) => () => {
+    return this.evaluateFirstArgs(node, env, new SchemeCont((first: SchemeData) => {
       return cont.call(SchemeList.cast(first).cadr())
     }))
   }
 
   private isEqual(node: SchemeList, env: Env, cont: SchemeCont): Thunk {
-    return this.evaluateFirstArgs(node, env, new SchemeCont((first: SchemeData) => () => {
-      return this.evaluateSecondArgs(node, env, new SchemeCont((second: SchemeData) => () => {
+    return this.evaluateFirstArgs(node, env, new SchemeCont((first: SchemeData) => {
+      return this.evaluateSecondArgs(node, env, new SchemeCont((second: SchemeData) => {
         return cont.call(new SchemeBoolean(SchemeNumber.cast(first).value === SchemeNumber.cast(second).value))
       }))
     }))
   }
 
   private isLessThan(node: SchemeList, env: Env, cont: SchemeCont): Thunk {
-    return this.evaluateFirstArgs(node, env, new SchemeCont((first: SchemeData) => () => {
-      return this.evaluateSecondArgs(node, env, new SchemeCont((second: SchemeData) => () => {
+    return this.evaluateFirstArgs(node, env, new SchemeCont((first: SchemeData) => {
+      return this.evaluateSecondArgs(node, env, new SchemeCont((second: SchemeData) => {
         return cont.call(new SchemeBoolean(SchemeNumber.cast(first).value < SchemeNumber.cast(second).value))
       }))
     }))
   }
 
   private isMoreThan(node: SchemeList, env: Env, cont: SchemeCont): Thunk {
-    return this.evaluateFirstArgs(node, env, new SchemeCont((first: SchemeData) => () => {
-      return this.evaluateSecondArgs(node, env, new SchemeCont((second: SchemeData) => () => {
+    return this.evaluateFirstArgs(node, env, new SchemeCont((first: SchemeData) => {
+      return this.evaluateSecondArgs(node, env, new SchemeCont((second: SchemeData) => {
         return cont.call(new SchemeBoolean(SchemeNumber.cast(first).value > SchemeNumber.cast(second).value))
       }))
     }))
   }
 
   private add(node: SchemeList, env: Env, cont: SchemeCont): Thunk {
-    return this.evaluateFirstArgs(node, env, new SchemeCont((first: SchemeData) => () => {
-      return this.evaluateSecondArgs(node, env, new SchemeCont((second: SchemeData) => () => {
+    return this.evaluateFirstArgs(node, env, new SchemeCont((first: SchemeData) => {
+      return this.evaluateSecondArgs(node, env, new SchemeCont((second: SchemeData) => {
         return cont.call(new SchemeNumber(SchemeNumber.cast(first).value + SchemeNumber.cast(second).value))
       }))
     }))
   }
 
   private minus(node: SchemeList, env: Env, cont: SchemeCont): Thunk {
-    return this.evaluateFirstArgs(node, env, new SchemeCont((first: SchemeData) => () => {
-      return this.evaluateSecondArgs(node, env, new SchemeCont((second: SchemeData) => () => {
+    return this.evaluateFirstArgs(node, env, new SchemeCont((first: SchemeData) => {
+      return this.evaluateSecondArgs(node, env, new SchemeCont((second: SchemeData) => {
         return cont.call(new SchemeNumber(SchemeNumber.cast(first).value - SchemeNumber.cast(second).value))
       }))
     }))
   }
 
   private multiply(node: SchemeList, env: Env, cont: SchemeCont): Thunk {
-    return this.evaluateFirstArgs(node, env, new SchemeCont((first: SchemeData) => () => {
-      return this.evaluateSecondArgs(node, env, new SchemeCont((second: SchemeData) => () => {
+    return this.evaluateFirstArgs(node, env, new SchemeCont((first: SchemeData) => {
+      return this.evaluateSecondArgs(node, env, new SchemeCont((second: SchemeData) => {
         return cont.call(new SchemeNumber(SchemeNumber.cast(first).value * SchemeNumber.cast(second).value))
       }))
     }))
   }
 
   private divide(node: SchemeList, env: Env, cont: SchemeCont): Thunk {
-    return this.evaluateFirstArgs(node, env, new SchemeCont((first: SchemeData) => () => {
-      return this.evaluateSecondArgs(node, env, new SchemeCont((second: SchemeData) => () => {
+    return this.evaluateFirstArgs(node, env, new SchemeCont((first: SchemeData) => {
+      return this.evaluateSecondArgs(node, env, new SchemeCont((second: SchemeData) => {
         return cont.call(new SchemeNumber(SchemeNumber.cast(first).value / SchemeNumber.cast(second).value))
       }))
     }))
   }
 
   private min(node: SchemeList, env: Env, cont: SchemeCont): Thunk {
-    return this.evaluateFirstArgs(node, env, new SchemeCont((first: SchemeData) => () => {
-      return this.evaluateSecondArgs(node, env, new SchemeCont((second: SchemeData) => () => {
+    return this.evaluateFirstArgs(node, env, new SchemeCont((first: SchemeData) => {
+      return this.evaluateSecondArgs(node, env, new SchemeCont((second: SchemeData) => {
         return cont.call(new SchemeNumber(Math.min(SchemeNumber.cast(first).value, SchemeNumber.cast(second).value)))
       }))
     }))
   }
 
   private max(node: SchemeList, env: Env, cont: SchemeCont): Thunk {
-    return this.evaluateFirstArgs(node, env, new SchemeCont((first: SchemeData) => () => {
-      return this.evaluateSecondArgs(node, env, new SchemeCont((second: SchemeData) => () => {
+    return this.evaluateFirstArgs(node, env, new SchemeCont((first: SchemeData) => {
+      return this.evaluateSecondArgs(node, env, new SchemeCont((second: SchemeData) => {
         return cont.call(new SchemeNumber(Math.max(SchemeNumber.cast(first).value, SchemeNumber.cast(second).value)))
       }))
     }))
   }
 
   private abs(node: SchemeList, env: Env, cont: SchemeCont): Thunk {
-    return this.evaluateFirstArgs(node, env, new SchemeCont((first: SchemeData) => () => {
+    return this.evaluateFirstArgs(node, env, new SchemeCont((first: SchemeData) => {
       return cont.call(new SchemeNumber(Math.abs(SchemeNumber.cast(first).value)))
     }))
   }
 
   private isZero(node: SchemeList, env: Env, cont: SchemeCont): Thunk {
-    return this.evaluateFirstArgs(node, env, new SchemeCont((first: SchemeData) => () => {
+    return this.evaluateFirstArgs(node, env, new SchemeCont((first: SchemeData) => {
       return cont.call(new SchemeBoolean(SchemeNumber.cast(first).value === 0))
     }))
   }
 
   private length(node: SchemeList, env: Env, cont: SchemeCont): Thunk {
-    return this.evaluateFirstArgs(node, env, new SchemeCont((first: SchemeData) => () => {
+    return this.evaluateFirstArgs(node, env, new SchemeCont((first: SchemeData) => {
       return cont.call(SchemeList.cast(first).getLength())
     }))
   }
 
   private not(node: SchemeList, env: Env, cont: SchemeCont): Thunk {
-    return this.evaluateFirstArgs(node, env, new SchemeCont((first: SchemeData) => () => {
+    return this.evaluateFirstArgs(node, env, new SchemeCont((first: SchemeData) => {
       return cont.call(new SchemeBoolean(!SchemeBoolean.cast(first).value))
     }))
   }
@@ -207,37 +207,28 @@ export default class BuildInEvaluator implements IEvaluator {
     if (SchemeList.isNil(node.cdr())) {
       return cont.call(new SchemeBoolean(true))
     }
-    return this.evaluator.evaluate(node.cadr(), env, new SchemeCont((first: SchemeData) => () => {
+    return this.evaluator.evaluate(node.cadr(), env, new SchemeCont((first: SchemeData) => {
       if (!SchemeBoolean.isTrue(first)) {
         return cont.call(new SchemeBoolean(false))
       }
       return this.and(node.cdr(), env, cont)
     }))
-    // while (!SchemeList.isNil(node.cdr())) {
-    //   node = node.cdr()
-    //   const value = this.evaluator.evaluate(node.car(), env)
-    //   if (!SchemeBoolean.isTrue(value)) {
-    //     return new SchemeBoolean(false)
-    //   }
-    // }
-
-    // return new SchemeBoolean(true)
   }
 
-  // private or(node: SchemeList, env: Env, cont: SchemeCont): SchemeBoolean {
-  //   while (!SchemeList.isNil(node.cdr())) {
-  //     node = node.cdr()
-  //     const value = this.evaluator.evaluate(node.car(), env)
-  //     if (SchemeBoolean.isTrue(value)) {
-  //       return new SchemeBoolean(true)
-  //     }
-  //   }
-
-  //   return new SchemeBoolean(false)
-  // }
+  private or(node: SchemeList, env: Env, cont: SchemeCont): Thunk {
+    if (SchemeList.isNil(node.cdr())) {
+      return cont.call(new SchemeBoolean(false))
+    }
+    return this.evaluator.evaluate(node.cadr(), env, new SchemeCont((first: SchemeData) => {
+      if (SchemeBoolean.isTrue(first)) {
+        return cont.call(new SchemeBoolean(true))
+      }
+      return this.and(node.cdr(), env, cont)
+    }))
+  }
 
   private display(node: SchemeList, env: Env, cont: SchemeCont): Thunk {
-    return this.evaluateFirstArgs(node, env, new SchemeCont((first: SchemeData) => () => {
+    return this.evaluateFirstArgs(node, env, new SchemeCont((first: SchemeData) => {
       console.log(first.toString())
       return cont.call(first)
     }))

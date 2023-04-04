@@ -17,7 +17,7 @@ export default class SetEvaluator implements IEvaluator {
     return this.evaluator.evaluate(
       node.caddr(),
       env,
-      new SchemeCont((val: SchemeData) => () => {
+      new SchemeCont((val: SchemeData) => {
         env.set(SchemeSym.cast(node.cadr()).value, val)
         return cont.call(val)
       })

@@ -19,7 +19,7 @@ export default class CallCCEvaluator implements IEvaluator {
   }
 
   public evaluate(node: SchemeList, env: Env, cont: SchemeCont): Thunk {
-    return this.evaluator.evaluate(node.cadr(), env, new SchemeCont((proc: SchemeData) => () => {
+    return this.evaluator.evaluate(node.cadr(), env, new SchemeCont((proc: SchemeData) => {
       assert(SchemeProc.matches(proc), 'callcc args evaluate eror!')
       const newEnv = new Env(env, new StackFrame(env.getStackFrame()))
       const virtualName = 'callcc'
