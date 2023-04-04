@@ -1,4 +1,4 @@
-import { type Cont, type SchemeData, SchemeList, SchemeCont, SchemeBoolean } from '../parser/data'
+import { type Thunk, type SchemeData, SchemeList, SchemeCont, SchemeBoolean } from '../parser/data'
 import type { Env } from '../env'
 import type { IEvaluator, Evaluator } from './index'
 
@@ -13,13 +13,13 @@ export default class IfEvaluator implements IEvaluator {
     return value === 'if'
   }
 
-  public evaluate(node: SchemeList, env: Env, cont: Cont): SchemeData {
+  public evaluate(node: SchemeList, env: Env, cont: SchemeCont): Thunk {
     return this.evaluator.evaluate(
       node.cadr(),
       env,
-      (data: SchemeData) => SchemeBoolean.isTrue(data)
+      new SchemeCont((data: SchemeData) => SchemeBoolean.isTrue(data)
         ? this.evaluator.evaluate(node.caddr(), env, cont)
-        : this.evaluator.evaluate(node.cadddr(), env, cont)
+        : this.evaluator.evaluate(node.cadddr(), env, cont))
     )
   }
 }

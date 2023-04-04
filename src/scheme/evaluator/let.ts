@@ -1,4 +1,4 @@
-import { type Cont, SchemeList, SchemeCont, type SchemeData, SchemeSym } from '../parser/data'
+import { type Thunk, SchemeList, SchemeCont, type SchemeData, SchemeSym } from '../parser/data'
 import { Env, StackFrame } from '../env'
 import type { IEvaluator, Evaluator } from './index'
 
@@ -24,12 +24,12 @@ export default class LetEvaluator implements IEvaluator {
     return this.isLet(value) || this.isLetStar(value) || this.isLetRec(value)
   }
 
-  public evaluate(node: SchemeList, env: Env, cont: Cont): SchemeData {
+  public evaluate(node: SchemeList, env: Env, cont: SchemeCont): Thunk {
     const newEnv = new Env(env, new StackFrame(env.getStackFrame()))
     return this.evaluateDefination(
       SchemeList.cast(node.cadr()),
       newEnv,
-      (_: SchemeData) => this.evaluator.evaluate(node.caddr(), newEnv, cont))
+      new SchemeCont((_: SchemeData) => this.evaluator.evaluate(node.caddr(), newEnv, cont)))
   }
 
   private isLet(value: string): boolean {
@@ -41,17 +41,16 @@ export default class LetEvaluator implements IEvaluator {
   private isLetRec(value: string): boolean {
     return value === 'letrec'
   }
-  private evaluateDefination(node: SchemeList, env: Env, cont: Cont): SchemeData {
+  private evaluateDefination(node: SchemeList, env: Env, cont: SchemeCont): Thunk {
     if (!SchemeList.isNil(node)) {
       const defination = SchemeList.cast(node.car())
       const name = SchemeSym.cast(defination.car()).value
       const body = defination.cdr()
-      return this.evaluator.evaluate(body, env, (data: SchemeData) => {
+      return this.evaluator.evaluate(body, env, new SchemeCont((data: SchemeData) => {
         env.define(name, data)
         return this.evaluateDefination(node.cdr(), env, cont)
-      })
+      }))
     }
-    // 这里是不是应该这样？
-    return new SchemeCont(cont, SchemeList.buildSchemeNil())
+    return cont.call(SchemeList.buildSchemeNil())
   }
 }
