@@ -20,8 +20,9 @@ import type { IEvaluator, Evaluator } from './index'
 export default class LetEvaluator implements IEvaluator {
   constructor(private evaluator: Evaluator) {}
 
-  public matches(value: string): boolean {
-    return this.isLet(value) || this.isLetStar(value) || this.isLetRec(value)
+  public matches(node: SchemeData): boolean {
+    return SchemeSym.matches(node)
+      && (this.isLet(node.value) || this.isLetStar(node.value) || this.isLetRec(node.value))
   }
 
   public evaluate(node: SchemeList, env: Env, cont: SchemeCont): Thunk {
@@ -32,6 +33,9 @@ export default class LetEvaluator implements IEvaluator {
       new SchemeCont((_: SchemeData) => this.evaluator.evaluate(node.caddr(), newEnv, cont)))
   }
 
+  // Remember that let computes the initial values of variables,
+  // then initializes all of the variables' storage,
+  // and only then do any of the bindings become visible
   private isLet(value: string): boolean {
     return value === 'let'
   }
@@ -46,8 +50,8 @@ export default class LetEvaluator implements IEvaluator {
       const defination = SchemeList.cast(node.car())
       const name = SchemeSym.cast(defination.car()).value
       const body = defination.cdr()
-      return this.evaluator.evaluate(body, env, new SchemeCont((data: SchemeData) => {
-        env.define(name, data)
+      return this.evaluator.evaluateList(body, env, new SchemeCont((data: SchemeData) => {
+        env.setCurrent(name, data)
         return this.evaluateDefination(node.cdr(), env, cont)
       }))
     }

@@ -54,8 +54,8 @@ export default class BuildInEvaluator implements IEvaluator {
     this.register('display', this.oneArgsWrap(this.display))
   }
 
-  public matches(value: string): boolean {
-    return this.evaluatorMap.has(value)
+  public matches(node: SchemeData): boolean {
+    return SchemeSym.matches(node) && this.evaluatorMap.has(node.value)
   }
 
   public evaluate(node: SchemeList, env: Env, cont: SchemeCont): Thunk {

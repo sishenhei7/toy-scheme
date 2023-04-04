@@ -1,7 +1,7 @@
 import { parse } from './parser'
 import { Evaluator } from './evaluator'
 import { Env } from './env'
-import program from './programs/counting-change'
+import program from './programs/ying-yang'
 
 export function test() {
   const evaluator = new Evaluator()

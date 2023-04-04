@@ -10,9 +10,10 @@ import CallCCEvaluator from './call-cc'
 import SetEvaluator from './set'
 import BeginEvaluator from './begin'
 import ProcEvaluator from './proc'
+import { assert } from '../utils'
 
 export interface IEvaluator {
-  matches(value: string, env?: Env): boolean
+  matches(node: SchemeData, env?: Env): boolean
   evaluate(node: SchemeData, env: Env, cont: SchemeCont): Thunk
 }
 
@@ -32,7 +33,7 @@ export class Evaluator {
       new CallCCEvaluator(this),
       new SetEvaluator(this),
       new BeginEvaluator(this),
-      new ProcEvaluator(this)
+      new ProcEvaluator(this) // should be the last one
     ]
   }
 
@@ -45,23 +46,24 @@ export class Evaluator {
   }
 
   public evaluate(node: SchemeData, env: Env, cont: SchemeCont = SchemeCont.Identity): Thunk {
+    if (this.step ++ > 500) {
+      debugger
+    }
     if (SchemeList.matches(node) && node.shouldEval) {
       const peek = node.car()
-
-      if (SchemeSym.matches(peek)) {
-        for (const evaluator of this.evaluators) {
-          if (evaluator.matches(peek.value, env)) {
-            return () => evaluator.evaluate(node, env, cont)
-          }
-        }
-      }
 
       // 当节点是 SchemeCont 的时候，丢弃当前的 cont，直接执行 SchemeCont
       if (SchemeCont.matches(peek) && !SchemeList.isNil(node.cdr())) {
         return () => this.evaluate(node.cadr(), env, peek)
       }
 
-      return this.evaluateList(node, env, cont)
+      for (const evaluator of this.evaluators) {
+        if (evaluator.matches(peek, env)) {
+          return () => evaluator.evaluate(node, env, cont)
+        }
+      }
+
+      assert(false, `evaluate error: ${node.toString}`)
     }
 
     if (SchemeSym.matches(node)) {
@@ -82,7 +84,7 @@ export class Evaluator {
   }
 
   // TODO: 缺少一个 application 的语法
-  // public evaluateApplication(node: SchemeList, env: Env, cont: SchemeCont = SchemeCont.Identity) {
+  public evaluateApplication(node: SchemeList, env: Env, cont: SchemeCont = SchemeCont.Identity) {
 
-  // }
+  }
 }

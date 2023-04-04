@@ -14,8 +14,8 @@ import { assert } from '../utils'
 export default class DefineEvaluator implements IEvaluator {
   constructor(private evaluator: Evaluator) {}
 
-  public matches(value: string): boolean {
-    return value === 'define'
+  public matches(node: SchemeData): boolean {
+    return SchemeSym.matches(node) && node.value === 'define'
   }
 
   public evaluate(node: SchemeList, env: Env, cont: SchemeCont): Thunk {
@@ -24,7 +24,7 @@ export default class DefineEvaluator implements IEvaluator {
 
     // 定义变量或者函数
     if (SchemeSym.matches(varNode)) {
-      return this.evaluator.evaluate(bodyNode, env, new SchemeCont((data: SchemeData) => {
+      return this.evaluator.evaluateList(bodyNode, env, new SchemeCont((data: SchemeData) => {
         env.define(varNode.value, data)
         return cont.call(data)
       }))

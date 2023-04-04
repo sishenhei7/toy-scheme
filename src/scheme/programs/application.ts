@@ -4,11 +4,16 @@ export default `
 ; but my scheme interpreter have implemented trampoline,
 ; so the stack size won't grow
 
-(define (factorial x)
-    (cond
-        ((= x 1) 1)
-        (else (+ 1 (factorial (- x 1))))))
+; 3
+(define (test a) (+ a 1))
+(display (test 2))
 
-(display (factorial 500))
-; support factorial 500000 here
+; <<function>>
+(display (lambda () (+ 2 1)))
+
+; 3
+(display ((lambda (a) (+ a 1)) 2))
+
+; 3
+(display ((lambda () (+ 2 1))))
 `

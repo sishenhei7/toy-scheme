@@ -249,8 +249,12 @@ export class SchemeCont extends SchemeData {
     super()
   }
 
+  get fString(): string {
+    return this.f.toString()
+  }
+
   public toString(): string {
-    return '<<continuation>>'
+    return `<<continuation>> ${this.fString}`
   }
 
   // 这里返回一个 Thunk 而不是直接计算
@@ -271,14 +275,14 @@ export class SchemeProc extends SchemeData {
   constructor(
     public name: string,
     public params: SchemeList,
-    public body: SchemeData,
+    public body: SchemeList,
     public envClosure: Env
   ) {
     super()
   }
 
   public toString(): string {
-    return '<<function>>'
+    return `<<function ${this.name}>> ${this.params.toString} ${this.body.toString()}`
   }
 
   static matches(item: SchemeData): item is SchemeProc {

@@ -45,6 +45,11 @@ export class Env {
     return value
   }
 
+  public setCurrent(key: string, value: SchemeData): SchemeData {
+    this.obj.set(key, value)
+    return value
+  }
+
   public define(key: string, value: SchemeData): SchemeData {
     assert(!this.obj.has(key), `${key} is already defined in this env!`)
     this.obj.set(key, value)

@@ -14,8 +14,8 @@ import { assert } from '../utils'
 export default class CallCCEvaluator implements IEvaluator {
   constructor(private evaluator: Evaluator) {}
 
-  public matches(value: string): boolean {
-    return value === 'call-with-current-continuation'
+  public matches(node: SchemeData): boolean {
+    return SchemeSym.matches(node) && node.value === 'call-with-current-continuation'
   }
 
   public evaluate(node: SchemeList, env: Env, cont: SchemeCont): Thunk {
@@ -35,7 +35,8 @@ export default class CallCCEvaluator implements IEvaluator {
   private buildEscapedProc(env: Env, cont: SchemeCont): SchemeProc {
     const paramName = '(escaped-proc-param)'
     const params = SchemeList.buildFromAtom(new SchemeSym(paramName))
-    const body = SchemeList.buildFromArray([cont as any, new SchemeSym(paramName)])
+    const virtualNode = SchemeList.buildFromArray([cont as any, new SchemeSym(paramName)])
+    const body = SchemeList.buildFromAtom(virtualNode) // need to wrap by a list
     return new SchemeProc('<<captured contiuation>>', params, body, env)
   }
 }

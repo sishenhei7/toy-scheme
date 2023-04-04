@@ -9,8 +9,8 @@ import type { IEvaluator, Evaluator } from './index'
 export default class SetEvaluator implements IEvaluator {
   constructor(private evaluator: Evaluator) {}
 
-  public matches(value: string): boolean {
-    return value === 'set!'
+  public matches(node: SchemeData): boolean {
+    return SchemeSym.matches(node) && node.value === 'set!'
   }
 
   public evaluate(node: SchemeList, env: Env, cont: SchemeCont): Thunk {

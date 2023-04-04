@@ -14,8 +14,8 @@ import { assert } from '../utils'
 export default class CondEvaluator implements IEvaluator {
   constructor(private evaluator: Evaluator) {}
 
-  public matches(value: string): boolean {
-    return value === 'cond'
+  public matches(node: SchemeData): boolean {
+    return SchemeSym.matches(node) && node.value === 'cond'
   }
 
   public evaluate(node: SchemeList, env: Env, cont: SchemeCont): Thunk {
@@ -29,13 +29,13 @@ export default class CondEvaluator implements IEvaluator {
 
       // 匹配 else 语句
       if (SchemeSym.matches(predictNode) && predictNode.value === 'else') {
-        return this.evaluator.evaluate(currentNode.cdr(), env, cont)
+        return this.evaluator.evaluateList(currentNode.cdr(), env, cont)
       }
 
       // 匹配第一个成功的 predict
       return this.evaluator.evaluate(predictNode, env, new SchemeCont((data: SchemeData) => {
         if (SchemeBoolean.isTrue(data)) {
-          return this.evaluator.evaluate(currentNode.cdr(), env, cont)
+          return this.evaluator.evaluateList(currentNode.cdr(), env, cont)
         }
         return this.evaluateConditions(node.cdr(), env, cont)
       }))

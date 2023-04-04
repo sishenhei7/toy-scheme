@@ -1,4 +1,4 @@
-import type { SchemeData, SchemeCont, SchemeList, Thunk } from '../parser/data'
+import { type SchemeData, type SchemeCont, type SchemeList, type Thunk, SchemeSym } from '../parser/data'
 import type { Env } from '../env'
 import type { IEvaluator, Evaluator } from './index'
 
@@ -12,8 +12,8 @@ import type { IEvaluator, Evaluator } from './index'
 export default class BeginEvaluator implements IEvaluator {
   constructor(private evaluator: Evaluator) {}
 
-  public matches(value: string): boolean {
-    return value === 'begin'
+  public matches(node: SchemeData): boolean {
+    return SchemeSym.matches(node) && node.value === 'begin'
   }
 
   public evaluate(node: SchemeList, env: Env, cont: SchemeCont): Thunk {
