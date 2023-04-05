@@ -217,7 +217,7 @@ export default class BuildInEvaluator implements IEvaluator {
         node.car(),
         env,
         new SchemeCont((data: SchemeData) => {
-          res += ` ${data.toString()}`
+          res += `${res ? ' ' : ''}${data.toString()}`
           return traverse(node.cdr())
         })
       )

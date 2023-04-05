@@ -1,6 +1,6 @@
 import { parse } from './parser'
 import { Evaluator } from './evaluator'
-import program from './programs/lazy-generator'
+import program from './programs/factorial'
 
 export function test() {
   const evaluator = new Evaluator()

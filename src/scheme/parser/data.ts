@@ -6,7 +6,7 @@
  */
 import { type TokenItem, TokenType } from './token'
 import type { Env } from '../env'
-import { assert } from '../utils'
+import { assert, deleteDoubleQuote } from '../utils'
 
 export class ILocation {
   start: number = 0
@@ -321,7 +321,7 @@ export default function parseToken(tokenList: TokenItem[]): SchemeList {
           list.push(new SchemeNumber(Number(value)).setLocationInfo(start, end))
           break
         case TokenType.String:
-          list.push(new SchemeString(value).setLocationInfo(start, end))
+          list.push(new SchemeString(deleteDoubleQuote(value)).setLocationInfo(start, end))
           break
         case TokenType.Quote:
           // 'xxxx 的 quote 只需要 parse 一个

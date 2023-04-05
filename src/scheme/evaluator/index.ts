@@ -58,7 +58,7 @@ export class Evaluator {
   }
 
   public evaluate(node: SchemeData, env: Env, cont: SchemeCont = SchemeCont.Identity): Thunk {
-    if (SchemeList.matches(node) && node.shouldEval) {
+    if (SchemeList.matches(node) && !SchemeList.isNil(node) && node.shouldEval) {
       const peek = node.car()
 
       for (const evaluator of this.evaluators) {

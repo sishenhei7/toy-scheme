@@ -30,7 +30,7 @@ export default `
 
 
 (define generate-digit
-  (generate-one-element-at-a-time '(0 1 2)))
+  (generate-one-element-at-a-time '(0 1 3)))
 
 (display
     (generate-digit) " "
