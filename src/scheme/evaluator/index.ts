@@ -1,5 +1,5 @@
 import { type Thunk, type SchemeData, SchemeCont, SchemeList, SchemeSym, SchemeProc } from '../parser/data'
-import type { Env } from '../env'
+import { Env } from '../env'
 import BuildInEvaluator from './buildin'
 import LetEvaluator from './let'
 import LambdaEvaluator from './lambda'
@@ -37,7 +37,12 @@ export class Evaluator {
     ]
   }
 
-  public trampoline(node: Thunk | SchemeData) {
+  public run(node: SchemeData): SchemeData {
+    const thunk = this.evaluate(node, new Env())
+    return this.trampoline(thunk)
+  }
+
+  public trampoline(node: Thunk | SchemeData): SchemeData {
     while (typeof node === 'function') {
       // console.log(111111, node)
       node = node()
