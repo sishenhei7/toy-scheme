@@ -1,57 +1,54 @@
-import { type Thunk, type SchemeData, SchemeCont, SchemeSym, SchemeList, SchemeBoolean, SchemeNumber } from '../parser/data';
+import { type Thunk, type SchemeData, SchemeCont, SchemeSym, SchemeList, SchemeBoolean, SchemeNumber, SchemeString } from '../parser/data';
 import type { Env } from '../env'
 import type { IEvaluator, Evaluator } from './index'
-import { assert } from '../utils'
-
-// makeProc('ask', (args: Sv) => {
-//   let msg = "";
-//   while (!SvCons.isNil(args)) {
-//     msg += SvCons.car(args).toDisplayString();
-//     args = SvCons.cdr(args);
-//   }
-
-//   log("> " + msg + " ");
-//   const answer = parseInt(prompt(msg), 10);
-//   log(answer + "\n");
-//   return new SvNumber(answer);
-// });
-
+import { assert, guessNumber } from '../utils'
 
 type BaseBuildInEvaluator = (node: SchemeList, env: Env, cont: SchemeCont) => Thunk
 type OneArgsWrapper = (first: SchemeData) => SchemeData
 type TwoArgsWrapper = (first: SchemeData, second: SchemeData) => SchemeData
+type BuildInTraverseFunc = (node: SchemeList) => Thunk
 
 /**
  * 内置语法：
  * 1. 内置变量：'()
  * 2. 内置方法：cons、null?、car、cadr、cdr等
  */
+export interface BuildInEvaluatorOptions {
+  log: Function
+  prompt: Function
+}
 export default class BuildInEvaluator implements IEvaluator {
+  log: Function
+  prompt: Function
   evaluatorMap: Map<string, BaseBuildInEvaluator> = new Map()
 
-  constructor(private evaluator: Evaluator) {
+  constructor(private evaluator: Evaluator, options?: BuildInEvaluatorOptions) {
     this.evaluator = evaluator
-    this.register('cons', this.twoArgsWrap(this.cons))
-    this.register('null?', this.oneArgsWrap(this.isNull))
-    this.register('car', this.oneArgsWrap(this.car))
-    this.register('cdr', this.oneArgsWrap(this.cdr))
-    this.register('cadr', this.oneArgsWrap(this.cadr))
-    this.register('=', this.twoArgsWrap(this.isEqual))
-    this.register('>', this.twoArgsWrap(this.isMoreThan))
-    this.register('<', this.twoArgsWrap(this.isLessThan))
-    this.register('+', this.twoArgsWrap(this.add))
-    this.register('-', this.twoArgsWrap(this.minus))
-    this.register('*', this.twoArgsWrap(this.multiply))
-    this.register('/', this.twoArgsWrap(this.divide))
-    this.register('min', this.twoArgsWrap(this.min))
-    this.register('max', this.twoArgsWrap(this.max))
-    this.register('abs', this.oneArgsWrap(this.abs))
-    this.register('zero?', this.oneArgsWrap(this.isZero))
-    this.register('length', this.oneArgsWrap(this.length))
-    this.register('not', this.oneArgsWrap(this.not))
+    this.log = options?.log || console.log
+    this.prompt = options?.prompt || prompt.bind(window)
+
+    this.register('cons', this.twoArgsWrap(this.cons.bind(this)))
+    this.register('null?', this.oneArgsWrap(this.isNull.bind(this)))
+    this.register('car', this.oneArgsWrap(this.car.bind(this)))
+    this.register('cdr', this.oneArgsWrap(this.cdr.bind(this)))
+    this.register('cadr', this.oneArgsWrap(this.cadr.bind(this)))
+    this.register('=', this.twoArgsWrap(this.isEqual.bind(this)))
+    this.register('>', this.twoArgsWrap(this.isMoreThan.bind(this)))
+    this.register('<', this.twoArgsWrap(this.isLessThan.bind(this)))
+    this.register('+', this.twoArgsWrap(this.add.bind(this)))
+    this.register('-', this.twoArgsWrap(this.minus.bind(this)))
+    this.register('*', this.twoArgsWrap(this.multiply.bind(this)))
+    this.register('/', this.twoArgsWrap(this.divide.bind(this)))
+    this.register('min', this.twoArgsWrap(this.min.bind(this)))
+    this.register('max', this.twoArgsWrap(this.max.bind(this)))
+    this.register('abs', this.oneArgsWrap(this.abs.bind(this)))
+    this.register('zero?', this.oneArgsWrap(this.isZero.bind(this)))
+    this.register('length', this.oneArgsWrap(this.length.bind(this)))
+    this.register('not', this.oneArgsWrap(this.not.bind(this)))
     this.register('and', this.and)
     this.register('or', this.or)
-    this.register('display', this.oneArgsWrap(this.display))
+    this.register('ask', this.ask)
+    this.register('display', this.display)
   }
 
   public matches(node: SchemeData): boolean {
@@ -178,16 +175,53 @@ export default class BuildInEvaluator implements IEvaluator {
     if (SchemeList.isNil(node.cdr())) {
       return cont.call(new SchemeBoolean(false))
     }
-    return this.evaluator.evaluate(node.cadr(), env, new SchemeCont((first: SchemeData) => {
-      if (SchemeBoolean.isTrue(first)) {
+    return this.evaluator.evaluate(node.cadr(), env, new SchemeCont((data: SchemeData) => {
+      if (SchemeBoolean.isTrue(data)) {
         return cont.call(new SchemeBoolean(true))
       }
       return this.or(node.cdr(), env, cont)
     }))
   }
 
-  private display(first: SchemeData): SchemeData {
-    console.log(first.toString())
-    return first
+  private ask(node: SchemeList, env: Env, cont: SchemeCont): Thunk {
+    let msg = ''
+    const traverse: BuildInTraverseFunc = (node: SchemeList) => {
+      if (SchemeList.isNil(node)) {
+        msg = msg.trim()
+        const answer = this.prompt(msg)
+        this.log(answer + '\n')
+        return cont.call(guessNumber(answer) ? new SchemeNumber(Number(answer)) : new SchemeString(answer))
+      }
+
+      return this.evaluator.evaluate(
+        node.car(),
+        env,
+        new SchemeCont((data: SchemeData) => {
+          msg += ` ${data.toString()}`
+          return traverse(node.cdr())
+        })
+      )
+    }
+    return traverse(node.cdr())
+  }
+
+  private display(node: SchemeList, env: Env, cont: SchemeCont): Thunk {
+    let res = ''
+    const traverse: BuildInTraverseFunc = (node: SchemeList) => {
+      if (SchemeList.isNil(node)) {
+        this.log(res)
+        return cont.call(new SchemeString(res))
+      }
+
+      return this.evaluator.evaluate(
+        node.car(),
+        env,
+        new SchemeCont((data: SchemeData) => {
+          res += ` ${data.toString()}`
+          return traverse(node.cdr())
+        })
+      )
+    }
+    return traverse(node.cdr())
   }
 }

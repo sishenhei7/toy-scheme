@@ -1,6 +1,6 @@
 import { parse } from './parser'
 import { Evaluator } from './evaluator'
-import program from './programs/n-queues'
+import program from './programs/lazy-generator'
 
 export function test() {
   const evaluator = new Evaluator()

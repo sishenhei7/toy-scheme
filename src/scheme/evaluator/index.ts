@@ -18,14 +18,19 @@ export interface IEvaluator {
   evaluate(node: SchemeData, env: Env, cont: SchemeCont): Thunk
 }
 
+export interface EvaluatorOptions {
+  log: Function
+  prompt: Function
+}
+
 export class Evaluator {
   private evaluators: IEvaluator[]
   private stepCount = 0
   private step = 0
 
-  constructor() {
+  constructor(options?: EvaluatorOptions) {
     this.evaluators = [
-      new BuildInEvaluator(this),
+      new BuildInEvaluator(this, options),
       new LetEvaluator(this),
       new LambdaEvaluator(this),
       new IfEvaluator(this),

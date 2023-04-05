@@ -16,7 +16,6 @@ export default class ContEvaluator implements IEvaluator {
 
   // 当节点是 SchemeCont 的时候，丢弃当前的 cont，直接执行 SchemeCont
   public evaluate(node: SchemeList, env: Env, _cont: SchemeCont): Thunk {
-    console.log(node.cadr(), node.car())
     return this.evaluator.evaluate(node.cadr(), env, SchemeCont.cast(node.car()))
   }
 }

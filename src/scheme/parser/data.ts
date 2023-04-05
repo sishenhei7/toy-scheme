@@ -195,6 +195,16 @@ export class SchemeList extends SchemeData {
     return `(${res.trim()})`
   }
 
+  public toDisplay(): string {
+    let res = ''
+    let current: SchemeList = this
+    while (!SchemeList.isNil(current)) {
+      res += ' ' + current.car().toString()
+      current = current.cdr()
+    }
+    return `${res.trim()}`
+  }
+
   static buildSchemeNil(): SchemeList {
     return new SchemeList(null, null)
   }
@@ -298,7 +308,7 @@ export class SchemeProc extends SchemeData {
 export default function parseToken(tokenList: TokenItem[]): SchemeList {
   let tokenCursor = 0
 
-  function parseTokenList(): SchemeData[] {
+  function parseTokenList(onlyOne: boolean = false): SchemeData[] {
     let list: SchemeData[] = []
 
     while (tokenList.length && tokenCursor < tokenList.length) {
@@ -314,7 +324,8 @@ export default function parseToken(tokenList: TokenItem[]): SchemeList {
           list.push(new SchemeString(value).setLocationInfo(start, end))
           break
         case TokenType.Quote:
-          list.push(SchemeList.buildFromArray(parseTokenList()).setEval().setLocationInfo(start, end))
+          // 'xxxx 的 quote 只需要 parse 一个
+          list.push(SchemeList.buildFromArray(parseTokenList(!value.startsWith("'("))).setEval().setLocationInfo(start, end))
           break
         case TokenType.Symbol:
           list.push(new SchemeSym(value).setLocationInfo(start, end))
@@ -326,6 +337,10 @@ export default function parseToken(tokenList: TokenItem[]): SchemeList {
           return list
         default:
           assert(false, `Parsing Error: Unexpected TokenType: ${type}`)
+      }
+
+      if (onlyOne) {
+        break
       }
     }
 

@@ -5,7 +5,7 @@ export default `
 ; once to generate a "return" continuation as in the first example
 ; and once to suspend an iteration through a list of items:
 
- (define (for-each dg lst)
+(define (for-each dg lst)
         (cond
             ((null? lst) ())
             (else
