@@ -262,6 +262,11 @@ export class SchemeCont extends SchemeData {
     return () => this.f(value)
   }
 
+  static cast(item: SchemeData): SchemeCont {
+    assert(SchemeCont.matches(item), 'Invalid SchemeCont!')
+    return item
+  }
+
   static matches(item: SchemeData): item is SchemeCont {
     return item instanceof SchemeCont
   }

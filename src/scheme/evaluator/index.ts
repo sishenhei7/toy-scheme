@@ -1,4 +1,4 @@
-import { type Thunk, type SchemeData, SchemeCont, SchemeList, SchemeSym, SchemeProc } from '../parser/data'
+import { type Thunk, type SchemeData, SchemeCont, SchemeList, SchemeSym } from '../parser/data'
 import { Env } from '../env'
 import BuildInEvaluator from './buildin'
 import LetEvaluator from './let'
@@ -9,11 +9,12 @@ import CondEvaluator from './cond'
 import CallCCEvaluator from './call-cc'
 import SetEvaluator from './set'
 import BeginEvaluator from './begin'
+import ContEvaluator from './cont'
 import ProcEvaluator from './proc'
 import { assert } from '../utils'
 
 export interface IEvaluator {
-  matches(node: SchemeData, env?: Env): boolean
+  matches(node: SchemeData): boolean
   evaluate(node: SchemeData, env: Env, cont: SchemeCont): Thunk
 }
 
@@ -33,12 +34,13 @@ export class Evaluator {
       new CallCCEvaluator(this),
       new SetEvaluator(this),
       new BeginEvaluator(this),
+      new ContEvaluator(this),
       new ProcEvaluator(this) // should be the last one
     ]
   }
 
-  public run(node: SchemeData): SchemeData {
-    const thunk = this.evaluate(node, new Env())
+  public run(node: SchemeList): SchemeData {
+    const thunk = this.evaluateList(node, new Env())
     return this.trampoline(thunk)
   }
 
@@ -54,13 +56,8 @@ export class Evaluator {
     if (SchemeList.matches(node) && node.shouldEval) {
       const peek = node.car()
 
-      // 当节点是 SchemeCont 的时候，丢弃当前的 cont，直接执行 SchemeCont
-      if (SchemeCont.matches(peek) && !SchemeList.isNil(node.cdr())) {
-        return () => this.evaluate(node.cadr(), env, peek)
-      }
-
       for (const evaluator of this.evaluators) {
-        if (evaluator.matches(peek, env)) {
+        if (evaluator.matches(peek)) {
           return () => evaluator.evaluate(node, env, cont)
         }
       }

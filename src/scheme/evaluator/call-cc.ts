@@ -1,7 +1,6 @@
 import { type Thunk, type SchemeData, SchemeCont, SchemeList, SchemeProc, SchemeSym } from '../parser/data'
 import { Env, StackFrame } from '../env'
 import type { IEvaluator, Evaluator } from './index'
-import ProcEvaluator from './proc'
 import { assert } from '../utils'
 
 /**

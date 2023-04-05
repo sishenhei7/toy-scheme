@@ -21,7 +21,7 @@ export default class ProcEvaluator implements IEvaluator {
     // 1.用来查找这个 proc
     // 2.用来查找 args 里面的变量
     return this.evaluator.evaluate(node.car(), env, new SchemeCont((data: SchemeData) => {
-      assert(SchemeProc.matches(data), 'Evaluate proc error: not a SchemeProc!')
+      assert(SchemeProc.matches(data), 'Application error: not a valid SchemeProc!')
       return this.evaluateProc(data, node.cdr(), env, cont)
     }))
   }
