@@ -1,5 +1,24 @@
 @import './base.css';
 
+#app {
+  padding: 24px;
+  min-width: 100vw;
+  min-height: 100vh;
+  background-color: #fef6e4!important;
+}
+
+.mb-12 {
+  margin-bottom: 12px;
+}
+
+.mb-16 {
+  margin-bottom: 16px;
+}
+
+.mb-20 {
+  margin-bottom: 20px;
+}
+
 .monaco-editor-highlight {
   background-color: #FFF0E5!important;
   color: #FF5B00!important;
