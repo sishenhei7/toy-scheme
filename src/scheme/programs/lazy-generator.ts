@@ -1,5 +1,4 @@
-export default `
-; Lazy generator
+export default `; Lazy generator
 ; https://en.wikipedia.org/wiki/Call-with-current-continuation
 ; In the following example, call/cc is used twice:
 ; once to generate a "return" continuation as in the first example

@@ -1,5 +1,4 @@
-export default `
-; Factorial
+export default `; Factorial
 ; 500000 should have exceeded maximum call stack size,
 ; but my scheme interpreter have implemented trampoline,
 ; so the stack size won't grow

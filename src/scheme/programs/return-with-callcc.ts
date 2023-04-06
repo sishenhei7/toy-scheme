@@ -1,5 +1,4 @@
-export default `
-; Emulate return statement with call/cc
+export default `; Emulate return statement with call/cc
 ; https://en.wikipedia.org/wiki/Call-with-current-continuation
 ; As shown by the following example, call/cc can be used to emulate the functionality of the
 ; return statement known from C-style languages, which is missing from Scheme:

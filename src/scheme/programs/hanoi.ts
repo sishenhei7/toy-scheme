@@ -1,5 +1,4 @@
-export default `
-; Tower of Hanoi
+export default `; Tower of Hanoi
 
 (define (tower-of-hanoi n source dest temp)
   (if (= n 1)

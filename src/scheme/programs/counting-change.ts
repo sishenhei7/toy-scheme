@@ -1,5 +1,4 @@
-export default `
-; Counting change
+export default `; Counting change
 ; How many different ways can we make change of $1.00 given half-dollars, quarters, dimes, nickels, and pennies?
 ; From SICP Tree recursion, https://mitpress.mit.edu/sicp/full-text/sicp/book/node16.html
 

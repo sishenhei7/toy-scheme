@@ -5,11 +5,10 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, onBeforeUnmount, ref, watch } from 'vue'
 import * as monaco from 'monaco-editor'
 import 'monaco-editor/esm/vs/basic-languages/scheme/scheme.contribution'
 import EditorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker'
-import program from '../scheme/programs/lazy-generator'
 
 self.MonacoEnvironment = {
   getWorker(_: string, _label: string) {
@@ -17,47 +16,68 @@ self.MonacoEnvironment = {
   }
 }
 
+const props = defineProps({
+  modelValue: {
+    type: String as PropType<string>,
+    default: ''
+  },
+  highlightRange: {
+    type: Object as PropType<[number, number, number, number]>,
+    default: null
+  }
+})
+
+const emit = defineEmits<{
+  (e: 'update:modelValue', name: string): void
+}>()
+
+let editor: monaco.editor.IStandaloneCodeEditor
+let highlight: monaco.editor.IEditorDecorationsCollection
 const monacoEditorRef = ref()
+
 onMounted(() => {
-  const editor = monaco.editor.create(monacoEditorRef.value, {
+  editor = monaco.editor.create(monacoEditorRef.value, {
     scrollBeyondLastLine: false,
     minimap: { enabled: false },
     automaticLayout: false,
     language: 'scheme',
-    value: program
+    value: props.modelValue
   })
 
-  let highlight = editor.createDecorationsCollection([
+  editor.onDidChangeModelContent(() => {
+    const value = editor.getValue()
+    emit('update:modelValue', value)
+  })
+})
+
+onBeforeUnmount(() => {
+  editor.dispose()
+})
+
+watch(() => props.modelValue, (newValue) => {
+  editor?.setValue(newValue)
+})
+
+watch(() => props.highlightRange, newValue => {
+  highlight?.clear()
+  highlight = editor?.createDecorationsCollection([
     {
-      range: new monaco.Range(3, 3, 3, 10),
+      range: new monaco.Range(...newValue),
       options: {
         inlineClassName: "monaco-editor-highlight"
       }
     }
   ])
-
-  setTimeout(() => {
-    highlight.clear()
-    highlight = editor.createDecorationsCollection([
-      {
-        range: new monaco.Range(5, 3, 6, 10),
-        options: {
-          inlineClassName: "monaco-editor-highlight"
-        }
-      }
-    ])
-  }, 3000)
-
-  // monaco.languages.registerDocumentHighlightProvider.
-  // monaco.editor.setModelMarkers(monacoInstance.value.getModel(), 'highlight', [])
 })
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .editor-container {
   width: 100%;
-  height: 300px;
-  border: 1px solid #ced4da;
+  height: 350px;
+  border: 1px solid #001858;
+  border-radius: 8px;
+  overflow: hidden;
 }
 #monaco-editor {
   width: 100%;

@@ -1,5 +1,4 @@
-export default `
-; Yin-yang puzzle
+export default `; Yin-yang puzzle
 ; https://en.wikipedia.org/wiki/Call-with-current-continuation
 ; In 1999, David Madore (the inventor of Unlambda programming language) found
 ; a 12 characters term in Unlambda that have the same effect (write all integers

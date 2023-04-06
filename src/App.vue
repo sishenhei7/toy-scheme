@@ -1,17 +1,53 @@
 <template>
   <div class="app-container">
-    <AppTitle title="Toy-Scheme" class="mb-20" />
-    <AppBar :program-list="['test1', 'test2']" class="mb-12" />
-    <MonacoEditor />
+    <AppTitle
+      title="Toy-Scheme"
+      class="mb-20"
+    />
+    <AppBar
+      :program-name="programName"
+      :program-name-list="programNameList"
+      class="mb-12"
+      @run="handleRun"
+      @step="handleStep"
+      @continue="handleContinue"
+      @program="handleSelectProgram"
+    />
+    <MonacoEditor
+      v-model="program"
+      class="mb-12"
+    />
     <ProgramInner />
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue'
 import AppTitle from './components/AppTitle.vue'
 import AppBar from './components/AppBar.vue'
 import MonacoEditor from './components/MonacoEditor.vue'
 import ProgramInner from './components/ProgramInner.vue'
+import programMap from './scheme/programs'
+
+const programNameList = Object.keys(programMap)
+const programName = ref<string>(programNameList[0])
+const program = ref<string>(programMap[programName.value])
+const handleSelectProgram = (name: string) => {
+  programName.value = name
+  program.value = programMap[name]
+}
+
+const handleRun = () => {
+
+}
+
+const handleStep = () => {
+
+}
+
+const handleContinue = () => {
+
+}
 </script>
 
 <style scoped>

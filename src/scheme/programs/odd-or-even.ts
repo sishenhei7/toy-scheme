@@ -1,5 +1,4 @@
-export default `
-; Odd or even
+export default `; Odd or even
 
 (letrec (
     (even?
