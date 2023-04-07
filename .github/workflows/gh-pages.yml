@@ -17,14 +17,20 @@ jobs:
       group: ${{ github.workflow }}-${{ github.ref }}
     steps:
       - uses: actions/checkout@v3
+      
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 7
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 14
           cache: 'pnpm'
-      - run: pnpm install --frozen-lockfile 
-      - run: pnpm build
+      - run: pnpm install --frozen-lockfile
+      
+      - name: Run build script
+        run: pnpm build
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
