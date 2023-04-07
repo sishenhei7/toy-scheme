@@ -17,7 +17,11 @@
       v-model="program"
       class="mb-m"
     />
-    <ProgramInner />
+    <ProgramInner
+      :output="output"
+      :call-stack="callStack"
+      :var-scope="varScope"
+    />
   </div>
 </template>
 
@@ -28,18 +32,40 @@ import AppBar from './components/AppBar.vue'
 import MonacoEditor from './components/MonacoEditor.vue'
 import ProgramInner from './components/ProgramInner.vue'
 import programMap from './scheme/programs'
+import Interpreter from './scheme'
 
 // program
 const programNameList = Object.keys(programMap)
-const programName = ref<string>(programNameList[0])
-const program = ref<string>(programMap[programName.value])
+const programName = ref<string>('')
+const program = ref<string>('')
 const handleSelectProgram = (name: string) => {
   programName.value = name
   program.value = programMap[name]
 }
+handleSelectProgram(programNameList[0])
+
+// interpreter
+let interpreter: Interpreter
+const output = ref<string>('')
+const callStack = ref<string>('')
+const varScope = ref<string>('')
 
 const handleRun = () => {
+  output.value = ''
 
+  let times = 0
+  const interval = 60
+  interpreter = new Interpreter(program.value, {
+    log: (res: string) => {
+      times += 1
+      setTimeout(() => {
+        console.log(res, times)
+        output.value += res
+      }, times * interval)
+    }
+  })
+
+  interpreter.run()
 }
 
 const handleStep = () => {

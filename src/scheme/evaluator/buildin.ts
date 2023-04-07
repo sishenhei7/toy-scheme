@@ -14,8 +14,8 @@ type BuildInTraverseFunc = (node: SchemeList) => Thunk
  * 2. 内置方法：cons、null?、car、cadr、cdr等
  */
 export interface BuildInEvaluatorOptions {
-  log: Function
-  prompt: Function
+  log?: Function
+  prompt?: Function
 }
 export default class BuildInEvaluator implements IEvaluator {
   log: Function

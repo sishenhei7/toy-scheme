@@ -9,6 +9,6 @@ export function guessNumber(str: string): boolean {
 }
 
 export function deleteDoubleQuote(st: string): string {
-  const matched = /^"(.*)"$/.exec(st)
+  const matched = /^"([\s\S]*)"$/.exec(st)
   return matched ? matched[1] : st
 }

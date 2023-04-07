@@ -19,8 +19,8 @@ export interface IEvaluator {
 }
 
 export interface EvaluatorOptions {
-  log: Function
-  prompt: Function
+  log?: Function
+  prompt?: Function
 }
 
 export class Evaluator {
@@ -57,7 +57,7 @@ export class Evaluator {
     return node
   }
 
-  public evaluate(node: SchemeData, env: Env, cont: SchemeCont = SchemeCont.Identity): Thunk {
+  public evaluate(node: SchemeData, env: Env, cont: SchemeCont): Thunk {
     if (SchemeList.matches(node) && !SchemeList.isNil(node) && node.shouldEval) {
       const peek = node.car()
 
