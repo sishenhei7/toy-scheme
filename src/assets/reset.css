@@ -9,7 +9,7 @@
  */
 
 html {
-  line-height: $lineHeight-compact; /* 1 */
+  line-height: 1.15; /* 1 */
   -webkit-text-size-adjust: 100%; /* 2 */
 }
 
@@ -38,8 +38,7 @@ main {
  */
 
 h1 {
-  font-size: $fontSize-heading-l;
-  margin: 0 0;
+  font-size: 2em;
 }
 
 /* Grouping content
@@ -62,10 +61,8 @@ hr {
  */
 
 pre {
-  font-family: monospace; /* 1 */
-  /* stylelint-disable */
+  font-family: monospace, monospace; /* 1 */
   font-size: 1em; /* 2 */
-  /* stylelint-enable */
 }
 
 /* Text-level semantics
@@ -96,7 +93,7 @@ abbr[title] {
 
 b,
 strong {
-  font-weight: $fontWeight-bold;
+  font-weight: bolder;
 }
 
 /**
@@ -107,11 +104,8 @@ strong {
 code,
 kbd,
 samp {
-  font-family: monospace; /* 1 */
-
-  /* stylelint-disable */
+  font-family: monospace, monospace; /* 1 */
   font-size: 1em; /* 2 */
-  /* stylelint-enable */
 }
 
 /**
@@ -119,9 +113,7 @@ samp {
  */
 
 small {
-  /* stylelint-disable */
   font-size: 80%;
-  /* stylelint-enable */
 }
 
 /**
@@ -131,16 +123,10 @@ small {
 
 sub,
 sup {
+  font-size: 75%;
   line-height: 0;
   position: relative;
   vertical-align: baseline;
-}
-
-sub,
-sup {
-  /* stylelint-disable */
-  font-size: 75%;
-  /* stylelint-enable */
 }
 
 sub {
@@ -176,10 +162,8 @@ optgroup,
 select,
 textarea {
   font-family: inherit; /* 1 */
-  /* stylelint-disable */
   font-size: 100%; /* 1 */
-  /* stylelint-enable */
-  line-height: $lineHeight-compact; /* 1 */
+  line-height: 1.15; /* 1 */
   margin: 0; /* 2 */
 }
 
