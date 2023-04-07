@@ -52,9 +52,23 @@ export class TokenItem extends ILocation {
  */
 export default function tokenize(st: string): TokenItem[] {
   let cursor = 0
+  let line = 1
+  let column = 1
   const stack = []
 
+  function forward(n: number, isNewLine: boolean = false) {
+    cursor += n
+    st = st.substring(n)
+    line += isNewLine ? 1 : 0
+    column = isNewLine ? 1 : (column + n)
+  }
+
   while (st) {
+    if (st.startsWith('\n')) {
+      forward(1, true)
+      continue
+    }
+
     let isMatched = false
 
     for (const [tokenType, reg] of tokenRegexList) {
@@ -63,11 +77,15 @@ export default function tokenize(st: string): TokenItem[] {
       if (matched) {
         const value = matched?.[0]
         const len = value.length
-        stack.push(new TokenItem(tokenType, value, len).setLocationInfo(cursor, cursor + len))
+        stack.push(new TokenItem(tokenType, value, len).setLocationInfo({
+          lineStart: line,
+          columnStart: column,
+          lineEnd: line,
+          columnEnd: column + len
+        }))
 
         // advance
-        cursor += len
-        st = st.substring(len)
+        forward(len)
         isMatched = true
         break
       }
