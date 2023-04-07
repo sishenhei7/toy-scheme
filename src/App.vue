@@ -2,12 +2,12 @@
   <div class="app-container">
     <AppTitle
       title="Toy-Scheme"
-      class="mb-20"
+      class="mb-xl"
     />
     <AppBar
       :program-name="programName"
       :program-name-list="programNameList"
-      class="mb-12"
+      class="mb-m"
       @run="handleRun"
       @step="handleStep"
       @continue="handleContinue"
@@ -15,7 +15,7 @@
     />
     <MonacoEditor
       v-model="program"
-      class="mb-12"
+      class="mb-m"
     />
     <ProgramInner />
   </div>

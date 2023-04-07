@@ -75,8 +75,8 @@ watch(() => props.highlightRange, newValue => {
 .editor-container {
   width: 100%;
   height: 350px;
-  border: 1px solid #001858;
-  border-radius: 8px;
+  border: 1px solid var(--stroke-color);
+  border-radius: var(--border-radius-l);
   overflow: hidden;
 }
 #monaco-editor {

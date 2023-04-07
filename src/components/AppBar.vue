@@ -1,6 +1,6 @@
 <template>
   <div class="controller-bar">
-    <div>
+    <section class="controller-bar-section">
       <span
         v-for="name of programNameList"
         :key="name"
@@ -9,8 +9,8 @@
       >
         {{ name }}
       </span>
-    </div>
-    <div>
+    </section>
+    <section class="controller-bar-section">
       <span
         class="button control-button"
         @click="emit('run')"
@@ -23,7 +23,7 @@
         class="button control-button"
         @click="emit('run')"
       >continue</span>
-    </div>
+    </section>
   </div>
 </template>
 
@@ -51,15 +51,21 @@ const emit = defineEmits<{
   display: flex;
   align-items: center;
   justify-content: space-between;
-  width: 100%
+  width: 100%;
+
+  &-section {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+  }
 }
 .button {
   margin-right: 6px;
   padding: 4px;
-  color: #001858;
+  color: var(--stroke-color);
   font-size: 14px;
-  border-radius: 6px;
-  border: 1px solid #001858;
+  border-radius: var(--border-radius-m);
+  border: 1px solid var(--stroke-color);
   cursor: pointer;
 
   &:last-child {
@@ -67,18 +73,15 @@ const emit = defineEmits<{
   }
 }
 .program-button {
-  background-color: #f3d2c1;
+  background-color: var(--main-color);
 
-  &:hover {
-    background-color: #8bd3dd;
-  }
-
+  &:hover,
   &.is-active {
-    background-color: #8bd3dd;
+    background-color: var(--secondary-color);
   }
 }
 .control-button {
-  background-color: #f582ae;
+  background-color: var(--caution-color);
   opacity: 0.85;
 
   &:hover {

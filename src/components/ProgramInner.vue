@@ -27,10 +27,11 @@
   width: 100%;
 
   &-block {
-    width: 32%;
+    width: calc((100% - var(--margin-m) * 2) / 3);
     height: 100%;
-    border: 1px solid #001858;
-    border-radius: 8px;
+    box-sizing: border-box;
+    border: 1px solid var(--stroke-color);
+    border-radius: var(--border-radius-l);
     background-color: #fff;
     overflow: hidden;
   }
@@ -39,9 +40,9 @@
     padding: 2px 6px;
     width: 100%;
     box-sizing: border-box;
-    border-bottom: 1px solid #001858;
-    color: #172c66;
-    background-color: #fec7d7;
+    border-bottom: 1px solid var(--stroke-color);
+    color: var(--paragraph-color);
+    background-color: var(--background-title-color);
   }
 
   &-content {
