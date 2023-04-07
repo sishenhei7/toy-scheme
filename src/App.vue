@@ -50,12 +50,10 @@ const output = ref<string>('')
 const callStack = ref<string>('')
 const varScope = ref<string>('')
 
-const handleRun = () => {
-  output.value = ''
-
+const createInterpreter = () => {
   let times = 0
   const interval = 60
-  interpreter = new Interpreter(program.value, {
+  return new Interpreter(program.value, {
     log: (res: string) => {
       times += 1
       setTimeout(() => {
@@ -64,8 +62,11 @@ const handleRun = () => {
       }, times * interval)
     }
   })
+}
 
-  interpreter.run()
+const handleRun = () => {
+  output.value = ''
+  createInterpreter().run()
 }
 
 const handleStep = () => {
