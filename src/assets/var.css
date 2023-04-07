@@ -17,7 +17,15 @@
 
   --margin-xl: 20px;
   --margin-m: 12px;
+  --margin-s: 8px;
+  --margin-xs: 6px;
 
   --border-radius-l: 8px;
   --border-radius-m: 6px;
+
+  --font-size-xxl: 3rem;
+  --font-size-xl: 2.4rem;
+  --font-size-l: 1.6rem;
+  --font-size-m: 1rem;
+  --font-size-s: 0.8rem;
 }

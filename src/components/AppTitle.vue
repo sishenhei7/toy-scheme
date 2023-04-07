@@ -11,7 +11,7 @@ defineProps<{
 <style lang="scss" scoped>
 h1 {
   font-weight: 500;
-  font-size: 3rem;
+  font-size: var(--font-size-xxl);
   color: var(--headline-color);
 }
 </style>

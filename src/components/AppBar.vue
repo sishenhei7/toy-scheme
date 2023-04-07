@@ -60,10 +60,10 @@ const emit = defineEmits<{
   }
 }
 .button {
-  margin-right: 6px;
+  margin-right: var(--margin-xs);
   padding: 4px;
   color: var(--stroke-color);
-  font-size: 14px;
+  font-size: var(--font-size-m);
   border-radius: var(--border-radius-m);
   border: 1px solid var(--stroke-color);
   cursor: pointer;
