@@ -44,7 +44,7 @@ const handleSelectProgram = (name: string) => {
 }
 handleSelectProgram(programNameList[0])
 
-// interpreter
+// interpreter test
 let interpreter: Interpreter
 const output = ref<string>('')
 const callStack = ref<string>('')
