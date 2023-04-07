@@ -29,6 +29,7 @@ import MonacoEditor from './components/MonacoEditor.vue'
 import ProgramInner from './components/ProgramInner.vue'
 import programMap from './scheme/programs'
 
+// program
 const programNameList = Object.keys(programMap)
 const programName = ref<string>(programNameList[0])
 const program = ref<string>(programMap[programName.value])

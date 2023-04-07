@@ -1,22 +1,35 @@
 <template>
   <div class="program-inner">
     <section class="program-inner-block">
-      <div class="program-inner-title">Output</div>
-      <div class="program-inner-content">test</div>
+      <h3 class="program-inner-title">Output</h3>
+      <div class="program-inner-content">{{ output }}</div>
     </section>
     <section class="program-inner-block">
-      <div class="program-inner-title">Call Stack</div>
-      <div class="program-inner-content">test</div>
+      <h3 class="program-inner-title">Call Stack</h3>
+      <div class="program-inner-content">{{ callStack }}</div>
     </section>
     <section class="program-inner-block">
-      <div class="program-inner-title">Variables</div>
-      <div class="program-inner-content">test</div>
+      <h3 class="program-inner-title">Scope</h3>
+      <div class="program-inner-content">{{ scope }}</div>
     </section>
   </div>
 </template>
 
 <script setup lang="ts">
-
+defineProps({
+  output: {
+    type: String as PropType<string>,
+    required: true
+  },
+  callStack: {
+    type: String as PropType<string>,
+    required: true
+  },
+  scope: {
+    type: String as PropType<string>,
+    required: true
+  }
+})
 </script>
 
 <style lang="scss" scoped>
@@ -37,8 +50,10 @@
   }
 
   &-title {
+    margin: 0;
     padding: 2px 6px;
     width: 100%;
+    font-weight: normal;
     box-sizing: border-box;
     border-bottom: 1px solid var(--stroke-color);
     color: var(--paragraph-color);
@@ -50,6 +65,7 @@
     height: 150px;
     color: #000;
     cursor: text;
+    overflow-y: auto;
   }
 }
 </style>

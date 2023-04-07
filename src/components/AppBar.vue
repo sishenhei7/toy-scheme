@@ -73,15 +73,15 @@ const emit = defineEmits<{
   }
 }
 .program-button {
-  background-color: var(--main-color);
+  background-color: #fff;
 
   &:hover,
   &.is-active {
-    background-color: var(--secondary-color);
+    background-color: var(--main-color);
   }
 }
 .control-button {
-  background-color: var(--caution-color);
+  background-color: var(--secondary-color);
   opacity: 0.85;
 
   &:hover {
