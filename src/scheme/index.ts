@@ -2,6 +2,7 @@ import { parse } from './parser'
 import { Evaluator } from './evaluator'
 import { type SchemeData, SchemeCont, type ILocationRange } from './parser/data'
 import { Env } from './env'
+import { nextTick } from './utils'
 
 export interface InterpreterOptions {
   log?: Function
@@ -32,16 +33,24 @@ export default class Interpreter {
   }
 
   public smoothRun(callback?: Function) {
-    let node = this.node
-    let interval = setInterval(() => {
+    // 每次 nexttick 调用自身 20 次
+    const loop = (n: number) => {
+      const { node } = this
       if (SchemeCont.matches(node)) {
         // console.log(node)
-        node = node.call()
+        this.node = node.call()
+
+        if (n >= 0) {
+          n -= 1
+          loop(n)
+        } else {
+          this.smoothRun(callback)
+        }
       } else {
-        clearInterval(interval)
         callback && callback()
       }
-    }, 5)
+    }
+    nextTick(() => loop(20))
   }
 
   public step(): StepResponse {
