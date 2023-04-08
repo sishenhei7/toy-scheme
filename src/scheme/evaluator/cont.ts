@@ -1,4 +1,4 @@
-import { type Thunk, SchemeCont, SchemeList, type SchemeData } from '../parser/data'
+import { SchemeCont, SchemeList, type SchemeData } from '../parser/data'
 import type { Env } from '../env'
 import type { IEvaluator, Evaluator } from './index'
 
@@ -15,7 +15,7 @@ export default class ContEvaluator implements IEvaluator {
   }
 
   // 当节点是 SchemeCont 的时候，丢弃当前的 cont，直接执行 SchemeCont
-  public evaluate(node: SchemeList, env: Env, _cont: SchemeCont): Thunk {
+  public evaluate(node: SchemeList, env: Env, _cont: SchemeCont): SchemeData {
     return this.evaluator.evaluate(node.cadr(), env, SchemeCont.cast(node.car()))
   }
 }

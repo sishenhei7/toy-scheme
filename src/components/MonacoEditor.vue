@@ -21,8 +21,12 @@ const props = defineProps({
     type: String as PropType<string>,
     default: ''
   },
+  programName: {
+    type: String as PropType<string>,
+    default: ''
+  },
   highlightRange: {
-    type: Object as PropType<[number, number, number, number]>,
+    type: Object as PropType<[number, number, number, number] | null>,
     default: null
   }
 })
@@ -54,20 +58,22 @@ onBeforeUnmount(() => {
   editor.dispose()
 })
 
-watch(() => props.modelValue, (newValue) => {
-  editor?.setValue(newValue)
+watch(() => props.programName, () => {
+  editor?.setValue(props.modelValue)
 })
 
 watch(() => props.highlightRange, newValue => {
-  highlight?.clear()
-  highlight = editor?.createDecorationsCollection([
-    {
-      range: new monaco.Range(...newValue),
-      options: {
-        inlineClassName: "monaco-editor-highlight"
+  if (newValue) {
+    highlight?.clear()
+    highlight = editor?.createDecorationsCollection([
+      {
+        range: new monaco.Range(...newValue),
+        options: {
+          inlineClassName: "monaco-editor-highlight"
+        }
       }
-    }
-  ])
+    ])
+  }
 })
 </script>
 

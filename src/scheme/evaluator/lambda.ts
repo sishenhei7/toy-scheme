@@ -1,4 +1,4 @@
-import { type Thunk, SchemeCont, type SchemeData, SchemeList, SchemeProc, SchemeSym } from '../parser/data'
+import { SchemeCont, type SchemeData, SchemeList, SchemeProc, SchemeSym } from '../parser/data'
 import type { Env } from '../env'
 import type { IEvaluator, Evaluator } from './index'
 
@@ -13,7 +13,7 @@ export default class LambdaEvaluator implements IEvaluator {
     return SchemeSym.matches(node) && node.value === 'lambda'
   }
 
-  public evaluate(node: SchemeList, env: Env, cont: SchemeCont): Thunk {
-    return cont.call(new SchemeProc('<<lambda>>', SchemeList.cast(node.cadr()), node.cddr(), env))
+  public evaluate(node: SchemeList, env: Env, cont: SchemeCont): SchemeData {
+    return cont.setValue(new SchemeProc('<<lambda>>', SchemeList.cast(node.cadr()), node.cddr(), env))
   }
 }

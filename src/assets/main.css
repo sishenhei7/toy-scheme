@@ -17,6 +17,6 @@
 }
 
 .monaco-editor-highlight {
-  background-color: var(--editor-highlight-color)!important;
-  color: var(--editor-highlight-background-color)!important;
+  background-color: var(--editor-highlight-background-color)!important;
+  color: var(--editor-highlight-color)!important;
 }

@@ -1,4 +1,4 @@
-import { type Thunk, SchemeBoolean, SchemeCont, SchemeList, SchemeSym, type SchemeData } from '../parser/data'
+import { SchemeBoolean, SchemeCont, SchemeList, SchemeSym, type SchemeData } from '../parser/data'
 import type { Env } from '../env'
 import type { IEvaluator, Evaluator } from './index'
 import { assert } from '../utils'
@@ -18,11 +18,11 @@ export default class CondEvaluator implements IEvaluator {
     return SchemeSym.matches(node) && node.value === 'cond'
   }
 
-  public evaluate(node: SchemeList, env: Env, cont: SchemeCont): Thunk {
+  public evaluate(node: SchemeList, env: Env, cont: SchemeCont): SchemeData {
     return this.evaluateConditions(node.cdr(), env, cont)
   }
 
-  private evaluateConditions(node: SchemeList, env: Env, cont: SchemeCont): Thunk {
+  private evaluateConditions(node: SchemeList, env: Env, cont: SchemeCont): SchemeData {
     if (!SchemeList.isNil(node)) {
       const currentNode = SchemeList.cast(node.car())
       const predictNode = currentNode.car()

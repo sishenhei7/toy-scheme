@@ -1,4 +1,4 @@
-import { type Thunk, type SchemeData, SchemeCont, SchemeSym, SchemeList } from '../parser/data'
+import { type SchemeData, SchemeCont, SchemeSym, SchemeList } from '../parser/data'
 import type { Env } from '../env'
 import type { IEvaluator, Evaluator } from './index'
 
@@ -13,13 +13,13 @@ export default class SetEvaluator implements IEvaluator {
     return SchemeSym.matches(node) && node.value === 'set!'
   }
 
-  public evaluate(node: SchemeList, env: Env, cont: SchemeCont): Thunk {
+  public evaluate(node: SchemeList, env: Env, cont: SchemeCont): SchemeData {
     return this.evaluator.evaluate(
       node.caddr(),
       env,
       new SchemeCont((val: SchemeData) => {
         env.set(SchemeSym.cast(node.cadr()).value, val)
-        return cont.call(val)
+        return cont.setValue(val)
       })
     )
   }

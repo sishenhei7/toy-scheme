@@ -14,7 +14,7 @@ export interface ILocationRange {
   columnEnd: number
 }
 export class ILocation {
-  range: ILocationRange | null = null
+  public range: ILocationRange | null = null
 
   public setLocationInfo(range: ILocationRange | null): this {
     this.range = range
@@ -23,7 +23,16 @@ export class ILocation {
 }
 
 export class SchemeData extends ILocation {
+  private env: Env | null = null
 
+  public setEnv(env: Env): this {
+    this.env = env
+    return this
+  }
+
+  public getEnv(): Env | null {
+    return this.env
+  }
 }
 
 /**
@@ -254,11 +263,12 @@ export class SchemeList extends SchemeData {
 /**
  * 其它数据结构：continuation 是一等公民
  */
-export type Thunk = () => SchemeData | Thunk
 export class SchemeCont extends SchemeData {
-  static Identity = new SchemeCont(x => () => x)
+  private value: SchemeData = SchemeList.buildSchemeNil()
 
-  constructor(private f: (node: SchemeData) => Thunk) {
+  static Identity = new SchemeCont(x => x)
+
+  constructor(private f: (node: SchemeData) => SchemeData) {
     super()
   }
 
@@ -266,13 +276,17 @@ export class SchemeCont extends SchemeData {
     return this.f.toString()
   }
 
+  public setValue(value: SchemeData): this {
+    this.value = value
+    return this
+  }
+
   public toString(): string {
     return `<<continuation>> ${this.fString}`
   }
 
-  // 这里返回一个 Thunk 而不是直接计算
-  public call(value: SchemeData): Thunk {
-    return () => this.f(value)
+  public call(): SchemeData {
+    return this.f(this.value)
   }
 
   static cast(item: SchemeData): SchemeCont {
@@ -365,7 +379,7 @@ export default function parseToken(tokenList: TokenItem[]): SchemeList {
     if (startRange && endRange) {
       newRange = {
         lineStart: startRange.lineStart,
-        columnStart: startRange.columnStart,
+        columnStart: startRange.columnStart - 1,
         lineEnd: endRange.lineEnd,
         columnEnd: endRange.columnEnd
       }

@@ -1,4 +1,4 @@
-import { type Thunk, type SchemeData, SchemeCont, SchemeSym, SchemeProc, SchemeList } from '../parser/data';
+import { type SchemeData, SchemeCont, SchemeSym, SchemeProc, SchemeList } from '../parser/data';
 import { Env, StackFrame } from '../env'
 import type { IEvaluator, Evaluator } from './index'
 import { assert } from '../utils'
@@ -16,7 +16,7 @@ export default class ProcEvaluator implements IEvaluator {
     return true
   }
 
-  public evaluate(node: SchemeList, env: Env, cont: SchemeCont): Thunk {
+  public evaluate(node: SchemeList, env: Env, cont: SchemeCont): SchemeData {
     // env 的作用：
     // 1.用来查找这个 proc
     // 2.用来查找 args 里面的变量
@@ -26,7 +26,7 @@ export default class ProcEvaluator implements IEvaluator {
     }))
   }
 
-  public evaluateProc(proc: SchemeProc, args: SchemeList, env: Env, cont: SchemeCont): Thunk {
+  public evaluateProc(proc: SchemeProc, args: SchemeList, env: Env, cont: SchemeCont): SchemeData {
     // 流程：
     // 1.建立env，连接parentStackFrame
     // 2.解析args到env里面去
@@ -43,7 +43,7 @@ export default class ProcEvaluator implements IEvaluator {
     )
   }
 
-  private evaluateArgs(params: SchemeList, args: SchemeList, env: Env, newEnv: Env, cont: SchemeCont): Thunk {
+  private evaluateArgs(params: SchemeList, args: SchemeList, env: Env, newEnv: Env, cont: SchemeCont): SchemeData {
     if (!SchemeList.isNil(params)) {
       assert(!SchemeList.isNil(args), 'Proc params and args do not match!')
       return this.evaluator.evaluate(args.car(), env, new SchemeCont((data: SchemeData) => {
@@ -52,6 +52,6 @@ export default class ProcEvaluator implements IEvaluator {
         return this.evaluateArgs(params.cdr(), args.cdr(), env, newEnv, cont)
       }))
     }
-    return cont.call(SchemeList.buildSchemeNil())
+    return cont.setValue(SchemeList.buildSchemeNil())
   }
 }

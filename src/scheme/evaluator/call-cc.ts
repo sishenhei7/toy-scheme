@@ -1,4 +1,4 @@
-import { type Thunk, type SchemeData, SchemeCont, SchemeList, SchemeProc, SchemeSym } from '../parser/data'
+import { type SchemeData, SchemeCont, SchemeList, SchemeProc, SchemeSym } from '../parser/data'
 import { Env, StackFrame } from '../env'
 import type { IEvaluator, Evaluator } from './index'
 import { assert } from '../utils'
@@ -17,7 +17,7 @@ export default class CallCCEvaluator implements IEvaluator {
     return SchemeSym.matches(node) && node.value === 'call-with-current-continuation'
   }
 
-  public evaluate(node: SchemeList, env: Env, cont: SchemeCont): Thunk {
+  public evaluate(node: SchemeList, env: Env, cont: SchemeCont): SchemeData {
     return this.evaluator.evaluate(node.cadr(), env, new SchemeCont((proc: SchemeData) => {
       assert(SchemeProc.matches(proc), 'callcc args evaluate eror!')
       const newEnv = new Env(env, new StackFrame(env.getStackFrame()))

@@ -1,4 +1,4 @@
-import { type Thunk, type SchemeData, SchemeCont, SchemeSym, SchemeList, SchemeProc } from '../parser/data'
+import { type SchemeData, SchemeCont, SchemeSym, SchemeList, SchemeProc } from '../parser/data'
 import type { Env } from '../env'
 import type { IEvaluator, Evaluator } from './index'
 import { assert } from '../utils'
@@ -18,7 +18,7 @@ export default class DefineEvaluator implements IEvaluator {
     return SchemeSym.matches(node) && node.value === 'define'
   }
 
-  public evaluate(node: SchemeList, env: Env, cont: SchemeCont): Thunk {
+  public evaluate(node: SchemeList, env: Env, cont: SchemeCont): SchemeData {
     const varNode = node.cadr()
     const bodyNode = node.cddr()
 
@@ -26,7 +26,7 @@ export default class DefineEvaluator implements IEvaluator {
     if (SchemeSym.matches(varNode)) {
       return this.evaluator.evaluateList(bodyNode, env, new SchemeCont((data: SchemeData) => {
         env.define(varNode.value, data)
-        return cont.call(data)
+        return cont.setValue(data)
       }))
     }
 
@@ -35,7 +35,10 @@ export default class DefineEvaluator implements IEvaluator {
       const name = SchemeSym.cast(varNode.car()).value
       const proc = new SchemeProc(name, varNode.cdr(), bodyNode, env)
       env.define(name, proc)
-      return cont.call(proc)
+      return cont
+        .setValue(proc)
+        .setEnv(env)
+        .setLocationInfo(node.range)
     }
 
     assert(false, 'Error: define clause evaluate error!')

@@ -1,12 +1,12 @@
-import { type Thunk, type SchemeData, SchemeCont, SchemeSym, SchemeList, SchemeBoolean, SchemeNumber, SchemeString } from '../parser/data';
+import { type SchemeData, SchemeCont, SchemeSym, SchemeList, SchemeBoolean, SchemeNumber, SchemeString } from '../parser/data';
 import type { Env } from '../env'
 import type { IEvaluator, Evaluator } from './index'
 import { assert, guessNumber } from '../utils'
 
-type BaseBuildInEvaluator = (node: SchemeList, env: Env, cont: SchemeCont) => Thunk
+type BaseBuildInEvaluator = (node: SchemeList, env: Env, cont: SchemeCont) => SchemeData
 type OneArgsWrapper = (first: SchemeData) => SchemeData
 type TwoArgsWrapper = (first: SchemeData, second: SchemeData) => SchemeData
-type BuildInTraverseFunc = (node: SchemeList) => Thunk
+type BuildInTraverseFunc = (node: SchemeList) => SchemeData
 
 /**
  * 内置语法：
@@ -55,7 +55,7 @@ export default class BuildInEvaluator implements IEvaluator {
     return SchemeSym.matches(node) && this.evaluatorMap.has(node.value)
   }
 
-  public evaluate(node: SchemeList, env: Env, cont: SchemeCont): Thunk {
+  public evaluate(node: SchemeList, env: Env, cont: SchemeCont): SchemeData {
     const evaluator = this.evaluatorMap.get(SchemeSym.cast(node.car()).value)
     assert(evaluator, 'buildin evaluator evaluates error!')
     return evaluator(node, env, cont)
@@ -69,7 +69,7 @@ export default class BuildInEvaluator implements IEvaluator {
     return (node: SchemeList, env: Env, cont: SchemeCont) => this.evaluator.evaluate(
       node.cadr(),
       env,
-      new SchemeCont((first: SchemeData) => cont.call(evaluator(first)))
+      new SchemeCont((first: SchemeData) => cont.setValue(evaluator(first)))
     )
   }
 
@@ -81,7 +81,7 @@ export default class BuildInEvaluator implements IEvaluator {
         (first: SchemeData) => this.evaluator.evaluate(
           node.caddr(),
           env,
-          new SchemeCont((second: SchemeData) => cont.call(evaluator(first, second)))
+          new SchemeCont((second: SchemeData) => cont.setValue(evaluator(first, second)))
         )
       )
     )
@@ -159,38 +159,38 @@ export default class BuildInEvaluator implements IEvaluator {
     return new SchemeBoolean(!SchemeBoolean.cast(first).value)
   }
 
-  private and(node: SchemeList, env: Env, cont: SchemeCont): Thunk {
+  private and(node: SchemeList, env: Env, cont: SchemeCont): SchemeData {
     if (SchemeList.isNil(node.cdr())) {
-      return cont.call(new SchemeBoolean(true))
+      return cont.setValue(new SchemeBoolean(true))
     }
     return this.evaluator.evaluate(node.cadr(), env, new SchemeCont((first: SchemeData) => {
       if (!SchemeBoolean.isTrue(first)) {
-        return cont.call(new SchemeBoolean(false))
+        return cont.setValue(new SchemeBoolean(false))
       }
       return this.and(node.cdr(), env, cont)
     }))
   }
 
-  private or(node: SchemeList, env: Env, cont: SchemeCont): Thunk {
+  private or(node: SchemeList, env: Env, cont: SchemeCont): SchemeData {
     if (SchemeList.isNil(node.cdr())) {
-      return cont.call(new SchemeBoolean(false))
+      return cont.setValue(new SchemeBoolean(false))
     }
     return this.evaluator.evaluate(node.cadr(), env, new SchemeCont((data: SchemeData) => {
       if (SchemeBoolean.isTrue(data)) {
-        return cont.call(new SchemeBoolean(true))
+        return cont.setValue(new SchemeBoolean(true))
       }
       return this.or(node.cdr(), env, cont)
     }))
   }
 
-  private ask(node: SchemeList, env: Env, cont: SchemeCont): Thunk {
+  private ask(node: SchemeList, env: Env, cont: SchemeCont): SchemeData {
     let msg = ''
     const traverse: BuildInTraverseFunc = (node: SchemeList) => {
       if (SchemeList.isNil(node)) {
         msg = msg.trim()
         const answer = this.prompt(msg)
         this.log(answer + '\n')
-        return cont.call(guessNumber(answer) ? new SchemeNumber(Number(answer)) : new SchemeString(answer))
+        return cont.setValue(guessNumber(answer) ? new SchemeNumber(Number(answer)) : new SchemeString(answer))
       }
 
       return this.evaluator.evaluate(
@@ -205,12 +205,12 @@ export default class BuildInEvaluator implements IEvaluator {
     return traverse(node.cdr())
   }
 
-  private display(node: SchemeList, env: Env, cont: SchemeCont): Thunk {
+  private display(node: SchemeList, env: Env, cont: SchemeCont): SchemeData {
     let res = ''
     const traverse: BuildInTraverseFunc = (node: SchemeList) => {
       if (SchemeList.isNil(node)) {
         this.log(res)
-        return cont.call(new SchemeString(res))
+        return cont.setValue(new SchemeString(res))
       }
 
       return this.evaluator.evaluate(

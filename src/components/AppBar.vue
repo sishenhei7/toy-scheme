@@ -17,11 +17,11 @@
       >Run</span>
       <span
         class="button control-button"
-        @click="emit('run')"
+        @click="emit('step')"
       >Step</span>
       <span
         class="button control-button"
-        @click="emit('run')"
+        @click="emit('continue')"
       >continue</span>
     </section>
   </div>

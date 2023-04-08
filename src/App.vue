@@ -15,6 +15,8 @@
     />
     <MonacoEditor
       v-model="program"
+      :program-name="programName"
+      :highlight-range="highlightRange"
       class="mb-m"
     />
     <ProgramInner
@@ -26,7 +28,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import AppTitle from './components/AppTitle.vue'
 import AppBar from './components/AppBar.vue'
 import MonacoEditor from './components/MonacoEditor.vue'
@@ -35,24 +37,29 @@ import programMap from './scheme/programs'
 import Interpreter from './scheme'
 
 // program
+
 const programNameList = Object.keys(programMap)
 const programName = ref<string>('')
 const program = ref<string>('')
+
 const handleSelectProgram = (name: string) => {
   programName.value = name
   program.value = programMap[name]
 }
 handleSelectProgram(programNameList[0])
 
-// interpreter
-let interpreter: Interpreter
+let interpreter: Interpreter | null
+const highlightRange = ref<[number, number, number, number] | null>(null)
 const output = ref<string>('')
 const callStack = ref<string>('')
 const varScope = ref<string>('')
 
-const createInterpreter = () => {
+watch(() => program.value, () => {
+  interpreter = null
+})
+
+const createInterpreter = (interval: number = 0) => {
   let times = 0
-  const interval = 60
   return new Interpreter(program.value, {
     log: (res: string) => {
       times += 1
@@ -66,15 +73,22 @@ const createInterpreter = () => {
 
 const handleRun = () => {
   output.value = ''
-  createInterpreter().run()
+  createInterpreter(60).run()
 }
 
 const handleStep = () => {
-
+  if (!interpreter) {
+    interpreter = createInterpreter()
+  }
+  const stepRes = interpreter.step()
+  const { range } = stepRes
+  highlightRange.value = range ? [range.lineStart, range.columnStart, range.lineEnd, range.columnEnd] : null
 }
 
 const handleContinue = () => {
-
+  if (interpreter) {
+    interpreter.run()
+  }
 }
 </script>
 

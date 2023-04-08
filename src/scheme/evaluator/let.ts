@@ -1,4 +1,4 @@
-import { type Thunk, SchemeList, SchemeCont, type SchemeData, SchemeSym } from '../parser/data'
+import { SchemeList, SchemeCont, type SchemeData, SchemeSym } from '../parser/data'
 import { Env, StackFrame } from '../env'
 import type { IEvaluator, Evaluator } from './index'
 import { assert } from '../utils'
@@ -18,7 +18,7 @@ import { assert } from '../utils'
  *    (iter (cdr ls0) (+ (car ls0) n))))))
  *  (iter ls 0))
  */
-type LetStarTraverseFunc = (defNode: SchemeList, newEnv: Env) => Thunk
+type LetStarTraverseFunc = (defNode: SchemeList, newEnv: Env) => SchemeData
 export default class LetEvaluator implements IEvaluator {
   constructor(private evaluator: Evaluator) {}
 
@@ -26,7 +26,7 @@ export default class LetEvaluator implements IEvaluator {
     return this.isLet(node) || this.isLetStar(node) || this.isLetRec(node)
   }
 
-  public evaluate(node: SchemeList, env: Env, cont: SchemeCont): Thunk {
+  public evaluate(node: SchemeList, env: Env, cont: SchemeCont): SchemeData {
     const peek = node.car()
     const defNode = SchemeList.cast(node.cadr())
     const bodyNode = node.caddr()
@@ -61,7 +61,7 @@ export default class LetEvaluator implements IEvaluator {
   private isLetRec(node: SchemeData): boolean {
     return SchemeSym.matches(node) && node.value === 'letrec'
   }
-  private evaluateDefinition(node: SchemeList, env: Env, cont: SchemeCont): Thunk {
+  private evaluateDefinition(node: SchemeList, env: Env, cont: SchemeCont): SchemeData {
     if (!SchemeList.isNil(node)) {
       const defination = SchemeList.cast(node.car())
       const name = SchemeSym.cast(defination.car()).value
@@ -71,10 +71,10 @@ export default class LetEvaluator implements IEvaluator {
         return this.evaluateDefinition(node.cdr(), env, cont)
       }))
     }
-    return cont.call(SchemeList.buildSchemeNil())
+    return cont.setValue(SchemeList.buildSchemeNil())
   }
 
-  private evaluateLetStar(node: SchemeList, env: Env, cont: SchemeCont): Thunk {
+  private evaluateLetStar(node: SchemeList, env: Env, cont: SchemeCont): SchemeData {
     const traverse: LetStarTraverseFunc = (defNode: SchemeList, newEnv: Env) => {
       if (!SchemeList.isNil(defNode)) {
         const defination = SchemeList.cast(defNode.car())
@@ -94,7 +94,7 @@ export default class LetEvaluator implements IEvaluator {
     return traverse(SchemeList.cast(node.cadr()), new Env(env, new StackFrame(env.getStackFrame())))
   }
 
-  private traverseDefinition(node: SchemeList, env: Env) {
+  private traverseDefinition(node: SchemeList, env: Env): void {
     if (!SchemeList.isNil(node)) {
       const defination = SchemeList.cast(node.car())
       const name = SchemeSym.cast(defination.car()).value
