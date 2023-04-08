@@ -1,8 +1,7 @@
 /**
  * 数据结构：
  * 简单数据：number、string、boolean、quote、symbol
- * 复杂数据：list
- * 其它数据：cont、proc
+ * 复杂数据：list、cont、proc
  */
 import { type TokenItem, TokenType } from './token'
 import type { Env } from '../env'
@@ -172,8 +171,8 @@ export class SchemeList extends SchemeData {
     return this
   }
 
-  public setEval(value: boolean = false): SchemeList {
-    this.shouldEval = value
+  public setNotEval(): this {
+    this.shouldEval = false
     return this
   }
 
@@ -312,11 +311,20 @@ export class SchemeProc extends SchemeData {
 export default function parseToken(tokenList: TokenItem[]): SchemeList {
   let tokenCursor = 0
 
-  function parseTokenList(onlyOne: boolean = false): SchemeData[] {
+  function parseTokenList(onlyOne: boolean = false): [SchemeData[], ILocationRange | null] {
     let list: SchemeData[] = []
+    let startRange: ILocationRange | null = null
+    let endRange: ILocationRange | null = null
 
     while (tokenList.length && tokenCursor < tokenList.length) {
       const { type, value, range } = tokenList[tokenCursor++]
+
+      if (!startRange) {
+        startRange = range
+      }
+      endRange = range
+
+      let shouldBreakLoop = onlyOne
       switch (type) {
         case TokenType.Boolean:
           list.push(new SchemeBoolean(value === '#t').setLocationInfo(range))
@@ -327,29 +335,44 @@ export default function parseToken(tokenList: TokenItem[]): SchemeList {
         case TokenType.String:
           list.push(new SchemeString(deleteDoubleQuote(value)).setLocationInfo(range))
           break
-        case TokenType.Quote:
+        case TokenType.Quote: {
           // 'xxxx 的 quote 只需要 parse 一个
-          list.push(SchemeList.buildFromArray(parseTokenList(!value.startsWith("'("))).setEval().setLocationInfo(range))
+          const [tokenList, listRange] = parseTokenList(!value.startsWith("'("))
+          list.push(SchemeList.buildFromArray(tokenList).setNotEval().setLocationInfo(listRange))
           break
+        }
         case TokenType.Symbol:
           list.push(new SchemeSym(value).setLocationInfo(range))
           break
-        case TokenType.LParen:
-          list.push(SchemeList.buildFromArray(parseTokenList()).setLocationInfo(range))
+        case TokenType.LParen: {
+          const [tokenList, listRange] = parseTokenList()
+          list.push(SchemeList.buildFromArray(tokenList).setLocationInfo(listRange))
           break
+        }
         case TokenType.RParen:
-          return list
+          shouldBreakLoop = true
+          break
         default:
           assert(false, `Parsing Error: Unexpected TokenType: ${type}`)
       }
 
-      if (onlyOne) {
+      if (shouldBreakLoop) {
         break
       }
     }
 
-    return list
+    let newRange: ILocationRange | null = null
+    if (startRange && endRange) {
+      newRange = {
+        lineStart: startRange.lineStart,
+        columnStart: startRange.columnStart,
+        lineEnd: endRange.lineEnd,
+        columnEnd: endRange.columnEnd
+      }
+    }
+    return [list, newRange]
   }
 
-  return SchemeList.buildFromArray(parseTokenList())
+  const [list, listRange] = parseTokenList()
+  return SchemeList.buildFromArray(list).setLocationInfo(listRange)
 }
