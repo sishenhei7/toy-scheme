@@ -30,7 +30,7 @@ export default class LetEvaluator implements IEvaluator {
     const peek = node.car()
     const defNode = SchemeList.cast(node.cadr())
     const bodyNode = node.caddr()
-    const newEnv = new Env(env, new StackFrame(env.getStackFrame()))
+    const newEnv = new Env(env)
     const callback = () => this.evaluator.evaluate(bodyNode, newEnv, cont)
 
     if (this.isLet(peek)) {
@@ -81,7 +81,7 @@ export default class LetEvaluator implements IEvaluator {
         const name = SchemeSym.cast(defination.car()).value
         const body = defination.cdr()
         return this.evaluator.evaluateList(body, newEnv, new SchemeCont((data: SchemeData) => {
-          newEnv = new Env(newEnv, new StackFrame(newEnv.getStackFrame()))
+          newEnv = new Env(newEnv)
           newEnv.setCurrent(name, data)
           return traverse(defNode.cdr(), newEnv)
         }))
@@ -91,7 +91,7 @@ export default class LetEvaluator implements IEvaluator {
       return this.evaluator.evaluate(bodyNode, newEnv, cont)
     }
 
-    return traverse(SchemeList.cast(node.cadr()), new Env(env, new StackFrame(env.getStackFrame())))
+    return traverse(SchemeList.cast(node.cadr()), new Env(env))
   }
 
   private traverseDefinition(node: SchemeList, env: Env): void {

@@ -1,11 +1,15 @@
-import type { SchemeData } from './parser/data'
+import type { SchemeData, SchemeProc } from './parser/data'
 import { assert } from './utils'
 
 export class StackFrame {
-  constructor(private parentStackFrame: StackFrame | null) {}
+  constructor(private node: SchemeProc, private parentStackFrame: StackFrame | null) {}
 
   public getParent(): StackFrame | null {
     return this.parentStackFrame
+  }
+
+  public toString(): string {
+    return this.node.toString()
   }
 }
 
@@ -23,6 +27,14 @@ export class Env {
 
   public getStackFrame(): StackFrame | null {
     return this.stackFrame
+  }
+
+  public getVarScope(): string[] {
+    let res = []
+    for (const [key, val] of this.obj.entries()) {
+      res.push(`${key}: ${val}`)
+    }
+    return res
   }
 
   public get(key: string): SchemeData {

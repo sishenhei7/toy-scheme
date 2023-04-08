@@ -282,7 +282,7 @@ export class SchemeCont extends SchemeData {
   }
 
   public toString(): string {
-    return `<<continuation>> ${this.fString}`
+    return `<<continuation>>`
   }
 
   public call(): SchemeData {
@@ -314,7 +314,7 @@ export class SchemeProc extends SchemeData {
   }
 
   public toString(): string {
-    return `<<function ${this.name}>> ${this.params.toString} ${this.body.toString()}`
+    return `<<function ${this.name}>>`
   }
 
   static matches(item: SchemeData): item is SchemeProc {

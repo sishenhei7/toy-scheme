@@ -33,7 +33,7 @@ export default class ProcEvaluator implements IEvaluator {
     // 3.执行body
     // 4.把结果返回给cont
     const parentEnv = proc.envClosure // 词法作用域
-    const newEnv = new Env(parentEnv, new StackFrame(parentEnv.getStackFrame())) // shade
+    const newEnv = new Env(parentEnv, new StackFrame(proc, parentEnv.getStackFrame())) // shade
     return this.evaluateArgs(
       proc.params,
       args,

@@ -37,7 +37,6 @@ import programMap from './scheme/programs'
 import Interpreter from './scheme'
 
 // program
-
 const programNameList = Object.keys(programMap)
 const programName = ref<string>('')
 const program = ref<string>('')
@@ -81,8 +80,12 @@ const handleStep = () => {
     interpreter = createInterpreter()
   }
   const stepRes = interpreter.step()
-  const { range } = stepRes
-  highlightRange.value = range ? [range.lineStart, range.columnStart, range.lineEnd, range.columnEnd] : null
+  const { range, stack, scope } = stepRes
+  highlightRange.value = range
+    ? [range.lineStart, range.columnStart, range.lineEnd, range.columnEnd]
+    : null
+  callStack.value = stack
+  varScope.value = scope
 }
 
 const handleContinue = () => {

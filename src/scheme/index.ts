@@ -9,7 +9,8 @@ export interface InterpreterOptions {
 }
 export interface StepResponse {
   range: ILocationRange | null
-  env: Env | null
+  stack: string[]
+  scope: string[]
 }
 export default class Interpreter {
   private node: SchemeData
@@ -33,10 +34,27 @@ export default class Interpreter {
   public step(): StepResponse {
     const { node } = this
     this.node = SchemeCont.matches(node) ? node.call() : node
+    const env = this.node.getEnv()
     console.log(this.node)
     return {
       range: this.node.range,
-      env: this.node.getEnv()
+      stack: this.getStack(env),
+      scope: env ? env.getVarScope() : []
     }
+  }
+
+  private getStack(env: Env | null): string[] {
+    let res: string[] = []
+
+    if (!env) {
+      return res
+    }
+
+    let stackFrame = env.getStackFrame()
+    while (stackFrame) {
+      res.push(stackFrame.toString())
+      stackFrame = stackFrame.getParent()
+    }
+    return res
   }
 }
