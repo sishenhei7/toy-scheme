@@ -12,23 +12,26 @@
     </section>
     <section class="controller-bar-section">
       <span
-        class="button control-button"
-        @click="emit('run')"
+        v-if="step === 0"
+        :class="['button', 'control-button', isDisabled && 'disabled']"
+        @click="handleControl('run')"
       >Run</span>
       <span
-        class="button control-button"
-        @click="emit('step')"
-      >Step</span>
+        v-else="step > 0"
+        :class="['button', 'control-button', isDisabled && 'disabled']"
+        @click="handleControl('continue')"
+      >Continue</span>
       <span
-        class="button control-button"
-        @click="emit('continue')"
-      >continue</span>
+        :class="['button', 'control-button', isDisabled && 'disabled']"
+        @click="handleControl('step')"
+      >Step</span>
     </section>
   </div>
 </template>
 
 <script setup lang="ts">
-defineProps({
+import { computed } from 'vue'
+const props = defineProps({
   programNameList: {
     type: Array as PropType<string[]>,
     required: true
@@ -36,14 +39,26 @@ defineProps({
   programName: {
     type: String as PropType<string>,
     required: true
+  },
+  isRunning: {
+    type: Boolean as PropType<boolean>,
+    required: true
+  },
+  step: {
+    type: Number as PropType<number>,
+    required: true
   }
 })
 const emit = defineEmits<{
   (e: 'program', name: string): void
-  (e: 'run'): void
-  (e: 'step'): void
-  (e: 'continue'): void
+  (e: 'run' | 'step' | 'continue'): void
 }>()
+const isDisabled = computed(() => props.isRunning)
+const handleControl = (name: 'run' | 'step' | 'continue') => {
+  if (!isDisabled.value) {
+    emit(name)
+  }
+}
 </script>
 
 <style lang="scss" scoped>
@@ -71,6 +86,10 @@ const emit = defineEmits<{
   &:last-child {
     margin-right: 0;
   }
+
+  &.disabled {
+    cursor: not-allowed;
+  }
 }
 .program-button {
   background-color: #fff;
@@ -84,7 +103,7 @@ const emit = defineEmits<{
   background-color: var(--secondary-color);
   opacity: 0.85;
 
-  &:hover {
+  &:hover:not(.disabled) {
     opacity: 1;
   }
 }

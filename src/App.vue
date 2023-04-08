@@ -7,6 +7,8 @@
     <AppBar
       :program-name="programName"
       :program-name-list="programNameList"
+      :is-running="isRunning"
+      :step="step"
       class="mb-m"
       @run="handleRun"
       @step="handleStep"
@@ -52,27 +54,27 @@ const highlightRange = ref<[number, number, number, number] | null>(null)
 const output = ref<string[]>([])
 const callStack = ref<string[]>([])
 const varScope = ref<string[]>([])
+const isRunning = ref<boolean>(false)
+const step = ref<number>(0)
 
 watch(() => program.value, () => {
   interpreter = null
+  step.value = 0
 })
 
-const createInterpreter = (interval: number = 0) => {
-  let times = 0
-  output.value = []
-  return new Interpreter(program.value, {
-    log: (res: string) => {
-      times += 1
-      setTimeout(() => {
-        console.log(res, times)
-        output.value.push(res)
-      }, times * interval)
-    }
-  })
-}
+const createInterpreter = () => new Interpreter(program.value, {
+  log: (res: string) => {
+    console.log(res)
+    output.value.push(res)
+  }
+})
 
 const handleRun = () => {
-  createInterpreter(60).run()
+  output.value = []
+  isRunning.value = true
+  createInterpreter().smoothRun(() => {
+    isRunning.value = false
+  })
 }
 
 const handleStep = () => {
@@ -86,11 +88,15 @@ const handleStep = () => {
     : null
   callStack.value = stack
   varScope.value = scope
+  step.value += 1
 }
 
 const handleContinue = () => {
   if (interpreter) {
-    interpreter.run()
+    highlightRange.value = null
+    callStack.value = []
+    varScope.value = []
+    interpreter.smoothRun()
   }
 }
 </script>

@@ -65,8 +65,9 @@ watch(() => props.programName, () => {
 })
 
 watch(() => props.highlightRange, newValue => {
+  highlight?.clear()
+
   if (newValue) {
-    highlight?.clear()
     highlight = editor?.createDecorationsCollection([
       {
         range: new monaco.Range(...newValue),

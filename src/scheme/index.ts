@@ -25,10 +25,23 @@ export default class Interpreter {
   public run(): string {
     let node = this.node
     while (SchemeCont.matches(node)) {
-      console.log(node)
+      // console.log(node)
       node = node.call()
     }
     return node.toString()
+  }
+
+  public smoothRun(callback?: Function) {
+    let node = this.node
+    let interval = setInterval(() => {
+      if (SchemeCont.matches(node)) {
+        // console.log(node)
+        node = node.call()
+      } else {
+        clearInterval(interval)
+        callback && callback()
+      }
+    }, 5)
   }
 
   public step(): StepResponse {
