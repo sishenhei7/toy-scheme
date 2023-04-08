@@ -11,6 +11,7 @@
       :step="step"
       class="mb-m"
       @run="handleRun"
+      @stop="handleStop"
       @step="handleStep"
       @continue="handleContinue"
       @program="handleSelectProgram"
@@ -56,6 +57,7 @@ const callStack = ref<string[]>([])
 const varScope = ref<string[]>([])
 const isRunning = ref<boolean>(false)
 const step = ref<number>(0)
+const shouldStop = ref<boolean>(false)
 
 watch(() => program.value, () => {
   interpreter = null
@@ -65,16 +67,33 @@ watch(() => program.value, () => {
 const createInterpreter = () => new Interpreter(program.value, {
   log: (res: string) => {
     console.log(res)
-    output.value.push(res)
+    const list = res.split('\n')
+    for (let i = 0; i < list.length; i += 1) {
+      const item = list[i]
+      if (i === 0 && output.value.length > 0) {
+        const last = output.value.pop()
+        output.value.push(`${last}${item}`)
+      } else {
+        output.value.push(item)
+      }
+    }
   }
 })
 
 const handleRun = () => {
   output.value = []
   isRunning.value = true
-  createInterpreter().smoothRun(() => {
-    isRunning.value = false
-  })
+  createInterpreter().smoothRun(
+    () => {
+      isRunning.value = false
+      shouldStop.value = false
+    },
+    () => shouldStop.value
+  )
+}
+
+const handleStop = () => {
+  shouldStop.value = true
 }
 
 const handleStep = () => {

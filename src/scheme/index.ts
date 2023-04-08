@@ -32,9 +32,13 @@ export default class Interpreter {
     return node.toString()
   }
 
-  public smoothRun(callback?: Function) {
-    // 每次 nexttick 调用自身 20 次
+  public smoothRun(callback?: Function, checkStop?: Function) {
     const loop = (n: number) => {
+      if (checkStop && checkStop()) {
+        callback && callback()
+        return
+      }
+
       const { node } = this
       if (SchemeCont.matches(node)) {
         // console.log(node)
@@ -44,13 +48,15 @@ export default class Interpreter {
           n -= 1
           loop(n)
         } else {
-          this.smoothRun(callback)
+          this.smoothRun(callback, checkStop)
         }
       } else {
         callback && callback()
       }
     }
-    nextTick(() => loop(20))
+
+    // 每次 nexttick 调用自身 30 次
+    nextTick(() => loop(30))
   }
 
   public step(): StepResponse {

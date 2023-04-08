@@ -17,11 +17,17 @@
         @click="handleControl('run')"
       >Run</span>
       <span
-        v-else="step > 0"
+        v-else
         :class="['button', 'control-button', isDisabled && 'disabled']"
         @click="handleControl('continue')"
       >Continue</span>
       <span
+        v-if="isRunning"
+        :class="['button', 'control-button']"
+        @click="handleControl('stop')"
+      >Stop</span>
+      <span
+        v-else
         :class="['button', 'control-button', isDisabled && 'disabled']"
         @click="handleControl('step')"
       >Step</span>
@@ -51,11 +57,11 @@ const props = defineProps({
 })
 const emit = defineEmits<{
   (e: 'program', name: string): void
-  (e: 'run' | 'step' | 'continue'): void
+  (e: 'run' | 'stop' | 'step' | 'continue'): void
 }>()
 const isDisabled = computed(() => props.isRunning)
-const handleControl = (name: 'run' | 'step' | 'continue') => {
-  if (!isDisabled.value) {
+const handleControl = (name: 'run' | 'stop' | 'step' | 'continue') => {
+  if (!isDisabled.value || name === 'stop') {
     emit(name)
   }
 }

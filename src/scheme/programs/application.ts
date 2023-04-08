@@ -6,12 +6,15 @@ export default `; Factorial
 ; 3
 (define (test a) (+ a 1))
 (display (test 2))
+(display "\n")
 
 ; <<function>>
 (display (lambda () (+ 2 1)))
+(display "\n")
 
 ; 3
 (display ((lambda (a) (+ a 1)) 2))
+(display "\n")
 
 ; 3
 (display ((lambda () (+ 2 1))))

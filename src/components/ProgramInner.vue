@@ -3,31 +3,37 @@
     <section class="program-inner-block">
       <h3 class="program-inner-title">Output</h3>
       <div ref="outputRef" class="program-inner-content">
-        <p
-          v-for="item in output"
-          :key="item"
-          class="program-inner-row"
-        >{{ item }}</p>
+        <template v-for="item in output">
+          <p
+            v-if="item"
+            :key="item"
+            class="program-inner-row"
+          >{{ item }}</p>
+        </template>
       </div>
     </section>
     <section class="program-inner-block">
       <h3 class="program-inner-title">Call Stack</h3>
       <div class="program-inner-content">
-        <p
-          v-for="item in callStack"
-          :key="item"
-          class="program-inner-row"
-        >{{ item }}</p>
+        <template v-for="item in callStack">
+          <p
+            v-if="item"
+            :key="item"
+            class="program-inner-row"
+          >{{ item }}</p>
+        </template>
       </div>
     </section>
     <section class="program-inner-block">
       <h3 class="program-inner-title">Scope</h3>
       <div class="program-inner-content">
-        <p
-          v-for="item in varScope"
-          :key="item"
-          class="program-inner-row"
-        >{{ item }}</p>
+        <template v-for="item in varScope">
+          <p
+            v-if="item"
+            :key="item"
+            class="program-inner-row"
+          >{{ item }}</p>
+        </template>
       </div>
     </section>
   </div>
@@ -77,7 +83,7 @@ watch(() => props.output.length, async () => {
 
   &-title {
     margin: 0;
-    padding: 2px 6px;
+    padding: 2px 10px;
     width: 100%;
     font-weight: normal;
     box-sizing: border-box;
