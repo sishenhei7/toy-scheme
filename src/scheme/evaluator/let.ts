@@ -31,19 +31,19 @@ export default class LetEvaluator implements IEvaluator {
     const defNode = SchemeList.cast(node.cadr())
     const bodyNode = node.caddr()
     const newEnv = new Env(env, new StackFrame(env.getStackFrame()))
-    const newCont = new SchemeCont((_: SchemeData) => this.evaluator.evaluate(bodyNode, newEnv, cont))
+    const callback = () => this.evaluator.evaluate(bodyNode, newEnv, cont)
 
     if (this.isLet(peek)) {
-      return this.evaluateDefinition(defNode, newEnv, newCont)
+      return this.evaluateDefinition(defNode, newEnv, callback)
     }
 
     if (this.isLetStar(peek)) {
-      return this.evaluateLetStar(node, newEnv, newCont)
+      return this.evaluateLetStar(node, newEnv, cont)
     }
 
     if (this.isLetRec(peek)) {
       this.traverseDefinition(defNode, newEnv)
-      return this.evaluateDefinition(defNode, newEnv, newCont)
+      return this.evaluateDefinition(defNode, newEnv, callback)
     }
 
     assert(false, 'Evaluate let error!')
@@ -61,17 +61,17 @@ export default class LetEvaluator implements IEvaluator {
   private isLetRec(node: SchemeData): boolean {
     return SchemeSym.matches(node) && node.value === 'letrec'
   }
-  private evaluateDefinition(node: SchemeList, env: Env, cont: SchemeCont): SchemeData {
+  private evaluateDefinition(node: SchemeList, env: Env, callback: Function): SchemeData {
     if (!SchemeList.isNil(node)) {
       const defination = SchemeList.cast(node.car())
       const name = SchemeSym.cast(defination.car()).value
       const body = defination.cdr()
       return this.evaluator.evaluateList(body, env, new SchemeCont((data: SchemeData) => {
         env.setCurrent(name, data)
-        return this.evaluateDefinition(node.cdr(), env, cont)
+        return this.evaluateDefinition(node.cdr(), env, callback)
       }))
     }
-    return cont.setValue(SchemeList.buildSchemeNil())
+    return callback()
   }
 
   private evaluateLetStar(node: SchemeList, env: Env, cont: SchemeCont): SchemeData {

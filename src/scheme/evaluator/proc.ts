@@ -39,19 +39,19 @@ export default class ProcEvaluator implements IEvaluator {
       args,
       env,
       newEnv,
-      new SchemeCont((_: SchemeData) => this.evaluator.evaluateList(proc.body, newEnv, cont))
+      () => this.evaluator.evaluateList(proc.body, newEnv, cont)
     )
   }
 
-  private evaluateArgs(params: SchemeList, args: SchemeList, env: Env, newEnv: Env, cont: SchemeCont): SchemeData {
+  private evaluateArgs(params: SchemeList, args: SchemeList, env: Env, newEnv: Env, callback: Function): SchemeData {
     if (!SchemeList.isNil(params)) {
       assert(!SchemeList.isNil(args), 'Proc params and args do not match!')
       return this.evaluator.evaluate(args.car(), env, new SchemeCont((data: SchemeData) => {
         const name = SchemeSym.cast(params.car()).value
         newEnv.setCurrent(name, data)
-        return this.evaluateArgs(params.cdr(), args.cdr(), env, newEnv, cont)
+        return this.evaluateArgs(params.cdr(), args.cdr(), env, newEnv, callback)
       }))
     }
-    return cont.setValue(SchemeList.buildSchemeNil())
+    return callback()
   }
 }

@@ -50,7 +50,8 @@ onMounted(() => {
 
   editor.onDidChangeModelContent(() => {
     const value = editor.getValue()
-    emit('update:modelValue', value)
+    // 把 \\n 换回来
+    emit('update:modelValue', value.replace(/\\n"/g, '\n"'))
   })
 })
 
@@ -59,7 +60,8 @@ onBeforeUnmount(() => {
 })
 
 watch(() => props.programName, () => {
-  editor?.setValue(props.modelValue)
+  // \n 在编辑器里面会被解释为换行符
+  editor?.setValue(props.modelValue.replace(/\n"/g, '\\n"'))
 })
 
 watch(() => props.highlightRange, newValue => {
