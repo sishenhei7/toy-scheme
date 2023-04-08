@@ -2,15 +2,33 @@
   <div class="program-inner">
     <section class="program-inner-block">
       <h3 class="program-inner-title">Output</h3>
-      <div ref="outputRef" class="program-inner-content">{{ output }}</div>
+      <div ref="outputRef" class="program-inner-content">
+        <p
+          v-for="item in output"
+          :key="item"
+          class="program-inner-row"
+        >{{ item }}</p>
+      </div>
     </section>
     <section class="program-inner-block">
       <h3 class="program-inner-title">Call Stack</h3>
-      <div class="program-inner-content">{{ callStack }}</div>
+      <div class="program-inner-content">
+        <p
+          v-for="item in callStack"
+          :key="item"
+          class="program-inner-row"
+        >{{ item }}</p>
+      </div>
     </section>
     <section class="program-inner-block">
       <h3 class="program-inner-title">Scope</h3>
-      <div class="program-inner-content">{{ varScope }}</div>
+      <div class="program-inner-content">
+        <p
+          v-for="item in varScope"
+          :key="item"
+          class="program-inner-row"
+        >{{ item }}</p>
+      </div>
     </section>
   </div>
 </template>
@@ -20,21 +38,21 @@ import { watch, ref, nextTick } from 'vue'
 
 const props = defineProps({
   output: {
-    type: String as PropType<string>,
+    type: Array as PropType<string[]>,
     required: true
   },
   callStack: {
-    type: String as PropType<string>,
+    type: Array as PropType<string[]>,
     required: true
   },
   varScope: {
-    type: String as PropType<string>,
+    type: Array as PropType<string[]>,
     required: true
   }
 })
 
 const outputRef = ref<HTMLElement>()
-watch(() => props.output, async () => {
+watch(() => props.output.length, async () => {
   await nextTick()
   outputRef.value!.scrollTop = outputRef.value!.scrollHeight
 })
@@ -69,12 +87,20 @@ watch(() => props.output, async () => {
   }
 
   &-content {
-    padding: 6px;
+    padding: 0 6px;
     height: 150px;
     color: #000;
     cursor: text;
     overflow-y: auto;
     white-space: pre-line;
+  }
+
+  &-row {
+    margin: 0;
+    padding: 4px;
+    word-break: break-word;
+    hyphens: auto;
+    border-bottom: 1px dashed var(--stroke-color-secondary);
   }
 }
 </style>

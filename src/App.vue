@@ -50,9 +50,9 @@ handleSelectProgram(programNameList[0])
 
 let interpreter: Interpreter | null
 const highlightRange = ref<[number, number, number, number] | null>(null)
-const output = ref<string>('')
-const callStack = ref<string>('')
-const varScope = ref<string>('')
+const output = ref<string[]>([])
+const callStack = ref<string[]>([])
+const varScope = ref<string[]>([])
 
 watch(() => program.value, () => {
   interpreter = null
@@ -60,19 +60,19 @@ watch(() => program.value, () => {
 
 const createInterpreter = (interval: number = 0) => {
   let times = 0
+  output.value = []
   return new Interpreter(program.value, {
     log: (res: string) => {
       times += 1
       setTimeout(() => {
         console.log(res, times)
-        output.value += res
+        output.value.push(res)
       }, times * interval)
     }
   })
 }
 
 const handleRun = () => {
-  output.value = ''
   createInterpreter(60).run()
 }
 
