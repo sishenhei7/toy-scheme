@@ -2,7 +2,7 @@
   <div class="app-container">
     <AppTitle
       title="Toy-Scheme"
-      class="mb-xl"
+      class="mg-0 mb-xxxl"
     />
     <AppBar
       :program-name="programName"
@@ -66,7 +66,7 @@ watch(() => program.value, () => {
 
 const createInterpreter = () => new Interpreter(program.value, {
   log: (res: string) => {
-    console.log(res)
+    // console.log(res)
     const list = res.split('\n')
     for (let i = 0; i < list.length; i += 1) {
       const item = list[i]
@@ -98,6 +98,7 @@ const handleStop = () => {
 
 const handleStep = () => {
   if (!interpreter) {
+    output.value = []
     interpreter = createInterpreter()
   }
   const stepRes = interpreter.step()
@@ -116,6 +117,8 @@ const handleContinue = () => {
     callStack.value = []
     varScope.value = []
     interpreter.smoothRun()
+    step.value = 0
+    interpreter = null
   }
 }
 </script>

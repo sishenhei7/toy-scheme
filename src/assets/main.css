@@ -4,8 +4,16 @@
 #app {
   padding: 24px;
   min-width: 100vw;
-  min-height: 100vh;
+  min-height: calc(100vh - 48px);
   background-color: var(--background-color)!important;
+}
+
+.mg-0 {
+  margin: 0;
+}
+
+.mb-xxxl {
+  margin-bottom: var(--margin-xxxl);
 }
 
 .mb-xl {
