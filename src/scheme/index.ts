@@ -63,7 +63,8 @@ export default class Interpreter {
     const { node } = this
     this.node = SchemeCont.matches(node) ? node.call() : node
     const env = this.node.getEnv()
-    console.log(this.node)
+    // console.log(this.node)
+
     return {
       range: this.node.range,
       stack: this.getStack(env),

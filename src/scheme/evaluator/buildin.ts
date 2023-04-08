@@ -69,7 +69,12 @@ export default class BuildInEvaluator implements IEvaluator {
     return (node: SchemeList, env: Env, cont: SchemeCont) => this.evaluator.evaluate(
       node.cadr(),
       env,
-      new SchemeCont((first: SchemeData) => cont.setValue(evaluator(first)))
+      new SchemeCont((first: SchemeData) =>
+        cont
+          .setValue(evaluator(first))
+          .setEnv(env)
+          .setLocationInfo(node.range)
+      )
     )
   }
 
@@ -81,7 +86,12 @@ export default class BuildInEvaluator implements IEvaluator {
         (first: SchemeData) => this.evaluator.evaluate(
           node.caddr(),
           env,
-          new SchemeCont((second: SchemeData) => cont.setValue(evaluator(first, second)))
+          new SchemeCont((second: SchemeData) =>
+            cont
+              .setValue(evaluator(first, second))
+              .setEnv(env)
+              .setLocationInfo(node.range)
+          )
         )
       )
     )
@@ -161,11 +171,17 @@ export default class BuildInEvaluator implements IEvaluator {
 
   private and(node: SchemeList, env: Env, cont: SchemeCont): SchemeData {
     if (SchemeList.isNil(node.cdr())) {
-      return cont.setValue(new SchemeBoolean(true))
+      return cont
+        .setValue(new SchemeBoolean(true))
+        .setEnv(env)
+        .setLocationInfo(node.range)
     }
     return this.evaluator.evaluate(node.cadr(), env, new SchemeCont((first: SchemeData) => {
       if (!SchemeBoolean.isTrue(first)) {
-        return cont.setValue(new SchemeBoolean(false))
+        return cont
+          .setValue(new SchemeBoolean(false))
+          .setEnv(env)
+          .setLocationInfo(node.range)
       }
       return this.and(node.cdr(), env, cont)
     }))
@@ -173,11 +189,17 @@ export default class BuildInEvaluator implements IEvaluator {
 
   private or(node: SchemeList, env: Env, cont: SchemeCont): SchemeData {
     if (SchemeList.isNil(node.cdr())) {
-      return cont.setValue(new SchemeBoolean(false))
+      return cont
+        .setValue(new SchemeBoolean(false))
+        .setEnv(env)
+        .setLocationInfo(node.range)
     }
     return this.evaluator.evaluate(node.cadr(), env, new SchemeCont((data: SchemeData) => {
       if (SchemeBoolean.isTrue(data)) {
-        return cont.setValue(new SchemeBoolean(true))
+        return cont
+          .setValue(new SchemeBoolean(true))
+          .setEnv(env)
+          .setLocationInfo(node.range)
       }
       return this.or(node.cdr(), env, cont)
     }))
@@ -190,7 +212,10 @@ export default class BuildInEvaluator implements IEvaluator {
         msg = msg.trim()
         const answer = this.prompt(msg)
         this.log(answer + '\n')
-        return cont.setValue(guessNumber(answer) ? new SchemeNumber(Number(answer)) : new SchemeString(answer))
+        return cont
+          .setValue(guessNumber(answer) ? new SchemeNumber(Number(answer)) : new SchemeString(answer))
+          .setEnv(env)
+          .setLocationInfo(node.range)
       }
 
       return this.evaluator.evaluate(
@@ -210,7 +235,10 @@ export default class BuildInEvaluator implements IEvaluator {
     const traverse: BuildInTraverseFunc = (node: SchemeList) => {
       if (SchemeList.isNil(node)) {
         this.log(res)
-        return cont.setValue(new SchemeString(res))
+        return cont
+          .setValue(new SchemeString(res))
+          .setEnv(env)
+          .setLocationInfo(node.range)
       }
 
       return this.evaluator.evaluate(

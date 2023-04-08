@@ -19,7 +19,10 @@ export default class SetEvaluator implements IEvaluator {
       env,
       new SchemeCont((val: SchemeData) => {
         env.set(SchemeSym.cast(node.cadr()).value, val)
-        return cont.setValue(val)
+        return cont
+          .setValue(val)
+          .setEnv(env)
+          .setLocationInfo(node.range)
       })
     )
   }

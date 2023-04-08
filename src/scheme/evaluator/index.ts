@@ -51,7 +51,6 @@ export class Evaluator {
 
   public trampoline(node: SchemeData): SchemeData {
     while (SchemeCont.matches(node)) {
-      // console.log(111111, node)
       node = node.call()
     }
     return node
@@ -89,7 +88,10 @@ export class Evaluator {
   public evaluateList(node: SchemeList, env: Env, cont: SchemeCont = SchemeCont.Identity): SchemeData {
     return this.evaluate(node.car(), env, new SchemeCont((data: SchemeData) => {
       if (SchemeList.isNil(node.cdr())) {
-        return cont.setValue(data)
+        return cont
+          .setValue(data)
+          .setEnv(env)
+          .setLocationInfo(node.range)
       }
       return this.evaluateList(node.cdr(), env, cont)
     }))

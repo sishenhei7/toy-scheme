@@ -26,7 +26,10 @@ export default class DefineEvaluator implements IEvaluator {
     if (SchemeSym.matches(varNode)) {
       return this.evaluator.evaluateList(bodyNode, env, new SchemeCont((data: SchemeData) => {
         env.define(varNode.value, data)
-        return cont.setValue(data)
+        return cont
+          .setValue(data)
+          .setEnv(env)
+          .setLocationInfo(node.range)
       }))
     }
 

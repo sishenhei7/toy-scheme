@@ -17,7 +17,9 @@ export class ILocation {
   public range: ILocationRange | null = null
 
   public setLocationInfo(range: ILocationRange | null): this {
-    this.range = range
+    if (range) {
+      this.range = range
+    }
     return this
   }
 }

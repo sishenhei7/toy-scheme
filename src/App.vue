@@ -37,7 +37,7 @@ import AppBar from './components/AppBar.vue'
 import MonacoEditor from './components/MonacoEditor.vue'
 import ProgramInner from './components/ProgramInner.vue'
 import programMap from './scheme/programs'
-import Interpreter from './scheme'
+import Interpreter, { type StepResponse } from './scheme'
 
 // program
 const programNameList = Object.keys(programMap)
@@ -50,7 +50,8 @@ const handleSelectProgram = (name: string) => {
 }
 handleSelectProgram(programNameList[0])
 
-let interpreter: Interpreter | null
+let interpreter: Interpreter | null = null
+let cachedRange: StepResponse['range'] = null
 const highlightRange = ref<[number, number, number, number] | null>(null)
 const output = ref<string[]>([])
 const callStack = ref<string[]>([])
@@ -64,10 +65,10 @@ watch(() => program.value, () => {
   step.value = 0
 })
 
-const createInterpreter = () => new Interpreter(program.value, {
+// monaco 会把 \n 解析为换行，所以这里要转几次
+const createInterpreter = () => new Interpreter(program.value.replace(/\n"/g, '\\n"'), {
   log: (res: string) => {
-    // console.log(res)
-    const list = res.split('\n')
+    const list = res.split('\\n')
     for (let i = 0; i < list.length; i += 1) {
       const item = list[i]
       if (i === 0 && output.value.length > 0) {
@@ -96,6 +97,16 @@ const handleStop = () => {
   shouldStop.value = true
 }
 
+const isRangeSame = (r1: StepResponse['range'], r2: StepResponse['range']) => {
+  if (r1 && r2) {
+    return r1.lineStart === r2.lineStart
+     && r1.columnStart === r2.columnStart
+     && r1.lineEnd === r2.lineEnd
+     && r1.columnEnd === r2.columnEnd
+  }
+  return false
+}
+
 const handleStep = () => {
   if (!interpreter) {
     output.value = []
@@ -103,12 +114,20 @@ const handleStep = () => {
   }
   const stepRes = interpreter.step()
   const { range, stack, scope } = stepRes
-  highlightRange.value = range
-    ? [range.lineStart, range.columnStart, range.lineEnd, range.columnEnd]
-    : null
+
+  // 有些地方的 schemeList 是包裹性质的，所以没有 range
+  // 有些地方由于是包裹性质的，所以 range 和上一个一样
+  if (!range || isRangeSame(cachedRange, range)) {
+    handleStep()
+    return
+  }
+
+  const { lineStart, columnStart, lineEnd, columnEnd } = range
+  highlightRange.value = [lineStart, columnStart, lineEnd, columnEnd]
   callStack.value = stack
   varScope.value = scope
   step.value += 1
+  cachedRange = range
 }
 
 const handleContinue = () => {
