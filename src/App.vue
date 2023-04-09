@@ -120,7 +120,6 @@ const handleRun = () => {
 
   // woker 里面 prompt 不好实现，回退到 smoothRun
   isUsingWorker = !program.value.includes('ask')
-  console.log(isUsingWorker, program.value)
   if (isUsingWorker) {
     getWorker().postMessage({ program: program.value.replace(/\n"/g, '\\n"') })
   } else {
