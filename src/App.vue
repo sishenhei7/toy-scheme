@@ -61,6 +61,17 @@ const isRunning = ref<boolean>(false)
 const step = ref<number>(0)
 const shouldStop = ref<boolean>(false)
 
+const cleanProgram = () => {
+  isRunning.value = false
+  shouldStop.value = false
+
+  highlightRange.value = null
+  callStack.value = []
+  varScope.value = []
+  step.value = 0
+  interpreter = null
+}
+
 watch(() => program.value, () => {
   interpreter = null
   step.value = 0
@@ -92,8 +103,7 @@ const getWorker = () => {
   const newWorker = new MyWorker()
   newWorker.onmessage = (event) => {
     if (event.data.type === 'over') {
-      isRunning.value = false
-      shouldStop.value = false
+      cleanProgram()
     } else if (event.data.type === 'log' && isRunning.value) {
       const res = event.data.data
       const list = res.split('\\n')
@@ -124,10 +134,7 @@ const handleRun = () => {
     getWorker().postMessage({ program: program.value.replace(/\n"/g, '\\n"') })
   } else {
     createInterpreter().smoothRun(
-      () => {
-        isRunning.value = false
-        shouldStop.value = false
-      },
+      () => cleanProgram(),
       () => shouldStop.value
     )
   }
@@ -135,8 +142,7 @@ const handleRun = () => {
 
 const handleStop = () => {
   if (isUsingWorker) {
-    isRunning.value = false
-    shouldStop.value = false
+    cleanProgram()
     worker && worker.terminate()
     worker = null
   } else {
@@ -180,12 +186,8 @@ const handleStep = () => {
 
 const handleContinue = () => {
   if (interpreter) {
-    highlightRange.value = null
-    callStack.value = []
-    varScope.value = []
     interpreter.smoothRun()
-    step.value = 0
-    interpreter = null
+    cleanProgram()
   }
 }
 </script>

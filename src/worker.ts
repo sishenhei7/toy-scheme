@@ -1,9 +1,7 @@
 import Interpreter from './scheme'
 
 globalThis.onmessage = (event) => {
-  const program = event.data.program
-
-  const interpreter = new Interpreter(program, {
+  const interpreter = new Interpreter(event.data.program, {
     log: (res: string) => {
       globalThis.postMessage({
         type: 'log',
