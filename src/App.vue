@@ -26,6 +26,7 @@
       :output="output"
       :call-stack="callStack"
       :var-scope="varScope"
+      :show-tips="step === 0"
     />
   </div>
 </template>

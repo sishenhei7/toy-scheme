@@ -22,6 +22,9 @@
             class="program-inner-row"
           >{{ item }}</p>
         </template>
+        <p v-if="showTips" class="program-inner-row">
+          Not paused.
+        </p>
       </div>
     </section>
     <section class="program-inner-block">
@@ -34,6 +37,9 @@
             class="program-inner-row"
           >{{ item }}</p>
         </template>
+        <p v-if="showTips" class="program-inner-row">
+          Not paused.
+        </p>
       </div>
     </section>
   </div>
@@ -53,6 +59,10 @@ const props = defineProps({
   },
   varScope: {
     type: Array as PropType<string[]>,
+    required: true
+  },
+  showTips: {
+    type: Boolean as PropType<boolean>,
     required: true
   }
 })
