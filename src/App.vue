@@ -38,6 +38,7 @@ import MonacoEditor from './components/MonacoEditor.vue'
 import ProgramInner from './components/ProgramInner.vue'
 import programMap from './scheme/programs'
 import Interpreter, { type StepResponse } from './scheme'
+import MyWorker from './worker?worker'
 
 // program
 const programNameList = Object.keys(programMap)
@@ -81,20 +82,68 @@ const createInterpreter = () => new Interpreter(program.value.replace(/\n"/g, '\
   }
 })
 
+let worker: Worker | null
+let isUsingWorker = false
+const getWorker = () => {
+  if (worker) {
+    return worker
+  }
+
+  const newWorker = new MyWorker()
+  newWorker.onmessage = (event) => {
+    if (event.data.type === 'over') {
+      isRunning.value = false
+      shouldStop.value = false
+    } else if (event.data.type === 'log' && isRunning.value) {
+      const res = event.data.data
+      const list = res.split('\\n')
+      for (let i = 0; i < list.length; i += 1) {
+        const item = list[i]
+        if (i === 0 && output.value.length > 0) {
+          const last = output.value.pop()
+          output.value.push(`${last}${item}`)
+        } else {
+          output.value.push(item)
+        }
+      }
+    } else if (event.data.type === 'prompt') {
+      prompt(event.data.data)
+    }
+  }
+  worker = newWorker
+  return newWorker
+}
+
 const handleRun = () => {
   output.value = []
   isRunning.value = true
-  createInterpreter().smoothRun(
-    () => {
-      isRunning.value = false
-      shouldStop.value = false
-    },
-    () => shouldStop.value
-  )
+
+  // woker 里面 prompt 不好实现，回退到 smoothRun
+  isUsingWorker = !program.value.includes('ask')
+  console.log(isUsingWorker, program.value)
+  if (isUsingWorker) {
+    getWorker().postMessage({ program: program.value.replace(/\n"/g, '\\n"') })
+  } else {
+    createInterpreter().smoothRun(
+      () => {
+        isRunning.value = false
+        shouldStop.value = false
+      },
+      () => shouldStop.value
+    )
+  }
 }
 
 const handleStop = () => {
-  shouldStop.value = true
+  if (isUsingWorker) {
+    isRunning.value = false
+    shouldStop.value = false
+    worker && worker.terminate()
+    worker = null
+  } else {
+    shouldStop.value = true
+  }
+
 }
 
 const isRangeSame = (r1: StepResponse['range'], r2: StepResponse['range']) => {
