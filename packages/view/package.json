@@ -1,6 +1,6 @@
 {
-  "name": "toy-scheme",
-  "version": "0.0.0",
+  "name": "@toy-scheme/view",
+  "version": "0.0.1",
   "private": true,
   "scripts": {
     "dev": "vite",
@@ -12,6 +12,8 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
   },
   "dependencies": {
+    "@toy-scheme/interpreter-node": "workspace:*",
+    "@toy-scheme/programs": "workspace:*",
     "monaco-editor": "^0.37.0",
     "vue": "^3.2.45"
   },
@@ -30,13 +32,11 @@
     "jsdom": "^20.0.3",
     "npm-run-all": "^4.1.5",
     "prettier": "^2.7.1",
-    "rimraf": "^5.0.0",
     "sass": "^1.60.0",
     "typescript": "~4.7.4",
     "vite": "^4.0.0",
     "vite-plugin-monaco-editor": "^1.1.0",
     "vitest": "^0.25.6",
-    "vue-tsc": "^1.0.12",
-    "why-is-node-running": "^2.2.2"
+    "vue-tsc": "^1.0.12"
   }
 }

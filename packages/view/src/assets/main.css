@@ -1,0 +1,30 @@
+@import './reset.css';
+@import './var.css';
+
+#app {
+  padding: 24px;
+  min-width: 100vw;
+  min-height: calc(100vh - 48px);
+  background-color: var(--background-color)!important;
+}
+
+.mg-0 {
+  margin: 0;
+}
+
+.mb-xxxl {
+  margin-bottom: var(--margin-xxxl);
+}
+
+.mb-xl {
+  margin-bottom: var(--margin-xl);
+}
+
+.mb-m {
+  margin-bottom: var(--margin-m);
+}
+
+.monaco-editor-highlight {
+  background-color: var(--editor-highlight-background-color)!important;
+  color: var(--editor-highlight-color)!important;
+}
