@@ -1,5 +1,6 @@
 // @ts-check
 /* eslint-env node */
+/* eslint-disable node/no-unpublished-require, @typescript-eslint/no-var-requires */
 require('@rushstack/eslint-patch/modern-module-resolution')
 const { defineConfig } = require('eslint-define-config')
 
@@ -22,6 +23,7 @@ module.exports = defineConfig({
     '@typescript-eslint/ban-types': 'off', // TODO: we should turn this on in a new PR
     '@typescript-eslint/no-non-null-assertion': 'off', // maybe we should turn this on in a new PR
     '@typescript-eslint/no-this-alias': 'off', // maybe we should turn this on in a new PR
+    '@typescript-eslint/no-empty-function': 'off', // maybe we should turn this on in a new PR
     'node/no-missing-import': 'off',
     'node/no-unsupported-features/es-syntax': 'off',
     '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],

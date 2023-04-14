@@ -11,7 +11,7 @@
   },
   "lint-staged": {
     "*.rs": "rustfmt --edition 2021",
-    "*.(js,jsx,cjs,mjs,ts,tsx,cts,mts)": "pnpm run lint",
+    "*.{js,jsx,cjs,mjs,ts,tsx,cts,mts}": "pnpm run lint",
     "*.toml": "pnpm run format:toml"
   },
   "devDependencies": {
