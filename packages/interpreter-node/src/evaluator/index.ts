@@ -72,28 +72,23 @@ export class Evaluator {
     }
 
     if (SchemeSym.matches(node)) {
-      return cont
-        .setValue(env.get(node.value))
-        .setEnv(env)
-        .setLocationInfo(node.range)
+      return cont.setValue(env.get(node.value)).setEnv(env).setLocationInfo(node.range)
     }
 
-    return cont
-      .setValue(node)
-      .setEnv(env)
-      .setLocationInfo(node.range)
+    return cont.setValue(node).setEnv(env).setLocationInfo(node.range)
   }
 
   // 这里很重要，下一个语句是通过上一个语句的cont进行执行的！
   public evaluateList(node: SchemeList, env: Env, cont: SchemeCont = SchemeCont.Identity): SchemeData {
-    return this.evaluate(node.car(), env, new SchemeCont((data: SchemeData) => {
-      if (SchemeList.isNil(node.cdr())) {
-        return cont
-          .setValue(data)
-          .setEnv(env)
-          .setLocationInfo(node.range)
-      }
-      return this.evaluateList(node.cdr(), env, cont)
-    }))
+    return this.evaluate(
+      node.car(),
+      env,
+      new SchemeCont((data: SchemeData) => {
+        if (SchemeList.isNil(node.cdr())) {
+          return cont.setValue(data).setEnv(env).setLocationInfo(node.range)
+        }
+        return this.evaluateList(node.cdr(), env, cont)
+      })
+    )
   }
 }

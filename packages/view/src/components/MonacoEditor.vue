@@ -59,25 +59,31 @@ onBeforeUnmount(() => {
   editor.dispose()
 })
 
-watch(() => props.programName, () => {
-  // \n 在编辑器里面会被解释为换行符
-  editor?.setValue(props.modelValue.replace(/\n"/g, '\\n"'))
-})
-
-watch(() => props.highlightRange, newValue => {
-  highlight?.clear()
-
-  if (newValue) {
-    highlight = editor?.createDecorationsCollection([
-      {
-        range: new monaco.Range(...newValue),
-        options: {
-          inlineClassName: "monaco-editor-highlight"
-        }
-      }
-    ])
+watch(
+  () => props.programName,
+  () => {
+    // \n 在编辑器里面会被解释为换行符
+    editor?.setValue(props.modelValue.replace(/\n"/g, '\\n"'))
   }
-})
+)
+
+watch(
+  () => props.highlightRange,
+  (newValue) => {
+    highlight?.clear()
+
+    if (newValue) {
+      highlight = editor?.createDecorationsCollection([
+        {
+          range: new monaco.Range(...newValue),
+          options: {
+            inlineClassName: 'monaco-editor-highlight'
+          }
+        }
+      ])
+    }
+  }
+)
 </script>
 
 <style lang="scss" scoped>

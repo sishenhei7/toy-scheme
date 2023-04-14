@@ -33,12 +33,16 @@ export default class CondEvaluator implements IEvaluator {
       }
 
       // 匹配第一个成功的 predict
-      return this.evaluator.evaluate(predictNode, env, new SchemeCont((data: SchemeData) => {
-        if (SchemeBoolean.isTrue(data)) {
-          return this.evaluator.evaluateList(currentNode.cdr(), env, cont)
-        }
-        return this.evaluateConditions(node.cdr(), env, cont)
-      }))
+      return this.evaluator.evaluate(
+        predictNode,
+        env,
+        new SchemeCont((data: SchemeData) => {
+          if (SchemeBoolean.isTrue(data)) {
+            return this.evaluator.evaluateList(currentNode.cdr(), env, cont)
+          }
+          return this.evaluateConditions(node.cdr(), env, cont)
+        })
+      )
     }
 
     assert(false, 'Cond error: no predict is matched!')

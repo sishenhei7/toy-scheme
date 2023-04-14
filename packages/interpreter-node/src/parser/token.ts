@@ -60,7 +60,7 @@ export default function tokenize(st: string): TokenItem[] {
     cursor += n
     st = st.substring(n)
     line += isNewLine ? 1 : 0
-    column = isNewLine ? 1 : (column + n)
+    column = isNewLine ? 1 : column + n
   }
 
   while (st) {
@@ -77,12 +77,14 @@ export default function tokenize(st: string): TokenItem[] {
       if (matched) {
         const value = matched?.[0]
         const len = value.length
-        stack.push(new TokenItem(tokenType, value, len).setLocationInfo({
-          lineStart: line,
-          columnStart: column,
-          lineEnd: line,
-          columnEnd: column + len
-        }))
+        stack.push(
+          new TokenItem(tokenType, value, len).setLocationInfo({
+            lineStart: line,
+            columnStart: column,
+            lineEnd: line,
+            columnEnd: column + len
+          })
+        )
 
         // advance
         forward(len)

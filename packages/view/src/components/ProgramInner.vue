@@ -4,11 +4,7 @@
       <h3 class="program-inner-title">Output</h3>
       <div ref="outputRef" class="program-inner-content">
         <template v-for="item in output">
-          <p
-            v-if="item"
-            :key="item"
-            class="program-inner-row"
-          >{{ item }}</p>
+          <p v-if="item" :key="item" class="program-inner-row">{{ item }}</p>
         </template>
       </div>
     </section>
@@ -16,30 +12,18 @@
       <h3 class="program-inner-title">Call Stack</h3>
       <div class="program-inner-content">
         <template v-for="item in callStack">
-          <p
-            v-if="item"
-            :key="item"
-            class="program-inner-row"
-          >{{ item }}</p>
+          <p v-if="item" :key="item" class="program-inner-row">{{ item }}</p>
         </template>
-        <p v-if="showTips" class="program-inner-row">
-          Not paused.
-        </p>
+        <p v-if="showTips" class="program-inner-row">Not paused.</p>
       </div>
     </section>
     <section class="program-inner-block">
       <h3 class="program-inner-title">Scope</h3>
       <div class="program-inner-content">
         <template v-for="item in varScope">
-          <p
-            v-if="item"
-            :key="item"
-            class="program-inner-row"
-          >{{ item }}</p>
+          <p v-if="item" :key="item" class="program-inner-row">{{ item }}</p>
         </template>
-        <p v-if="showTips" class="program-inner-row">
-          Not paused.
-        </p>
+        <p v-if="showTips" class="program-inner-row">Not paused.</p>
       </div>
     </section>
   </div>
@@ -68,10 +52,13 @@ const props = defineProps({
 })
 
 const outputRef = ref<HTMLElement>()
-watch(() => props.output.length, async () => {
-  await nextTick()
-  outputRef.value!.scrollTop = outputRef.value!.scrollHeight
-})
+watch(
+  () => props.output.length,
+  async () => {
+    await nextTick()
+    outputRef.value!.scrollTop = outputRef.value!.scrollHeight
+  }
+)
 </script>
 
 <style lang="scss" scoped>

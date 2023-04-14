@@ -8,13 +8,14 @@ globalThis.onmessage = (event) => {
         data: res
       })
     },
-    prompt: (data: number | string) => globalThis.postMessage({
-      type: 'prompt',
-      data: data
-    })
+    prompt: (data: number | string) =>
+      globalThis.postMessage({
+        type: 'prompt',
+        data: data
+      })
   })
 
   interpreter.run()
 
   globalThis.postMessage({ type: 'over' })
-};
+}

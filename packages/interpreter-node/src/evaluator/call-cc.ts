@@ -18,17 +18,21 @@ export default class CallCCEvaluator implements IEvaluator {
   }
 
   public evaluate(node: SchemeList, env: Env, cont: SchemeCont): SchemeData {
-    return this.evaluator.evaluate(node.cadr(), env, new SchemeCont((proc: SchemeData) => {
-      assert(SchemeProc.matches(proc), 'callcc args evaluate eror!')
-      const newEnv = new Env(env, new StackFrame(proc, env.getStackFrame()))
-      const virtualName = 'callcc'
-      const virtualNode = SchemeList.buildFromArray([
-        new SchemeSym(virtualName),
-        this.buildEscapedProc(env, cont)
-      ])
-      newEnv.define(virtualName, proc)
-      return this.evaluator.evaluate(virtualNode, newEnv, cont)
-    }))
+    return this.evaluator.evaluate(
+      node.cadr(),
+      env,
+      new SchemeCont((proc: SchemeData) => {
+        assert(SchemeProc.matches(proc), 'callcc args evaluate eror!')
+        const newEnv = new Env(env, new StackFrame(proc, env.getStackFrame()))
+        const virtualName = 'callcc'
+        const virtualNode = SchemeList.buildFromArray([
+          new SchemeSym(virtualName),
+          this.buildEscapedProc(env, cont)
+        ])
+        newEnv.define(virtualName, proc)
+        return this.evaluator.evaluate(virtualNode, newEnv, cont)
+      })
+    )
   }
 
   private buildEscapedProc(env: Env, cont: SchemeCont): SchemeProc {

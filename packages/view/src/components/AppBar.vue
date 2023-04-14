@@ -4,7 +4,7 @@
       <span
         v-for="name of programNameList"
         :key="name"
-        :class="['button', 'program-button', (name === programName) && 'is-active']"
+        :class="['button', 'program-button', name === programName && 'is-active']"
         @click="emit('program', name)"
       >
         {{ name }}
@@ -15,22 +15,21 @@
         v-if="step === 0"
         :class="['button', 'control-button', isDisabled && 'disabled']"
         @click="handleControl('run')"
-      >Run</span>
+        >Run</span
+      >
       <span
         v-else
         :class="['button', 'control-button', isDisabled && 'disabled']"
         @click="handleControl('continue')"
-      >Continue</span>
-      <span
-        v-if="isRunning"
-        :class="['button', 'control-button']"
-        @click="handleControl('stop')"
-      >Stop</span>
+        >Continue</span
+      >
+      <span v-if="isRunning" :class="['button', 'control-button']" @click="handleControl('stop')">Stop</span>
       <span
         v-else
         :class="['button', 'control-button', isDisabled && 'disabled']"
         @click="handleControl('step')"
-      >Step</span>
+        >Step</span
+      >
     </section>
   </div>
 </template>

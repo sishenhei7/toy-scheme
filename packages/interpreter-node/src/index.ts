@@ -73,7 +73,7 @@ export default class Interpreter {
   }
 
   private getStack(env: Env | null): string[] {
-    let res: string[] = []
+    const res: string[] = []
 
     if (!env) {
       return res

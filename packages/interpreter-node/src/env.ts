@@ -16,10 +16,7 @@ export class StackFrame {
 export class Env {
   private obj: Map<string, any> = new Map()
 
-  constructor(
-    private parentEnv: Env | null = null,
-    private stackFrame: StackFrame | null = null
-  ) {}
+  constructor(private parentEnv: Env | null = null, private stackFrame: StackFrame | null = null) {}
 
   public getParent(): Env | null {
     return this.parentEnv
@@ -30,7 +27,7 @@ export class Env {
   }
 
   public getVarScope(): string[] {
-    let res = []
+    const res = []
     for (const [key, val] of this.obj.entries()) {
       res.push(`${key}: ${val}`)
     }

@@ -8,7 +8,7 @@ import type { IEvaluator, Evaluator } from './index'
  */
 
 export default class ContEvaluator implements IEvaluator {
-  constructor(private evaluator: Evaluator) { }
+  constructor(private evaluator: Evaluator) {}
 
   public matches(node: SchemeData): boolean {
     return SchemeCont.matches(node)

@@ -24,13 +24,14 @@ export default class DefineEvaluator implements IEvaluator {
 
     // 定义变量或者函数
     if (SchemeSym.matches(varNode)) {
-      return this.evaluator.evaluateList(bodyNode, env, new SchemeCont((data: SchemeData) => {
-        env.define(varNode.value, data)
-        return cont
-          .setValue(data)
-          .setEnv(env)
-          .setLocationInfo(node.range)
-      }))
+      return this.evaluator.evaluateList(
+        bodyNode,
+        env,
+        new SchemeCont((data: SchemeData) => {
+          env.define(varNode.value, data)
+          return cont.setValue(data).setEnv(env).setLocationInfo(node.range)
+        })
+      )
     }
 
     // 定义函数
@@ -38,10 +39,7 @@ export default class DefineEvaluator implements IEvaluator {
       const name = SchemeSym.cast(varNode.car()).value
       const proc = new SchemeProc(name, varNode.cdr(), bodyNode, env)
       env.define(name, proc)
-      return cont
-        .setValue(proc)
-        .setEnv(env)
-        .setLocationInfo(node.range)
+      return cont.setValue(proc).setEnv(env).setLocationInfo(node.range)
     }
 
     assert(false, 'Error: define clause evaluate error!')

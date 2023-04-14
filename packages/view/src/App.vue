@@ -1,9 +1,6 @@
 <template>
   <div class="app-container">
-    <AppTitle
-      title="Toy-Scheme"
-      class="mg-0 mb-xxxl"
-    />
+    <AppTitle title="Toy-Scheme" class="mg-0 mb-xxxl" />
     <AppBar
       :program-name="programName"
       :program-name-list="programNameList"
@@ -22,12 +19,7 @@
       :highlight-range="highlightRange"
       class="mb-m"
     />
-    <ProgramInner
-      :output="output"
-      :call-stack="callStack"
-      :var-scope="varScope"
-      :show-tips="step === 0"
-    />
+    <ProgramInner :output="output" :call-stack="callStack" :var-scope="varScope" :show-tips="step === 0" />
   </div>
 </template>
 
@@ -73,26 +65,30 @@ const cleanProgram = () => {
   interpreter = null
 }
 
-watch(() => program.value, () => {
-  interpreter = null
-  step.value = 0
-})
+watch(
+  () => program.value,
+  () => {
+    interpreter = null
+    step.value = 0
+  }
+)
 
 // monaco 会把 \n 解析为换行，所以这里要转几次
-const createInterpreter = () => new Interpreter(program.value.replace(/\n"/g, '\\n"'), {
-  log: (res: string) => {
-    const list = res.split('\\n')
-    for (let i = 0; i < list.length; i += 1) {
-      const item = list[i]
-      if (i === 0 && output.value.length > 0) {
-        const last = output.value.pop()
-        output.value.push(`${last}${item}`)
-      } else {
-        output.value.push(item)
+const createInterpreter = () =>
+  new Interpreter(program.value.replace(/\n"/g, '\\n"'), {
+    log: (res: string) => {
+      const list = res.split('\\n')
+      for (let i = 0; i < list.length; i += 1) {
+        const item = list[i]
+        if (i === 0 && output.value.length > 0) {
+          const last = output.value.pop()
+          output.value.push(`${last}${item}`)
+        } else {
+          output.value.push(item)
+        }
       }
     }
-  }
-})
+  })
 
 let worker: Worker | null
 let isUsingWorker = false
@@ -149,15 +145,16 @@ const handleStop = () => {
   } else {
     shouldStop.value = true
   }
-
 }
 
 const isRangeSame = (r1: StepResponse['range'], r2: StepResponse['range']) => {
   if (r1 && r2) {
-    return r1.lineStart === r2.lineStart
-     && r1.columnStart === r2.columnStart
-     && r1.lineEnd === r2.lineEnd
-     && r1.columnEnd === r2.columnEnd
+    return (
+      r1.lineStart === r2.lineStart &&
+      r1.columnStart === r2.columnStart &&
+      r1.lineEnd === r2.lineEnd &&
+      r1.columnEnd === r2.columnEnd
+    )
   }
   return false
 }

@@ -136,10 +136,7 @@ export class SchemeBoolean extends SchemeData {
 export class SchemeList extends SchemeData {
   public shouldEval: boolean = true
 
-  constructor(
-    private _car: SchemeData | null,
-    private _cdr: SchemeList | null,
-  ) {
+  constructor(private _car: SchemeData | null, private _cdr: SchemeList | null) {
     super()
   }
 
@@ -268,7 +265,7 @@ export class SchemeList extends SchemeData {
 export class SchemeCont extends SchemeData {
   private value: SchemeData = SchemeList.buildSchemeNil()
 
-  static Identity = new SchemeCont(x => x)
+  static Identity = new SchemeCont((x) => x)
 
   constructor(private f: (node: SchemeData) => SchemeData) {
     super()
@@ -301,7 +298,6 @@ export class SchemeCont extends SchemeData {
   }
 }
 
-
 /**
  * 其它数据结构：proc 是一等公民
  */
@@ -328,7 +324,7 @@ export default function parseToken(tokenList: TokenItem[]): SchemeList {
   let tokenCursor = 0
 
   function parseTokenList(onlyOne: boolean = false): [SchemeData[], ILocationRange | null] {
-    let list: SchemeData[] = []
+    const list: SchemeData[] = []
     let startRange: ILocationRange | null = null
     let endRange: ILocationRange | null = null
 

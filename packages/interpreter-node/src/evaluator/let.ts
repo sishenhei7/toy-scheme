@@ -66,10 +66,14 @@ export default class LetEvaluator implements IEvaluator {
       const defination = SchemeList.cast(node.car())
       const name = SchemeSym.cast(defination.car()).value
       const body = defination.cdr()
-      return this.evaluator.evaluateList(body, env, new SchemeCont((data: SchemeData) => {
-        env.setCurrent(name, data)
-        return this.evaluateDefinition(node.cdr(), env, callback)
-      }))
+      return this.evaluator.evaluateList(
+        body,
+        env,
+        new SchemeCont((data: SchemeData) => {
+          env.setCurrent(name, data)
+          return this.evaluateDefinition(node.cdr(), env, callback)
+        })
+      )
     }
     return callback()
   }
@@ -80,11 +84,15 @@ export default class LetEvaluator implements IEvaluator {
         const defination = SchemeList.cast(defNode.car())
         const name = SchemeSym.cast(defination.car()).value
         const body = defination.cdr()
-        return this.evaluator.evaluateList(body, newEnv, new SchemeCont((data: SchemeData) => {
-          newEnv = new Env(newEnv)
-          newEnv.setCurrent(name, data)
-          return traverse(defNode.cdr(), newEnv)
-        }))
+        return this.evaluator.evaluateList(
+          body,
+          newEnv,
+          new SchemeCont((data: SchemeData) => {
+            newEnv = new Env(newEnv)
+            newEnv.setCurrent(name, data)
+            return traverse(defNode.cdr(), newEnv)
+          })
+        )
       }
 
       const bodyNode = node.caddr()
