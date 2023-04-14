@@ -35,7 +35,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { type PropType, computed } from 'vue'
 const props = defineProps({
   programNameList: {
     type: Array as PropType<string[]>,

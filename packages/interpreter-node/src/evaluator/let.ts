@@ -1,5 +1,5 @@
 import { SchemeList, SchemeCont, type SchemeData, SchemeSym } from '../parser/data'
-import { Env, StackFrame } from '../env'
+import { Env } from '../env'
 import type { IEvaluator, Evaluator } from './index'
 import { assert } from '../utils'
 

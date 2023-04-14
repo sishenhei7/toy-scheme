@@ -1,4 +1,4 @@
-import Interpreter from './scheme'
+import Interpreter from '@toy-scheme/interpreter-node'
 
 globalThis.onmessage = (event) => {
   const interpreter = new Interpreter(event.data.program, {

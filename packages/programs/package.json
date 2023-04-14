@@ -2,10 +2,23 @@
   "name": "@toy-scheme/programs",
   "version": "0.0.1",
   "description": "",
-  "main": "index.js",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js",
+      "default": "./dist/esm/index.js"
+    }
+  },
+  "engines": {
+    "node": "^14.18.0 || >=16.0.0"
+  },
   "scripts": {
-    "build": "rimraf lib/ && tsc",
-    "dev": "tsc -w",
+    "build": "rimraf dist/ && tsc --project tsconfig.json && tsc --project tsconfig.cjs.json",
+    "dev": "tsc -w --project tsconfig.json",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

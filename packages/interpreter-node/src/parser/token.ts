@@ -17,7 +17,8 @@ export const tokenRegexList: [TokenType, RegExp][] = [
   [TokenType.Quote, /^'\(?/],
   [TokenType.LParen, /^\(/],
   [TokenType.RParen, /^\)/],
-  [TokenType.Number, /^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?/],
+  [TokenType.Number, /^[-+]?\d*\.?\d+([eE][-+]?\d+)?/],
+  // eslint-disable-next-line regexp/no-super-linear-backtracking
   [TokenType.String, /^"([^\\"]+|\\.)*"/],
   [TokenType.Boolean, /^#t|^#f/],
   [TokenType.WhiteSpace, /^\s+/],
@@ -51,13 +52,11 @@ export class TokenItem extends ILocation {
  * 把一段 string 解析成一个 token 数组
  */
 export default function tokenize(st: string): TokenItem[] {
-  let cursor = 0
   let line = 1
   let column = 1
   const stack = []
 
-  function forward(n: number, isNewLine: boolean = false) {
-    cursor += n
+  function forward(n: number, isNewLine = false) {
     st = st.substring(n)
     line += isNewLine ? 1 : 0
     column = isNewLine ? 1 : column + n

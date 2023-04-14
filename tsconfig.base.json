@@ -1,16 +1,13 @@
 {
   "compilerOptions": {
-    "module": "CommonJS",
-    "target": "ES2018",
-    "moduleResolution": "node",
-    "esModuleInterop": true,
-    "outDir": "dist",
-    "declaration": true,
-    "isolatedModules": true,
-    "sourceMap": true,
-    "declarationMap": true,
+    "target": "ES2020",
+    "module": "ES2020",
+    "moduleResolution": "Node",
     "composite": true,
-    "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true
+    "strict": true,
+    "declaration": true,
+    "sourceMap": true,
+    "noUnusedLocals": true,
+    "esModuleInterop": true
   }
 }

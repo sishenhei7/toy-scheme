@@ -5,7 +5,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onBeforeUnmount, ref, watch } from 'vue'
+import { type PropType, onMounted, onBeforeUnmount, ref, watch } from 'vue'
 import * as monaco from 'monaco-editor'
 import 'monaco-editor/esm/vs/basic-languages/scheme/scheme.contribution'
 import EditorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker'

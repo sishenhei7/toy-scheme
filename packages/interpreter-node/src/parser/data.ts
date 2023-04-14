@@ -134,7 +134,7 @@ export class SchemeBoolean extends SchemeData {
  * 注意：把 null 收拢在 SchemeList 内部，不让它向外暴露
  */
 export class SchemeList extends SchemeData {
-  public shouldEval: boolean = true
+  public shouldEval = true
 
   constructor(private _car: SchemeData | null, private _cdr: SchemeList | null) {
     super()
@@ -323,7 +323,7 @@ export class SchemeProc extends SchemeData {
 export default function parseToken(tokenList: TokenItem[]): SchemeList {
   let tokenCursor = 0
 
-  function parseTokenList(onlyOne: boolean = false): [SchemeData[], ILocationRange | null] {
+  function parseTokenList(onlyOne = false): [SchemeData[], ILocationRange | null] {
     const list: SchemeData[] = []
     let startRange: ILocationRange | null = null
     let endRange: ILocationRange | null = null

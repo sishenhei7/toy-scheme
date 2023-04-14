@@ -38,7 +38,7 @@ export default class CallCCEvaluator implements IEvaluator {
   private buildEscapedProc(env: Env, cont: SchemeCont): SchemeProc {
     const paramName = '(escaped-proc-param)'
     const params = SchemeList.buildFromAtom(new SchemeSym(paramName))
-    const virtualNode = SchemeList.buildFromArray([cont as any, new SchemeSym(paramName)])
+    const virtualNode = SchemeList.buildFromArray([cont, new SchemeSym(paramName)])
     const body = SchemeList.buildFromAtom(virtualNode) // need to wrap by a list
     return new SchemeProc('<<captured contiuation>>', params, body, env)
   }

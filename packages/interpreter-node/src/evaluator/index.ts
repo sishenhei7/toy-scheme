@@ -25,14 +25,12 @@ export interface EvaluatorOptions {
 
 export class Evaluator {
   private evaluators: IEvaluator[]
-  private stepCount = 0
-  private step = 0
 
   constructor(options?: EvaluatorOptions) {
     this.evaluators = [
       new BuildInEvaluator(this, options),
       new LetEvaluator(this),
-      new LambdaEvaluator(this),
+      new LambdaEvaluator(),
       new IfEvaluator(this),
       new DefineEvaluator(this),
       new CondEvaluator(this),

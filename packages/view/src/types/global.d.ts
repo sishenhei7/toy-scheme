@@ -1,5 +1,3 @@
-import type { PropType as VuePropType } from 'vue'
-
-declare global {
-  type PropType<T> = VuePropType<T>
-}
+/// <reference types="vite/client" />
+declare
+;('monaco-editor/esm/vs/editor/editor.worker')

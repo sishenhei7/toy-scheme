@@ -25,12 +25,12 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import programMap from '@toy-scheme/programs'
+import Interpreter, { type StepResponse } from '@toy-scheme/interpreter-node'
 import AppTitle from './components/AppTitle.vue'
 import AppBar from './components/AppBar.vue'
 import MonacoEditor from './components/MonacoEditor.vue'
 import ProgramInner from './components/ProgramInner.vue'
-import programMap from './scheme/programs'
-import Interpreter, { type StepResponse } from './scheme'
 import MyWorker from './worker?worker'
 
 // program

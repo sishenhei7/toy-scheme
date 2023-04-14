@@ -14,7 +14,7 @@ export class StackFrame {
 }
 
 export class Env {
-  private obj: Map<string, any> = new Map()
+  private obj: Map<string, SchemeData> = new Map()
 
   constructor(private parentEnv: Env | null = null, private stackFrame: StackFrame | null = null) {}
 
@@ -36,7 +36,7 @@ export class Env {
 
   public get(key: string): SchemeData {
     if (this.obj.has(key)) {
-      return this.obj.get(key)
+      return this.obj.get(key)!
     }
 
     assert(this.parentEnv, `${key} is not defined!`)

@@ -1,10 +1,10 @@
 {
   "extends": "../../tsconfig.base.json",
-  "include": ["./src"],
+  "include": ["src"],
+  "exclude": ["**/*.spec.ts"],
   "compilerOptions": {
-    "strict": true,
-  },
-  "ts-node": {
-    "transpileOnly": true
+    "rootDir": "src",
+    "outDir": "dist/esm",
+    "declarationDir": "dist/types"
   }
 }

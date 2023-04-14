@@ -2,6 +2,12 @@
   "files": [],
   "references": [
     {
+      "path": "../programs"
+    },
+    {
+      "path": "../interpreter-node"
+    },
+    {
       "path": "./tsconfig.config.json"
     },
     {
