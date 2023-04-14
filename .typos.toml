@@ -1,0 +1,10 @@
+# https://github.com/crate-ci/typos
+# cargo install typos
+# typos
+
+[files]
+extend-exclude = [
+  "**/*.{css,map,json,txt,ts,tsx,js,snap,bak}",
+  "**/CHANGELOG.md",
+  "pnpm-lock.yaml",
+]

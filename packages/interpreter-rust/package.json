@@ -2,11 +2,20 @@
   "name": "@toy-scheme/interpreter-rust",
   "version": "0.0.1",
   "description": "",
-  "main": "index.js",
+  "main": "./toy-scheme.node",
+  "types": "./index.d.ts",
   "scripts": {
+    "build": "napi build --release --dts index.d.ts",
+    "dev": "napi build",
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "napi": {
+    "name": "toy-scheme"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "@napi-rs/cli": "^2.15.2"
+  }
 }

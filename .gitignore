@@ -17,6 +17,12 @@ coverage
 /cypress/videos/
 /cypress/screenshots/
 
+# cargo
+debug/
+target/
+# Node Addons
+**/*.node
+
 # cache
 *.tsbuildinfo
 .eslintcache
