@@ -32,9 +32,9 @@ pub struct TokenError {
 }
 
 pub fn tokenize(program: &str) -> Result<Vec<TokenItem>, TokenError> {
-  let mut cursor: usize = 0;
-  let mut line: usize = 1;
-  let mut column: usize = 1;
+  let mut cursor = 0;
+  let mut line = 1;
+  let mut column = 1;
   let mut tokens = vec![];
   let mut char_list = program.chars().collect::<Vec<char>>();
   let len = char_list.len();
@@ -57,8 +57,8 @@ pub fn tokenize(program: &str) -> Result<Vec<TokenItem>, TokenError> {
   }
 
   while cursor < len {
-    let ch = char_list.get(cursor).unwrap_or(&' ');
-    let (n, token) = match ch {
+    let ch = char_list.get(cursor).unwrap();
+    let (n, token) = match *ch {
       '\n' => (1, TokenType::EOL),
       '\'' => (1, TokenType::Quote),
       '(' => (1, TokenType::LParen),
