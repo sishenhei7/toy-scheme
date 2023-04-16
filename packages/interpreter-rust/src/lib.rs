@@ -1,3 +1,5 @@
+pub mod lexer;
+
 use napi_derive::napi;
 
 #[napi]
