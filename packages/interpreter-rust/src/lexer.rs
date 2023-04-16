@@ -1,23 +1,23 @@
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum TokenType {
-  Quote(String),
+  Quote,
   LParen,
   RParen,
-  Number(i32),
+  Number(i64),
   String(String),
   Boolean(bool),
   WhiteSpace,
   Comment(String),
-  Symbol(String),
+  Identifier(String),
   EOL,
 }
 
 #[derive(Debug)]
 pub struct Location {
-  lineStart: u32,
-  columnStart: u32,
-  lineEnd: u32,
-  columnEnd: u32,
+  lineStart: usize,
+  columnStart: usize,
+  lineEnd: usize,
+  columnEnd: usize,
 }
 
 #[derive(Debug)]
@@ -32,75 +32,55 @@ pub struct TokenError {
 }
 
 pub fn tokenize(program: &str) -> Result<Vec<TokenItem>, TokenError> {
-  let mut cursor = 0;
-  let mut line = 1;
-  let mut column = 1;
+  let mut cursor: usize = 0;
+  let mut line: usize = 1;
+  let mut column: usize = 1;
   let mut tokens = Vec::new();
   let char_list = program.chars().collect::<Vec<char>>();
   let len = char_list.len();
 
-  fn forward(token: TokenType, n: i32) -> () {
-    tokens.push(TokenItem {
-      token,
-      loc: Location {
-        lineStart: line,
-        columnStart: column,
-        lineEnd: line,
-        columnEnd: column + n,
-      },
-    });
-
-    cursor += n;
-    column += n;
-
-    if (token == TokenType::EOL) {
-      line += 1;
-      column = 0;
-    }
-  }
-
-  fn get_content(start: i32, stop_check_fn: fn(char) -> bool) -> String {
+  fn get_content(list: Vec<char>, start: usize, stop_check_fn: fn(char) -> bool) -> String {
     let mut content = String::new();
-    while start < len {
-      let mut peek = char_list.get(start);
-      if stop_check_fn(peek) {
+    while start < list.len() {
+      let mut peek = list.get(start).unwrap_or(&' ');
+      if stop_check_fn(*peek) {
         break;
       }
-      content.push(peek);
+      content.push(*peek);
       start += 1;
     }
     content
   }
 
   while cursor < len {
-    let ch = char_list.get(cursor);
-    match ch {
-      '\n' => forward(TokenType::EOL, 1),
-      '\'' => forward(TokenType::Quote, 1),
-      '(' => forward(TokenType::LParen, 1),
-      ')' => forward(TokenType::RParen, 1),
+    let ch = char_list.get(cursor).unwrap_or(&' ');
+    let (token, n) = match ch {
+      '\n' => (TokenType::EOL, 1),
+      '\'' => (TokenType::Quote, 1),
+      '(' => (TokenType::LParen, 1),
+      ')' => (TokenType::RParen, 1),
       '#' => {
-        let next = char_list.get(cursor + 1);
-        forward(
-          TokenType::Boolean(if next == 't' { true } else { false }),
+        let next = char_list.get(cursor + 1).unwrap_or(&' ');
+        (
+          TokenType::Boolean(if *next == 't' { true } else { false }),
           2,
-        );
+        )
       }
       ';' => {
-        let content = get_content(cursor + 1, |peek| peek == '\n');
-        forward(TokenType::Comment, 1 + content.len());
+        let content = get_content(char_list, cursor + 1, |peek| peek == '\n');
+        (TokenType::Comment(content), 1 + content.len())
       }
       '"' => {
         // don't support newline in TokenType::String
-        let content = get_content(cursor + 1, |peek| peek == '"' || peek == '\n');
-        forward(TokenType::String, 2 + content.len());
+        let content = get_content(char_list, cursor + 1, |peek| peek == '"' || peek == '\n');
+        (TokenType::String(content), 2 + content.len())
       }
       _ => {
         if ch.is_whitespace() {
-          let content = get_content(cursor, |peek| !peek.is_whitespace());
-          forward(TokenType::WhiteSpace, content.len());
+          let content = get_content(char_list, cursor, |peek| !peek.is_whitespace());
+          (TokenType::WhiteSpace, content.len())
         } else {
-          let content = get_content(cursor, |peek| {
+          let content = get_content(char_list, cursor, |peek| {
             peek.is_whitespace()
               || peek == '\''
               || peek == '('
@@ -110,18 +90,36 @@ pub fn tokenize(program: &str) -> Result<Vec<TokenItem>, TokenError> {
               || peek == '"'
           });
 
-          forward(
-            if let Ok(v) = content.parse::<f64>() {
+          (
+            if let Ok(v) = content.parse::<i64>() {
               TokenType::Number(v)
             } else {
-              TokenType::Symbol(content)
+              TokenType::Identifier(content)
             },
             content.len(),
-          );
+          )
         }
       }
+    };
+
+    tokens.push(TokenItem {
+      token,
+      loc: Location {
+        lineStart: line,
+        columnStart: column,
+        lineEnd: line,
+        columnEnd: column + 2,
+      },
+    });
+
+    cursor += n;
+    column += n;
+
+    if token == TokenType::EOL {
+      line += 1;
+      column = 0;
     }
   }
 
-  tokens
+  Ok(tokens)
 }
