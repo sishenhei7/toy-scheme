@@ -12,18 +12,18 @@ pub enum TokenType {
   EOL,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Default)]
 pub struct Location {
-  lineStart: usize,
-  columnStart: usize,
-  lineEnd: usize,
-  columnEnd: usize,
+  pub line_start: usize,
+  pub column_start: usize,
+  pub line_end: usize,
+  pub column_end: usize,
 }
 
 #[derive(Debug, PartialEq)]
 pub struct TokenItem {
-  token: TokenType,
-  loc: Location,
+  pub token: TokenType,
+  pub loc: Location,
 }
 
 #[derive(Debug)]
@@ -114,10 +114,10 @@ pub fn tokenize(program: &str) -> Result<Vec<TokenItem>, TokenError> {
     tokens.push(TokenItem {
       token,
       loc: Location {
-        lineStart: line,
-        columnStart: column,
-        lineEnd: line,
-        columnEnd: column + n,
+        line_start: line,
+        column_start: column,
+        line_end: line,
+        column_end: column + n,
       },
     });
 
@@ -146,64 +146,64 @@ mod tests {
         TokenItem {
           token: TokenType::LParen,
           loc: Location {
-            lineStart: 1,
-            columnStart: 1,
-            lineEnd: 1,
-            columnEnd: 2
+            line_start: 1,
+            column_start: 1,
+            line_end: 1,
+            column_end: 2
           }
         },
         TokenItem {
           token: TokenType::Identifier(String::from("+")),
           loc: Location {
-            lineStart: 1,
-            columnStart: 2,
-            lineEnd: 1,
-            columnEnd: 3
+            line_start: 1,
+            column_start: 2,
+            line_end: 1,
+            column_end: 3
           }
         },
         TokenItem {
           token: TokenType::WhiteSpace,
           loc: Location {
-            lineStart: 1,
-            columnStart: 3,
-            lineEnd: 1,
-            columnEnd: 4
+            line_start: 1,
+            column_start: 3,
+            line_end: 1,
+            column_end: 4
           }
         },
         TokenItem {
           token: TokenType::Number(1 as f64),
           loc: Location {
-            lineStart: 1,
-            columnStart: 4,
-            lineEnd: 1,
-            columnEnd: 5
+            line_start: 1,
+            column_start: 4,
+            line_end: 1,
+            column_end: 5
           }
         },
         TokenItem {
           token: TokenType::WhiteSpace,
           loc: Location {
-            lineStart: 1,
-            columnStart: 5,
-            lineEnd: 1,
-            columnEnd: 6
+            line_start: 1,
+            column_start: 5,
+            line_end: 1,
+            column_end: 6
           }
         },
         TokenItem {
           token: TokenType::Number(2 as f64),
           loc: Location {
-            lineStart: 1,
-            columnStart: 6,
-            lineEnd: 1,
-            columnEnd: 7
+            line_start: 1,
+            column_start: 6,
+            line_end: 1,
+            column_end: 7
           }
         },
         TokenItem {
           token: TokenType::RParen,
           loc: Location {
-            lineStart: 1,
-            columnStart: 7,
-            lineEnd: 1,
-            columnEnd: 8
+            line_start: 1,
+            column_start: 7,
+            line_end: 1,
+            column_end: 8
           }
         },
       ]
