@@ -1,4 +1,6 @@
+pub mod env;
 pub mod lexer;
+pub mod parser;
 
 use napi_derive::napi;
 

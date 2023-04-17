@@ -3,7 +3,7 @@ pub enum TokenType {
   Quote,
   LParen,
   RParen,
-  Number(i64),
+  Number(f64),
   String(String),
   Boolean(bool),
   WhiteSpace,
@@ -98,7 +98,7 @@ pub fn tokenize(program: &str) -> Result<Vec<TokenItem>, TokenError> {
 
           (
             content.len(),
-            if let Ok(v) = content.parse::<i64>() {
+            if let Ok(v) = content.parse::<f64>() {
               TokenType::Number(v)
             } else {
               TokenType::Identifier(content)
@@ -171,7 +171,7 @@ mod tests {
           }
         },
         TokenItem {
-          token: TokenType::Number(1 as i64),
+          token: TokenType::Number(1 as f64),
           loc: Location {
             lineStart: 1,
             columnStart: 4,
@@ -189,7 +189,7 @@ mod tests {
           }
         },
         TokenItem {
-          token: TokenType::Number(2 as i64),
+          token: TokenType::Number(2 as f64),
           loc: Location {
             lineStart: 1,
             columnStart: 6,
