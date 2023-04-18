@@ -20,11 +20,10 @@ pub enum SchemeData {
   ),
 }
 
-// TODO: implement Error processing
-// #[derive(Debug)]
-// pub struct ParseError {
-//   msg: String,
-// }
+#[derive(Debug)]
+pub struct ParseError {
+  msg: String,
+}
 
 impl SchemeData {
   pub fn get_loc(&self) -> Location {
@@ -82,7 +81,7 @@ impl SchemeData {
     data
   }
 
-  pub fn parse_list_from_end(list: &mut Vec<TokenItem>, left_paren_loc: Location) -> SchemeData {
+  pub fn parse_list_from_end(list: &mut Vec<TokenItem>, left_paren_loc: Location) -> Result<SchemeData, ParseError> {
     let mut scheme_data_list: Vec<SchemeData> = vec![];
 
     while let Some(TokenItem { token, loc }) = list.pop() {
@@ -97,20 +96,17 @@ impl SchemeData {
         TokenType::Quote => {
           if let Some(peek) = list.last() {
             match peek.token {
-              TokenType::LParen => SchemeData::parse_list_from_end(list, SchemeData::build_default_loc()),
-              _ => SchemeData::parse_list_from_end(&mut vec![list.pop().unwrap()], SchemeData::build_default_loc()),
+              TokenType::LParen => SchemeData::parse_list_from_end(list, SchemeData::build_default_loc())?,
+              _ => SchemeData::parse_list_from_end(&mut vec![list.pop().unwrap()], SchemeData::build_default_loc())?,
             }
           } else {
             SchemeData::Nil
           }
         }
-        TokenType::LParen => {
-          SchemeData::parse_list_from_end(list, loc)
-        }
+        TokenType::LParen => SchemeData::parse_list_from_end(list, loc)?,
         TokenType::RParen => {
-          if left_paren_loc == (Location { ..Default::default() }) {
-            // Err(ParseError { msg: String::from("Right parens are more than left parens!") })
-            panic!("Right parens are more than left parens!")
+          return if left_paren_loc == (Location { ..Default::default() }) {
+            Err(ParseError { msg: String::from("Right parens are more than left parens!") })
           } else {
             let mut data = SchemeData::build_list_from_vec(&mut scheme_data_list);
             data.set_loc(Location {
@@ -119,24 +115,22 @@ impl SchemeData {
               line_end: loc.line_end,
               column_end: loc.column_end
             });
-            return data
+            Ok(data)
           }
         }
-        _ => panic!("Unexpected token!")
-        //  _ => return Err(ParseError { msg: String::from("Unexpected token!") })
+        _ => return Err(ParseError { msg: String::from("Unexpected token!") })
       })
     }
 
     if left_paren_loc != (Location { ..Default::default() }) {
-      panic!("Left parens are more than left parens!")
+      return Err(ParseError { msg: String::from("Left parens are more than left parens!") })
     }
 
-    // TODO: refine code
-    SchemeData::build_list_from_vec(&mut scheme_data_list)
+    Ok(SchemeData::build_list_from_vec(&mut scheme_data_list))
   }
 }
 
-pub fn parse(mut list: Vec<TokenItem>) -> SchemeData {
+pub fn parse(mut list: Vec<TokenItem>) -> Result<SchemeData, ParseError> {
   list.reverse();
   SchemeData::parse_list_from_end(&mut list, SchemeData::build_default_loc())
 }
@@ -147,8 +141,8 @@ mod tests {
 
   #[test]
   fn test_add() {
-    let tokens = tokenize("(+ 1 2)");
-    let data = parse(tokens);
+    let tokens = tokenize("(+ 1 2)").unwrap_or(vec![]);
+    let data = parse(tokens).unwrap_or(SchemeData::Nil);
     assert_eq!(
       data,
       SchemeData::List(

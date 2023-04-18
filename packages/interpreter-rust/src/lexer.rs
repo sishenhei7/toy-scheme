@@ -26,13 +26,11 @@ pub struct TokenItem {
   pub loc: Location,
 }
 
-// TODO: implement Error processing
-// #[derive(Debug)]
-// pub struct TokenError {
-//   msg: String,
-// }
+pub struct TokenError {
+  msg: String,
+}
 
-pub fn tokenize(program: &str) -> Vec<TokenItem> {
+pub fn tokenize(program: &str) -> Result<Vec<TokenItem>, TokenError> {
   let mut cursor = 0;
   let mut line = 1;
   let mut column = 1;
@@ -44,47 +42,47 @@ pub fn tokenize(program: &str) -> Vec<TokenItem> {
     list: &mut Vec<char>,
     mut start: usize,
     stop_check_fn: fn(char) -> bool,
-  ) -> String {
+  ) -> Result<String, TokenError> {
     let mut content = String::new();
     while start < list.len() {
-      let peek = list.get(start).unwrap_or(&' ');
+      let peek = list.get(start).ok_or(TokenError { msg: String::from("Token error!") })?;
       if stop_check_fn(*peek) {
         break;
       }
       content.push(*peek);
       start += 1;
     }
-    content
+    Ok(content)
   }
 
   while cursor < len {
-    let ch = char_list.get(cursor).unwrap();
+    let ch = char_list.get(cursor).ok_or(TokenError { msg: String::from("Token error!") })?;
     let (n, token) = match ch {
       '\n' => (1, TokenType::EOL),
       '\'' => (1, TokenType::Quote),
       '(' => (1, TokenType::LParen),
       ')' => (1, TokenType::RParen),
       '#' => {
-        let next = char_list.get(cursor + 1).unwrap_or(&' ');
+        let next = char_list.get(cursor + 1).ok_or(TokenError { msg: String::from("Token error: boolean!") })?;
         (
           2,
           TokenType::Boolean(if *next == 't' { true } else { false }),
         )
       }
       ';' => {
-        let content = get_content(&mut char_list, cursor + 1, |peek| peek == '\n');
+        let content = get_content(&mut char_list, cursor + 1, |peek| peek == '\n')?;
         (1 + content.len(), TokenType::Comment(content))
       }
       '"' => {
         // don't support newline in TokenType::String
         let content = get_content(&mut char_list, cursor + 1, |peek| {
           peek == '"' || peek == '\n'
-        });
+        })?;
         (2 + content.len(), TokenType::String(content))
       }
       _ => {
         if ch.is_whitespace() {
-          let content = get_content(&mut char_list, cursor, |peek| !peek.is_whitespace());
+          let content = get_content(&mut char_list, cursor, |peek| !peek.is_whitespace())?;
           (content.len(), TokenType::WhiteSpace)
         } else {
           let content = get_content(&mut char_list, cursor, |peek| {
@@ -95,7 +93,7 @@ pub fn tokenize(program: &str) -> Vec<TokenItem> {
               || peek == '#'
               || peek == ';'
               || peek == '"'
-          });
+          })?;
 
           (
             content.len(),
@@ -131,7 +129,7 @@ pub fn tokenize(program: &str) -> Vec<TokenItem> {
     }
   }
 
-  tokens
+  Ok(tokens)
 }
 
 #[cfg(test)]
@@ -140,7 +138,7 @@ mod tests {
 
   #[test]
   fn test_add() {
-    let tokens = tokenize("(+ 1 2)");
+    let tokens = tokenize("(+ 1 2)").unwrap_or(vec![]);
     assert_eq!(
       tokens,
       vec![
