@@ -20,10 +20,11 @@ pub enum SchemeData {
   ),
 }
 
-#[derive(Debug)]
-pub struct ParseError {
-  msg: String,
-}
+// TODO: implement Error processing
+// #[derive(Debug)]
+// pub struct ParseError {
+//   msg: String,
+// }
 
 impl SchemeData {
   pub fn get_loc(&self) -> Location {
@@ -146,7 +147,7 @@ mod tests {
 
   #[test]
   fn test_add() {
-    let tokens = tokenize("(+ 1 2)").unwrap_or(vec![]);
+    let tokens = tokenize("(+ 1 2)");
     let data = parse(tokens);
     assert_eq!(
       data,

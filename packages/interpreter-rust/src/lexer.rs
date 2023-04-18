@@ -26,12 +26,13 @@ pub struct TokenItem {
   pub loc: Location,
 }
 
-#[derive(Debug)]
-pub struct TokenError {
-  msg: String,
-}
+// TODO: implement Error processing
+// #[derive(Debug)]
+// pub struct TokenError {
+//   msg: String,
+// }
 
-pub fn tokenize(program: &str) -> Result<Vec<TokenItem>, TokenError> {
+pub fn tokenize(program: &str) -> Vec<TokenItem> {
   let mut cursor = 0;
   let mut line = 1;
   let mut column = 1;
@@ -58,7 +59,7 @@ pub fn tokenize(program: &str) -> Result<Vec<TokenItem>, TokenError> {
 
   while cursor < len {
     let ch = char_list.get(cursor).unwrap();
-    let (n, token) = match *ch {
+    let (n, token) = match ch {
       '\n' => (1, TokenType::EOL),
       '\'' => (1, TokenType::Quote),
       '(' => (1, TokenType::LParen),
@@ -130,7 +131,7 @@ pub fn tokenize(program: &str) -> Result<Vec<TokenItem>, TokenError> {
     }
   }
 
-  Ok(tokens)
+  tokens
 }
 
 #[cfg(test)]
@@ -139,7 +140,7 @@ mod tests {
 
   #[test]
   fn test_add() {
-    let tokens = tokenize("(+ 1 2)").unwrap_or(vec![]);
+    let tokens = tokenize("(+ 1 2)");
     assert_eq!(
       tokens,
       vec![
