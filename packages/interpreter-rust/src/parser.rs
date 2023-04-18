@@ -5,6 +5,7 @@ use std::vec;
 use crate::env::Env;
 use crate::lexer::*;
 
+#[derive(Debug, PartialEq)]
 pub enum SchemeData {
   Nil, // only for SchemeData::List
   Identifier(String, Location),
@@ -46,7 +47,7 @@ impl SchemeData {
       Default::default()
     };
 
-    if let Some(item) = list.pop() {
+    while let Some(item) = list.pop() {
       let loc = item.get_loc();
       data = SchemeData::List(
         (Box::new(item), Box::new(data)),
@@ -94,7 +95,79 @@ impl SchemeData {
   }
 }
 
-pub fn parse(list: &mut Vec<TokenItem>) -> SchemeData {
+pub fn parse(mut list: Vec<TokenItem>) -> SchemeData {
   list.reverse();
-  SchemeData::parse_list_from_end(list)
+  SchemeData::parse_list_from_end(&mut list)
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test]
+  fn test_add() {
+    let tokens = tokenize("(+ 1 2)").unwrap_or(vec![]);
+    let data = parse(tokens);
+    assert_eq!(
+      data,
+      SchemeData::List(
+        (
+          Box::new(SchemeData::Identifier(
+            String::from("+"),
+            Location {
+              line_start: 1,
+              column_start: 2,
+              line_end: 1,
+              column_end: 3
+            }
+          )),
+          Box::new(SchemeData::List(
+            (
+              Box::new(SchemeData::Number(
+                1 as f64,
+                Location {
+                  line_start: 1,
+                  column_start: 4,
+                  line_end: 1,
+                  column_end: 5
+                }
+              )),
+              Box::new(SchemeData::List(
+                (
+                  Box::new(SchemeData::Number(
+                    2 as f64,
+                    Location {
+                      line_start: 1,
+                      column_start: 6,
+                      line_end: 1,
+                      column_end: 7
+                    }
+                  )),
+                  Box::new(SchemeData::Nil)
+                ),
+                Location {
+                  line_start: 1,
+                  column_start: 6,
+                  line_end: 1,
+                  column_end: 7
+                }
+              ))
+            ),
+            Location {
+              line_start: 1,
+              column_start: 4,
+              line_end: 1,
+              column_end: 7
+            }
+          ))
+        ),
+        Location {
+          line_start: 1,
+          column_start: 1,
+          line_end: 1,
+          column_end: 8
+        }
+      )
+    );
+  }
 }
