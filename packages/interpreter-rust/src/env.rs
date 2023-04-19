@@ -12,7 +12,7 @@ pub struct Stackframe {
 
 #[derive(Debug, PartialEq)]
 pub struct Env {
-  hashmap: HashMap<String, SchemeData>,
+  scope: HashMap<String, SchemeData>,
   parent: Option<Rc<RefCell<Env>>>,
   stackframe: Option<Stackframe>,
 }
@@ -20,7 +20,7 @@ pub struct Env {
 impl Env {
   pub fn new() -> Self {
     Env {
-      hashmap: HashMap::new(),
+      scope: HashMap::new(),
       parent: None,
       stackframe: None,
     }
@@ -28,27 +28,34 @@ impl Env {
 
   pub fn extend(parent_env: Env, stackframe: Option<Stackframe>) -> Env {
     Env {
-      hashmap: HashMap::new(),
+      scope: HashMap::new(),
       parent: Some(Rc::new(RefCell::new(parent_env))),
       stackframe,
     }
   }
 
-  // pub fn get_parent(&self) -> Option<Rc<RefCell<Env>>> {
-  //   self.parent
-  // }
+  pub fn get(&self, key: &str) -> Option<&SchemeData> {
+    match self.scope.get(key) {
+      Some(x) => Some(x),
+      None => self.parent.unwrap().borrow().get(key)
+    }
+  }
 
-  // pub fn get(&self, key: String) -> Option<&SchemeData> {
-  //   if self.hashmap.contains_key(&key) {
-  //     self.hashmap.get(&key)
-  //   } else {
-  //     self.parent
-  //   }
-  // }
+  pub fn set(&mut self, key: String, val: SchemeData) -> Option<SchemeData> {
+    match self.scope.get(&key) {
+      Some(_) => self.scope.insert(key, val),
+      None => self.parent?.borrow().set(key, val)
+    }
+  }
 
-  // pub fn set(key: String, val: SchemeData) -> SchemeData {}
+  pub fn define(&mut self, key: String, val: SchemeData) -> Option<SchemeData> {
+    match self.scope.get(&key) {
+      Some(_) => None,
+      None => self.scope.insert(key, val)
+    }
+  }
 
-  // pub fn define(key: String, val: SchemeData) -> SchemeData {}
-
-  // pub fn modify(key: String, val: SchemeData) -> SchemeData {}
+  pub fn modify(&mut self, key: String, val: SchemeData) -> Option<SchemeData> {
+    self.scope.insert(key, val)
+  }
 }
