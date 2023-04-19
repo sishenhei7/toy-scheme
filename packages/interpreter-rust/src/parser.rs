@@ -35,7 +35,7 @@ impl SchemeData {
       SchemeData::List(_, loc) => loc.clone(),
       SchemeData::Continuation(_, loc) => loc.clone(),
       SchemeData::Procedure(_, loc) => loc.clone(),
-      _ => panic!()
+      _ => panic!(),
     }
   }
 
@@ -48,13 +48,15 @@ impl SchemeData {
       SchemeData::List(_, loc) => *loc = new_loc,
       SchemeData::Continuation(_, loc) => *loc = new_loc,
       SchemeData::Procedure(_, loc) => *loc = new_loc,
-      _ => panic!()
+      _ => panic!(),
     };
     self
   }
 
   pub fn build_default_loc() -> Location {
-    Location { ..Default::default() }
+    Location {
+      ..Default::default()
+    }
   }
 
   pub fn build_list_from_vec(list: &mut Vec<SchemeData>) -> SchemeData {
@@ -81,7 +83,10 @@ impl SchemeData {
     data
   }
 
-  pub fn parse_list_from_end(list: &mut Vec<TokenItem>, left_paren_loc: Location) -> Result<SchemeData, ParseError> {
+  pub fn parse_list_from_end(
+    list: &mut Vec<TokenItem>,
+    left_paren_loc: Location,
+  ) -> Result<SchemeData, ParseError> {
     let mut scheme_data_list: Vec<SchemeData> = vec![];
 
     while let Some(TokenItem { token, loc }) = list.pop() {
@@ -96,8 +101,13 @@ impl SchemeData {
         TokenType::Quote => {
           if let Some(peek) = list.last() {
             match peek.token {
-              TokenType::LParen => SchemeData::parse_list_from_end(list, SchemeData::build_default_loc())?,
-              _ => SchemeData::parse_list_from_end(&mut vec![list.pop().unwrap()], SchemeData::build_default_loc())?,
+              TokenType::LParen => {
+                SchemeData::parse_list_from_end(list, SchemeData::build_default_loc())?
+              }
+              _ => SchemeData::parse_list_from_end(
+                &mut vec![list.pop().unwrap()],
+                SchemeData::build_default_loc(),
+              )?,
             }
           } else {
             SchemeData::Nil
@@ -105,25 +115,40 @@ impl SchemeData {
         }
         TokenType::LParen => SchemeData::parse_list_from_end(list, loc)?,
         TokenType::RParen => {
-          return if left_paren_loc == (Location { ..Default::default() }) {
-            Err(ParseError { msg: String::from("Right parens are more than left parens!") })
+          return if left_paren_loc
+            == (Location {
+              ..Default::default()
+            }) {
+            Err(ParseError {
+              msg: "Right parens are more than left parens!".to_string(),
+            })
           } else {
             let mut data = SchemeData::build_list_from_vec(&mut scheme_data_list);
             data.set_loc(Location {
               line_start: left_paren_loc.line_start,
               column_start: left_paren_loc.column_start,
               line_end: loc.line_end,
-              column_end: loc.column_end
+              column_end: loc.column_end,
             });
             Ok(data)
           }
         }
-        _ => return Err(ParseError { msg: String::from("Unexpected token!") })
+        _ => {
+          return Err(ParseError {
+            msg: "Unexpected token!".to_string(),
+          })
+        }
       })
     }
 
-    if left_paren_loc != (Location { ..Default::default() }) {
-      return Err(ParseError { msg: String::from("Left parens are more than left parens!") })
+    if left_paren_loc
+      != (Location {
+        ..Default::default()
+      })
+    {
+      return Err(ParseError {
+        msg: "Left parens are more than left parens!".to_string(),
+      });
     }
 
     Ok(SchemeData::build_list_from_vec(&mut scheme_data_list))
@@ -150,7 +175,7 @@ mod tests {
           Box::new(SchemeData::List(
             (
               Box::new(SchemeData::Identifier(
-                String::from("+"),
+                "+".to_string(),
                 Location {
                   line_start: 1,
                   column_start: 2,

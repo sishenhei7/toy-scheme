@@ -34,21 +34,21 @@ impl Env {
     }
   }
 
-  pub fn get_parent(&self) -> Option<Rc<RefCell<Env>>> {
-    self.parent
-  }
+  // pub fn get_parent(&self) -> Option<Rc<RefCell<Env>>> {
+  //   self.parent
+  // }
 
-  pub fn get(&self, key: String) -> Option<&SchemeData> {
-    // if self.hashmap.contains_key(&key) {
-    //   self.hashmap.get(&key)
-    // } else {
-    //   self.parent
-    // }
-  }
+  // pub fn get(&self, key: String) -> Option<&SchemeData> {
+  //   if self.hashmap.contains_key(&key) {
+  //     self.hashmap.get(&key)
+  //   } else {
+  //     self.parent
+  //   }
+  // }
 
-  pub fn set(key: String, val: SchemeData) -> SchemeData {}
+  // pub fn set(key: String, val: SchemeData) -> SchemeData {}
 
-  pub fn define(key: String, val: SchemeData) -> SchemeData {}
+  // pub fn define(key: String, val: SchemeData) -> SchemeData {}
 
-  pub fn modify(key: String, val: SchemeData) -> SchemeData {}
+  // pub fn modify(key: String, val: SchemeData) -> SchemeData {}
 }

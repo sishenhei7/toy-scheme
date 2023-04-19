@@ -45,7 +45,9 @@ pub fn tokenize(program: &str) -> Result<Vec<TokenItem>, TokenError> {
   ) -> Result<String, TokenError> {
     let mut content = String::new();
     while start < list.len() {
-      let peek = list.get(start).ok_or(TokenError { msg: String::from("Token error!") })?;
+      let peek = list.get(start).ok_or(TokenError {
+        msg: "Token error!".to_string(),
+      })?;
       if stop_check_fn(*peek) {
         break;
       }
@@ -56,14 +58,18 @@ pub fn tokenize(program: &str) -> Result<Vec<TokenItem>, TokenError> {
   }
 
   while cursor < len {
-    let ch = char_list.get(cursor).ok_or(TokenError { msg: String::from("Token error!") })?;
+    let ch = char_list.get(cursor).ok_or(TokenError {
+      msg: "Token error!".to_string(),
+    })?;
     let (n, token) = match ch {
       '\n' => (1, TokenType::EOL),
       '\'' => (1, TokenType::Quote),
       '(' => (1, TokenType::LParen),
       ')' => (1, TokenType::RParen),
       '#' => {
-        let next = char_list.get(cursor + 1).ok_or(TokenError { msg: String::from("Token error: boolean!") })?;
+        let next = char_list.get(cursor + 1).ok_or(TokenError {
+          msg: "Token error: boolean!".to_string(),
+        })?;
         (
           2,
           TokenType::Boolean(if *next == 't' { true } else { false }),
@@ -152,7 +158,7 @@ mod tests {
           }
         },
         TokenItem {
-          token: TokenType::Identifier(String::from("+")),
+          token: TokenType::Identifier("+".to_string()),
           loc: Location {
             line_start: 1,
             column_start: 2,
