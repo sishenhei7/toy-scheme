@@ -5,7 +5,7 @@ use std::vec;
 use crate::env::Env;
 use crate::lexer::*;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum SchemeData {
   Nil, // only for SchemeData::List
   Identifier(String, Location),
