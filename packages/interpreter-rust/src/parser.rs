@@ -1,10 +1,10 @@
-use core::panic;
 use std::rc::Rc;
 use std::vec;
 
 use crate::env::Env;
 use crate::lexer::*;
 
+// TODO: scheme 里面的 data 都是保存在 heap 里面的，我们这里需要用 Rc 和 RefCell 包裹吗？
 #[derive(Debug, PartialEq, Clone)]
 pub enum SchemeData {
   Nil, // only for SchemeData::List
