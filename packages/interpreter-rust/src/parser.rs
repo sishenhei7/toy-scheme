@@ -1,22 +1,33 @@
+use std::cell::RefCell;
 use std::rc::Rc;
 use std::vec;
 
 use crate::env::Env;
 use crate::lexer::*;
 
+#[derive(Debug, Default, PartialEq, Clone)]
+struct SchemeDataMeta {
+  loc: Option<Location>,
+  env: Option<Rc<RefCell<Env>>>,
+  data: Option<Box<SchemeData>>
+}
+
 // TODO: scheme 里面的 data 都是保存在 heap 里面的，我们这里需要用 Rc 和 RefCell 包裹吗？
 #[derive(Debug, PartialEq, Clone)]
 pub enum SchemeData {
   Nil, // only for SchemeData::List
-  Identifier(String, Location),
-  Number(f64, Location),
-  String(String, Location),
-  Boolean(bool, Location),
-  List((Box<SchemeData>, Box<SchemeData>), Location),
-  Continuation(fn(SchemeData) -> SchemeData, Location),
+  Identifier(String, SchemeDataMeta),
+  Number(f64, SchemeDataMeta),
+  String(String, SchemeDataMeta),
+  Boolean(bool, SchemeDataMeta),
+  List((Box<SchemeData>, Box<SchemeData>), SchemeDataMeta),
+  Continuation(
+    fn(SchemeData) -> SchemeData,
+    SchemeDataMeta
+  ),
   Procedure(
     (String, Box<SchemeData>, Box<SchemeData>, Rc<Env>),
-    Location,
+    SchemeDataMeta,
   ),
 }
 
@@ -26,28 +37,28 @@ pub struct ParseError {
 }
 
 impl SchemeData {
-  pub fn get_loc(&self) -> Location {
+  pub fn get_loc(&self) -> Option<Location> {
     match self {
-      SchemeData::Identifier(_, loc) => loc.clone(),
-      SchemeData::Number(_, loc) => loc.clone(),
-      SchemeData::String(_, loc) => loc.clone(),
-      SchemeData::Boolean(_, loc) => loc.clone(),
-      SchemeData::List(_, loc) => loc.clone(),
-      SchemeData::Continuation(_, loc) => loc.clone(),
-      SchemeData::Procedure(_, loc) => loc.clone(),
-      _ => panic!(),
+      SchemeData::Identifier(_, meta) => meta.loc.clone(),
+      SchemeData::Number(_, meta) => meta.loc.clone(),
+      SchemeData::String(_, meta) => meta.loc.clone(),
+      SchemeData::Boolean(_, meta) => meta.loc.clone(),
+      SchemeData::List(_, meta) => meta.loc.clone(),
+      SchemeData::Continuation(_, meta) => meta.loc.clone(),
+      SchemeData::Procedure(_, meta) => meta.loc.clone(),
+      _ => None,
     }
   }
 
   pub fn set_loc(&mut self, new_loc: Location) -> &Self {
     match self {
-      SchemeData::Identifier(_, loc) => *loc = new_loc,
-      SchemeData::Number(_, loc) => *loc = new_loc,
-      SchemeData::String(_, loc) => *loc = new_loc,
-      SchemeData::Boolean(_, loc) => *loc = new_loc,
-      SchemeData::List(_, loc) => *loc = new_loc,
-      SchemeData::Continuation(_, loc) => *loc = new_loc,
-      SchemeData::Procedure(_, loc) => *loc = new_loc,
+      SchemeData::Identifier(_, meta) => meta.loc = Some(new_loc),
+      SchemeData::Number(_, meta) => meta.loc = Some(new_loc),
+      SchemeData::String(_, meta) => meta.loc = Some(new_loc),
+      SchemeData::Boolean(_, meta) => meta.loc = Some(new_loc),
+      SchemeData::List(_, meta) => meta.loc = Some(new_loc),
+      SchemeData::Continuation(_, meta) => meta.loc = Some(new_loc),
+      SchemeData::Procedure(_, meta) => meta.loc = Some(new_loc),
       _ => panic!(),
     };
     self
@@ -61,23 +72,28 @@ impl SchemeData {
 
   pub fn build_list_from_vec(list: &mut Vec<SchemeData>) -> SchemeData {
     let mut data = SchemeData::Nil;
-    let last_loc = if let Some(last) = list.last() {
+    let Some(last_loc) = if let Some(last) = list.last() {
       last.get_loc()
     } else {
       Default::default()
     };
 
     while let Some(item) = list.pop() {
-      let loc = item.get_loc();
-      data = SchemeData::List(
-        (Box::new(item), Box::new(data)),
-        Location {
-          line_start: loc.line_start,
-          column_start: loc.column_start,
-          line_end: last_loc.line_end,
-          column_end: last_loc.column_end,
-        },
-      )
+      if let Some(loc) = item.get_loc() {
+        data = SchemeData::List(
+          (Box::new(item), Box::new(data)),
+          SchemeDataMeta {
+            data: None,
+            env: None,
+            loc: Some(Location {
+              line_start: loc.line_start,
+              column_start: loc.column_start,
+              line_end: last_loc.line_end,
+              column_end: last_loc.column_end,
+            })
+          }
+        )
+      }
     }
 
     data
@@ -94,10 +110,10 @@ impl SchemeData {
         // ignore WhiteSpace and EOL
         TokenType::WhiteSpace => continue,
         TokenType::EOL => continue,
-        TokenType::Identifier(item) => SchemeData::Identifier(item, loc),
-        TokenType::Number(item) => SchemeData::Number(item, loc),
-        TokenType::String(item) => SchemeData::String(item, loc),
-        TokenType::Boolean(item) => SchemeData::Boolean(item, loc),
+        TokenType::Identifier(item) => SchemeData::Identifier(item, SchemeDataMeta { loc: Some(loc), data: None, env: None }),
+        TokenType::Number(item) => SchemeData::Number(item, SchemeDataMeta { loc: Some(loc), data: None, env: None }),
+        TokenType::String(item) => SchemeData::String(item, SchemeDataMeta { loc: Some(loc), data: None, env: None }),
+        TokenType::Boolean(item) => SchemeData::Boolean(item, SchemeDataMeta { loc: Some(loc), data: None, env: None }),
         TokenType::Quote => {
           if let Some(peek) = list.last() {
             match peek.token {
