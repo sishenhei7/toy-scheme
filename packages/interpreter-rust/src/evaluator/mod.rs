@@ -12,26 +12,32 @@ mod set;
 use crate::parser::SchemeData;
 
 struct Evaluator {
-  // why dyn ?
-  evaluators: Vec<Box<dyn IEvaluator>>,
+  i_evaluators: Vec<Box<dyn IEvaluator>>
 }
 
 pub trait IEvaluator {
-  fn evaluate(&self) -> SchemeData {
-    SchemeData::Nil
-  }
+  fn can_match(&self) -> bool;
+  fn evaluate(&self) -> SchemeData;
 }
 
 impl Evaluator {
-  pub fn new(&self) -> Self {
-    let mut res = Evaluator { evaluators: vec![] };
-    res
-      .evaluators
-      .extend(vec![Box::new(begin::BeginEvaluator::new(&res))]);
-    res
+  pub fn new() -> Self {
+    Evaluator {
+      i_evaluators: vec![
+        Box::new(begin::BeginEvaluator),
+        Box::new(buildin::BuildinEvaluator),
+        Box::new(call_cc::CallCcEvaluator),
+        Box::new(cond::CondEvaluator),
+        Box::new(define::DefineEvaluator),
+        Box::new(if_eval::IfEvalEvaluator),
+        Box::new(lambda::LambdaEvaluator),
+        Box::new(let_eval::LetEvalEvaluator),
+        Box::new(proc::ProcEvaluator),
+        Box::new(set::SetEvaluator),
+      ]
+    }
   }
-
-  pub fn evaluate() -> SchemeData {
+  pub fn evaluate(&self) -> SchemeData {
     SchemeData::Nil
   }
 }
