@@ -72,27 +72,27 @@ mod tests {
     let mut env = Env::new();
     env.define(
       "test",
-      SchemeData::Number(1 as f64, SchemeData::build_default_loc()),
+      SchemeData::Number(1 as f64, SchemeData::build_default_meta()),
     );
     assert_eq!(
       env.get("test").unwrap(),
-      SchemeData::Number(1 as f64, SchemeData::build_default_loc())
+      SchemeData::Number(1 as f64, SchemeData::build_default_meta())
     );
     env.set(
       "test",
-      SchemeData::String("test".to_string(), SchemeData::build_default_loc()),
+      SchemeData::String("test".to_string(), SchemeData::build_default_meta()),
     );
     assert_eq!(
       env.get("test").unwrap(),
-      SchemeData::String("test".to_string(), SchemeData::build_default_loc())
+      SchemeData::String("test".to_string(), SchemeData::build_default_meta())
     );
     env.modify(
       "test",
-      SchemeData::Boolean(false, SchemeData::build_default_loc()),
+      SchemeData::Boolean(false, SchemeData::build_default_meta()),
     );
     assert_eq!(
       env.get("test").unwrap(),
-      SchemeData::Boolean(false, SchemeData::build_default_loc())
+      SchemeData::Boolean(false, SchemeData::build_default_meta())
     );
   }
 }
