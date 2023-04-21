@@ -24,9 +24,11 @@ pub trait IEvaluator {
 
 impl Evaluator {
   pub fn new(&self) -> Self {
-    Evaluator {
-      evaluators: vec![Box::new(begin::BeginEvaluator::new(&self))],
-    }
+    let mut res = Evaluator { evaluators: vec![] };
+    res
+      .evaluators
+      .extend(vec![Box::new(begin::BeginEvaluator::new(&res))]);
+    res
   }
 
   pub fn evaluate() -> SchemeData {
