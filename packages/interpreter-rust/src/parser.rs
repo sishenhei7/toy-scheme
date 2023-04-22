@@ -8,8 +8,21 @@ use crate::lexer::*;
 #[derive(Debug, Default, PartialEq, Clone)]
 pub struct SchemeDataMeta {
   loc: Option<Location>,
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct SchemeCont {
+  func: fn(SchemeData) -> SchemeData,
   env: Option<Rc<RefCell<Env>>>,
   data: Option<Box<SchemeData>>,
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct SchemeProc {
+  name: String,
+  params: Box<SchemeData>,
+  body: Box<SchemeData>,
+  env: Rc<RefCell<Env>>,
 }
 
 // TODO: scheme 里面的 data 都是保存在 heap 里面的，我们这里需要用 Rc 和 RefCell 包裹吗？
@@ -21,11 +34,8 @@ pub enum SchemeData {
   String(String, SchemeDataMeta),
   Boolean(bool, SchemeDataMeta),
   List((Box<SchemeData>, Box<SchemeData>), SchemeDataMeta),
-  Continuation(fn(SchemeData) -> SchemeData, SchemeDataMeta),
-  Procedure(
-    (String, Box<SchemeData>, Box<SchemeData>, Rc<Env>),
-    SchemeDataMeta,
-  ),
+  Continuation(SchemeCont, SchemeDataMeta),
+  Procedure(SchemeProc, SchemeDataMeta),
 }
 
 #[derive(Debug)]
@@ -68,11 +78,7 @@ impl SchemeData {
   }
 
   pub fn build_default_meta() -> SchemeDataMeta {
-    SchemeDataMeta {
-      data: None,
-      env: None,
-      loc: None,
-    }
+    SchemeDataMeta { loc: None }
   }
 
   pub fn build_list_from_vec(list: &mut Vec<SchemeData>) -> SchemeData {
@@ -88,8 +94,6 @@ impl SchemeData {
         data = SchemeData::List(
           (Box::new(item), Box::new(data)),
           SchemeDataMeta {
-            data: None,
-            env: None,
             loc: Some(Location {
               line_start: loc.line_start,
               column_start: loc.column_start,
@@ -115,38 +119,12 @@ impl SchemeData {
         // ignore WhiteSpace and EOL
         TokenType::WhiteSpace => continue,
         TokenType::EOL => continue,
-        TokenType::Identifier(item) => SchemeData::Identifier(
-          item,
-          SchemeDataMeta {
-            loc: Some(loc),
-            data: None,
-            env: None,
-          },
-        ),
-        TokenType::Number(item) => SchemeData::Number(
-          item,
-          SchemeDataMeta {
-            loc: Some(loc),
-            data: None,
-            env: None,
-          },
-        ),
-        TokenType::String(item) => SchemeData::String(
-          item,
-          SchemeDataMeta {
-            loc: Some(loc),
-            data: None,
-            env: None,
-          },
-        ),
-        TokenType::Boolean(item) => SchemeData::Boolean(
-          item,
-          SchemeDataMeta {
-            loc: Some(loc),
-            data: None,
-            env: None,
-          },
-        ),
+        TokenType::Identifier(item) => {
+          SchemeData::Identifier(item, SchemeDataMeta { loc: Some(loc) })
+        }
+        TokenType::Number(item) => SchemeData::Number(item, SchemeDataMeta { loc: Some(loc) }),
+        TokenType::String(item) => SchemeData::String(item, SchemeDataMeta { loc: Some(loc) }),
+        TokenType::Boolean(item) => SchemeData::Boolean(item, SchemeDataMeta { loc: Some(loc) }),
         TokenType::Quote => {
           if let Some(peek) = list.last() {
             match peek.token {
@@ -226,8 +204,6 @@ mod tests {
               Box::new(SchemeData::Identifier(
                 "+".to_string(),
                 SchemeDataMeta {
-                  data: None,
-                  env: None,
                   loc: Some(Location {
                     line_start: 1,
                     column_start: 2,
@@ -241,8 +217,6 @@ mod tests {
                   Box::new(SchemeData::Number(
                     1 as f64,
                     SchemeDataMeta {
-                      data: None,
-                      env: None,
                       loc: Some(Location {
                         line_start: 1,
                         column_start: 4,
@@ -256,8 +230,6 @@ mod tests {
                       Box::new(SchemeData::Number(
                         2 as f64,
                         SchemeDataMeta {
-                          data: None,
-                          env: None,
                           loc: Some(Location {
                             line_start: 1,
                             column_start: 6,
@@ -269,8 +241,6 @@ mod tests {
                       Box::new(SchemeData::Nil)
                     ),
                     SchemeDataMeta {
-                      data: None,
-                      env: None,
                       loc: Some(Location {
                         line_start: 1,
                         column_start: 6,
@@ -281,8 +251,6 @@ mod tests {
                   ))
                 ),
                 SchemeDataMeta {
-                  data: None,
-                  env: None,
                   loc: Some(Location {
                     line_start: 1,
                     column_start: 4,
@@ -293,8 +261,6 @@ mod tests {
               ))
             ),
             SchemeDataMeta {
-              data: None,
-              env: None,
               loc: Some(Location {
                 line_start: 1,
                 column_start: 1,
@@ -306,8 +272,6 @@ mod tests {
           Box::new(SchemeData::Nil)
         ),
         SchemeDataMeta {
-          data: None,
-          env: None,
           loc: Some(Location {
             line_start: 1,
             column_start: 1,
