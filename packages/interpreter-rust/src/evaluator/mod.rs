@@ -9,10 +9,11 @@ mod let_eval;
 mod proc;
 mod set;
 
-use crate::parser::SchemeData;
+use crate::env::Env;
+use crate::parser::{SchemeCont, SchemeData};
 
 struct Evaluator {
-  i_evaluators: Vec<Box<dyn IEvaluator>>
+  i_evaluators: Vec<Box<dyn IEvaluator>>,
 }
 
 pub trait IEvaluator {
@@ -34,10 +35,10 @@ impl Evaluator {
         Box::new(let_eval::LetEvalEvaluator),
         Box::new(proc::ProcEvaluator),
         Box::new(set::SetEvaluator),
-      ]
+      ],
     }
   }
-  pub fn evaluate(&self) -> SchemeData {
+  pub fn evaluate(&self, data: &SchemeData, env: &Env, cont: SchemeCont) -> SchemeData {
     SchemeData::Nil
   }
 }

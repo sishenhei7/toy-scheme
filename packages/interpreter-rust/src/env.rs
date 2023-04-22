@@ -2,7 +2,7 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 
-use crate::parser::SchemeData;
+use crate::parser::{SchemeBoolean, SchemeData, SchemeNumber, SchemeString};
 
 #[derive(Debug, PartialEq)]
 pub struct Stackframe {
@@ -66,33 +66,19 @@ impl Env {
 #[cfg(test)]
 mod tests {
   use super::*;
+  use crate::{build_boolean, build_number, build_string};
 
   #[test]
   fn test() -> () {
     let mut env = Env::new();
-    env.define(
-      "test",
-      SchemeData::Number(1 as f64, SchemeData::build_default_meta()),
-    );
+    env.define("test", build_number!(1 as f64, None));
+    assert_eq!(env.get("test").unwrap(), build_number!(1 as f64, None));
+    env.set("test", build_string!("test".to_string(), None));
     assert_eq!(
       env.get("test").unwrap(),
-      SchemeData::Number(1 as f64, SchemeData::build_default_meta())
+      build_string!("test".to_string(), None)
     );
-    env.set(
-      "test",
-      SchemeData::String("test".to_string(), SchemeData::build_default_meta()),
-    );
-    assert_eq!(
-      env.get("test").unwrap(),
-      SchemeData::String("test".to_string(), SchemeData::build_default_meta())
-    );
-    env.modify(
-      "test",
-      SchemeData::Boolean(false, SchemeData::build_default_meta()),
-    );
-    assert_eq!(
-      env.get("test").unwrap(),
-      SchemeData::Boolean(false, SchemeData::build_default_meta())
-    );
+    env.modify("test", build_boolean!(false, None));
+    assert_eq!(env.get("test").unwrap(), build_boolean!(false, None));
   }
 }
