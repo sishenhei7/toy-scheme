@@ -3,7 +3,7 @@ use std::rc::Rc;
 use std::vec;
 
 use crate::env::Env;
-use crate::lexer::*;
+use crate::lexer::{Location, TokenItem, TokenType};
 
 // TODO: make these attributes private
 #[derive(Debug, PartialEq, Clone)]
@@ -248,6 +248,7 @@ pub fn parse(mut list: Vec<TokenItem>) -> Result<SchemeData, ParseError> {
 #[cfg(test)]
 mod tests {
   use super::*;
+  use crate::lexer::tokenize;
 
   #[test]
   fn test_add() {
