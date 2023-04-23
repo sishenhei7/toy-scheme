@@ -1,6 +1,6 @@
 use std::cell::RefCell;
 use std::rc::Rc;
-use std::vec;
+use std::{option, vec};
 
 use crate::env::Env;
 use crate::lexer::{Location, TokenItem, TokenType};
@@ -53,6 +53,13 @@ pub struct SchemeProc {
   pub loc: Option<Location>,
 }
 
+// 仅作为程序执行的容器
+#[derive(Debug, PartialEq, Clone)]
+pub struct SchemeVec {
+  value: Vec<SchemeExp>,
+  loc: Option<Location>,
+}
+
 // TODO: scheme 里面的 data 都是保存在 heap 里面的，我们这里需要用 Rc 和 RefCell 包裹吗？
 #[derive(Debug, PartialEq, Clone)]
 pub enum SchemeData {
@@ -64,6 +71,12 @@ pub enum SchemeData {
   List(SchemeList),
   Continuation(SchemeCont),
   Procedure(SchemeProc),
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub enum SchemeExp {
+  Data(SchemeData),
+  Vec(SchemeVec),
 }
 
 #[derive(Debug)]

@@ -1,3 +1,6 @@
+use std::cell::RefCell;
+use std::rc::Rc;
+
 mod begin;
 mod buildin;
 mod call_cc;
@@ -16,9 +19,17 @@ struct Evaluator {
   i_evaluators: Vec<Box<dyn IEvaluator>>,
 }
 
+struct EvaluateError;
+
 pub trait IEvaluator {
   fn can_match(&self) -> bool;
-  fn evaluate(&self) -> SchemeData;
+  fn evaluate(
+    &self,
+    data: &SchemeData,
+    env: Rc<RefCell<Env>>,
+    cont: &SchemeCont,
+    base_evaluator: Evaluator,
+  ) -> SchemeCont;
 }
 
 impl Evaluator {
@@ -38,7 +49,29 @@ impl Evaluator {
       ],
     }
   }
-  pub fn evaluate(&self, data: &SchemeData, env: &Env, cont: SchemeCont) -> SchemeData {
-    SchemeData::Nil
+  pub fn evaluate(
+    &self,
+    data: &SchemeData,
+    env: &Rc<RefCell<Env>>,
+    cont: &SchemeCont,
+  ) -> Result<SchemeCont, EvaluateError> {
+    match data {
+      SchemeData::List(value) => Ok(SchemeData::Nil),
+      SchemeData::Identifier(identifier) => match env.borrow_mut().get(&identifier.value) {
+        Some(x) => Ok(SchemeCont {
+          func: cont.func.clone(),
+          loc: data.get_loc(),
+          data: Some(Box::new(x.clone())),
+          env: Some(env.clone()),
+        }),
+        None => Err(EvaluateError),
+      },
+      _ => Ok(SchemeCont {
+        func: cont.func.clone(),
+        loc: data.get_loc(),
+        data: Some(Box::new(data.clone())),
+        env: Some(env.clone()),
+      }),
+    }
   }
 }
