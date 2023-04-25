@@ -53,11 +53,10 @@ pub struct SchemeProc {
   pub loc: Option<Location>,
 }
 
-// 仅作为程序执行的容器
 #[derive(Debug, PartialEq, Clone)]
 pub struct SchemeVec {
-  value: Vec<SchemeExp>,
-  loc: Option<Location>,
+  pub value: Vec<SchemeData>,
+  pub loc: Option<Location>,
 }
 
 // TODO: scheme 里面的 data 都是保存在 heap 里面的，我们这里需要用 Rc 和 RefCell 包裹吗？
@@ -71,12 +70,7 @@ pub enum SchemeData {
   List(SchemeList),
   Continuation(SchemeCont),
   Procedure(SchemeProc),
-}
-
-#[derive(Debug, PartialEq, Clone)]
-pub enum SchemeExp {
-  Data(SchemeData),
-  Vec(SchemeVec),
+  Vec(SchemeVec), // only for schemedata wrapper
 }
 
 #[derive(Debug)]
@@ -134,6 +128,16 @@ macro_rules! build_list {
   };
 }
 
+#[macro_export]
+macro_rules! build_vec {
+  ($vec:expr, $loc:expr) => {
+    SchemeData::Vec(SchemeVec {
+      value: $vec,
+      loc: $loc,
+    })
+  };
+}
+
 impl SchemeData {
   pub fn get_loc(&self) -> Option<Location> {
     match self {
@@ -144,6 +148,7 @@ impl SchemeData {
       SchemeData::List(x) => x.loc.clone(),
       SchemeData::Continuation(x) => x.loc.clone(),
       SchemeData::Procedure(x) => x.loc.clone(),
+      SchemeData::Vec(x) => x.loc.clone(),
       _ => None,
     }
   }
@@ -157,6 +162,7 @@ impl SchemeData {
       SchemeData::List(x) => x.loc = Some(new_loc),
       SchemeData::Continuation(x) => x.loc = Some(new_loc),
       SchemeData::Procedure(x) => x.loc = Some(new_loc),
+      SchemeData::Vec(x) => x.loc = Some(new_loc),
       _ => panic!(),
     };
     self
@@ -164,19 +170,22 @@ impl SchemeData {
 
   pub fn build_default_loc() -> Location {
     Location {
-      ..Default::default()
+      line_start: 1,
+      column_start: 1,
+      line_end: 1,
+      column_end: 1,
     }
   }
 
-  pub fn build_list_from_vec(list: &mut Vec<SchemeData>) -> SchemeData {
+  pub fn build_list_from_vec(vec: &mut Vec<SchemeData>) -> SchemeData {
     let mut data = SchemeData::Nil;
-    let last_loc = if let Some(last) = list.last() {
+    let last_loc = if let Some(last) = vec.last() {
       last.get_loc().unwrap_or(Default::default())
     } else {
       Default::default()
     };
 
-    while let Some(item) = list.pop() {
+    while let Some(item) = vec.pop() {
       if let Some(loc) = item.get_loc() {
         data = SchemeData::List(SchemeList {
           value: (Box::new(item), Box::new(data)),
@@ -195,8 +204,8 @@ impl SchemeData {
 
   pub fn parse_list_from_end(
     list: &mut Vec<TokenItem>,
-    left_paren_loc: Option<Location>,
-  ) -> Result<SchemeData, ParseError> {
+    left_paren_loc: Location,
+  ) -> Result<SchemeVec, ParseError> {
     let mut scheme_data_list: Vec<SchemeData> = vec![];
 
     while let Some(TokenItem { token, loc }) = list.pop() {
@@ -210,30 +219,31 @@ impl SchemeData {
         TokenType::Boolean(value) => build_boolean!(value, Some(loc)),
         TokenType::Quote => {
           if let Some(peek) = list.last() {
-            match peek.token {
-              TokenType::LParen => SchemeData::parse_list_from_end(list, None)?,
-              _ => SchemeData::parse_list_from_end(&mut vec![list.pop().unwrap()], None)?,
-            }
+            let mut quote_vec = match peek.token {
+              TokenType::LParen => SchemeData::parse_list_from_end(list, loc)?,
+              _ => SchemeData::parse_list_from_end(&mut vec![list.pop().unwrap()], loc)?,
+            };
+            SchemeData::build_list_from_vec(&mut quote_vec.value)
           } else {
-            SchemeData::Nil
+            return Err(ParseError {
+              msg: "Quote parsing error!".to_string(),
+            });
           }
         }
-        TokenType::LParen => SchemeData::parse_list_from_end(list, Some(loc))?,
+        TokenType::LParen => {
+          let paren_vec = SchemeData::parse_list_from_end(list, loc)?;
+          SchemeData::Vec(paren_vec)
+        }
         TokenType::RParen => {
-          return if let Some(left_loc) = left_paren_loc {
-            let mut data = SchemeData::build_list_from_vec(&mut scheme_data_list);
-            data.set_loc(Location {
-              line_start: left_loc.line_start,
-              column_start: left_loc.column_start,
+          return Ok(SchemeVec {
+            value: scheme_data_list,
+            loc: Some(Location {
+              line_start: left_paren_loc.line_start,
+              column_start: left_paren_loc.column_start,
               line_end: loc.line_end,
               column_end: loc.column_end,
-            });
-            Ok(data)
-          } else {
-            Err(ParseError {
-              msg: "Right parens are more than left parens!".to_string(),
-            })
-          }
+            }),
+          });
         }
         _ => {
           return Err(ParseError {
@@ -243,19 +253,30 @@ impl SchemeData {
       })
     }
 
-    if left_paren_loc.is_some() {
-      return Err(ParseError {
-        msg: "Left parens are more than left parens!".to_string(),
-      });
-    }
-
-    Ok(SchemeData::build_list_from_vec(&mut scheme_data_list))
+    return if let Some(last_data) = scheme_data_list.last() {
+      let last_loc = last_data
+        .get_loc()
+        .unwrap_or(SchemeData::build_default_loc());
+      Ok(SchemeVec {
+        value: scheme_data_list,
+        loc: Some(Location {
+          line_start: left_paren_loc.line_start,
+          column_start: left_paren_loc.column_start,
+          line_end: last_loc.line_end,
+          column_end: last_loc.column_end,
+        }),
+      })
+    } else {
+      Err(ParseError {
+        msg: "Parsing null!".to_string(),
+      })
+    };
   }
 }
 
-pub fn parse(mut list: Vec<TokenItem>) -> Result<SchemeData, ParseError> {
+pub fn parse(mut list: Vec<TokenItem>) -> Result<SchemeVec, ParseError> {
   list.reverse();
-  SchemeData::parse_list_from_end(&mut list, None)
+  SchemeData::parse_list_from_end(&mut list, SchemeData::build_default_loc())
 }
 
 #[cfg(test)]
