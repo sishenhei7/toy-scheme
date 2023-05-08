@@ -1,6 +1,5 @@
 use std::cell::RefCell;
 use std::rc::Rc;
-use std::{option, vec};
 
 use crate::env::Env;
 use crate::lexer::{Location, TokenItem, TokenType};
@@ -287,21 +286,24 @@ mod tests {
   #[test]
   fn test_add() {
     let tokens = tokenize("(+ 1 2)").unwrap_or(vec![]);
-    let data = parse(tokens).unwrap_or(SchemeData::Nil);
+    let data = parse(tokens).unwrap_or(SchemeVec {
+      value: vec![],
+      loc: None,
+    });
     assert_eq!(
       data,
-      build_list!(
-        build_list!(
-          build_identifier!(
-            "+".to_string(),
-            Some(Location {
-              line_start: 1,
-              column_start: 2,
-              line_end: 1,
-              column_end: 3
-            })
-          ),
-          build_list!(
+      SchemeVec {
+        value: vec![SchemeData::Vec(SchemeVec {
+          value: vec![
+            build_identifier!(
+              "+".to_string(),
+              Some(Location {
+                line_start: 1,
+                column_start: 2,
+                line_end: 1,
+                column_end: 3
+              })
+            ),
             build_number!(
               1 as f64,
               Some(Location {
@@ -311,46 +313,30 @@ mod tests {
                 column_end: 5
               })
             ),
-            build_list!(
-              build_number!(
-                2 as f64,
-                Some(Location {
-                  line_start: 1,
-                  column_start: 6,
-                  line_end: 1,
-                  column_end: 7
-                })
-              ),
-              SchemeData::Nil,
+            build_number!(
+              2 as f64,
               Some(Location {
                 line_start: 1,
                 column_start: 6,
                 line_end: 1,
                 column_end: 7
               })
-            ),
-            Some(Location {
-              line_start: 1,
-              column_start: 4,
-              line_end: 1,
-              column_end: 7
-            })
-          ),
-          Some(Location {
+            )
+          ],
+          loc: Some(Location {
             line_start: 1,
             column_start: 1,
             line_end: 1,
             column_end: 8
           })
-        ),
-        SchemeData::Nil,
-        Some(Location {
+        })],
+        loc: Some(Location {
           line_start: 1,
           column_start: 1,
           line_end: 1,
           column_end: 8
         })
-      )
+      }
     );
   }
 }

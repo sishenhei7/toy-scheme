@@ -13,7 +13,7 @@ mod proc;
 mod set;
 
 use crate::env::Env;
-use crate::parser::{SchemeCont, SchemeData};
+use crate::parser::{SchemeCont, SchemeData, SchemeVec};
 
 struct Evaluator {
   i_evaluators: Vec<Box<dyn IEvaluator>>,
@@ -25,11 +25,11 @@ pub trait IEvaluator {
   fn can_match(&self) -> bool;
   fn evaluate(
     &self,
-    data: &SchemeData,
-    env: Rc<RefCell<Env>>,
-    cont: &SchemeCont,
-    base_evaluator: Evaluator,
-  ) -> SchemeCont;
+    // data: &SchemeData,
+    // env: Rc<RefCell<Env>>,
+    // cont: &SchemeCont,
+    // base_evaluator: Evaluator,
+  ) -> SchemeData;
 }
 
 impl Evaluator {
@@ -56,7 +56,7 @@ impl Evaluator {
     cont: &SchemeCont,
   ) -> Result<SchemeCont, EvaluateError> {
     match data {
-      SchemeData::List(value) => Ok(SchemeData::Nil),
+      SchemeData::Vec(x) => self.evaluateVec(x, env, cont),
       SchemeData::Identifier(identifier) => match env.borrow_mut().get(&identifier.value) {
         Some(x) => Ok(SchemeCont {
           func: cont.func.clone(),
@@ -73,5 +73,13 @@ impl Evaluator {
         env: Some(env.clone()),
       }),
     }
+  }
+  pub fn evaluateVec(
+    &self,
+    data: &SchemeVec,
+    env: &Rc<RefCell<Env>>,
+    cont: &SchemeCont,
+  ) -> Result<SchemeCont, EvaluateError> {
+    Err(EvaluateError)
   }
 }
