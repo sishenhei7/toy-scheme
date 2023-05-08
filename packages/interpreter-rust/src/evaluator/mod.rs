@@ -22,7 +22,7 @@ struct Evaluator {
 struct EvaluateError;
 
 pub trait IEvaluator {
-  fn can_match(&self) -> bool;
+  fn can_match(&self, data: &SchemeExp) -> bool;
   fn evaluate(
     &self,
     // data: &SchemeData,
@@ -80,6 +80,16 @@ impl Evaluator {
     env: &Rc<RefCell<Env>>,
     cont: &SchemeCont,
   ) -> Result<SchemeCont, EvaluateError> {
+    for i_evaluator in self.i_evaluators {
+      if i_evaluator.can_match(data) {
+        return Ok(SchemeCont {
+          func: |_| i_evaluator.evaluate(data, env, cont),
+          loc: data.loc.clone(),
+          data: None,
+          env: Some(env.clone()),
+        });
+      }
+    }
     Err(EvaluateError)
   }
 }
