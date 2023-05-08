@@ -56,7 +56,7 @@ impl Evaluator {
     cont: &SchemeCont,
   ) -> Result<SchemeCont, EvaluateError> {
     match data {
-      SchemeData::Exp(x) => self.evaluateExp(x, env, cont),
+      SchemeData::Exp(x) => self.evaluate_exp(x, env, cont),
       SchemeData::Identifier(identifier) => match env.borrow_mut().get(&identifier.value) {
         Some(x) => Ok(SchemeCont {
           func: cont.func.clone(),
@@ -74,7 +74,7 @@ impl Evaluator {
       }),
     }
   }
-  pub fn evaluateExp(
+  pub fn evaluate_exp(
     &self,
     data: &SchemeExp,
     env: &Rc<RefCell<Env>>,
