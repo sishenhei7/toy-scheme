@@ -53,7 +53,7 @@ pub struct SchemeProc {
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct SchemeVec {
+pub struct SchemeExp {
   pub value: Vec<SchemeData>,
   pub loc: Option<Location>,
 }
@@ -69,7 +69,7 @@ pub enum SchemeData {
   List(SchemeList),
   Continuation(SchemeCont),
   Procedure(SchemeProc),
-  Vec(SchemeVec), // only for schemedata wrapper
+  Exp(SchemeExp), // only for schemedata wrapper
 }
 
 #[derive(Debug)]
@@ -128,9 +128,9 @@ macro_rules! build_list {
 }
 
 #[macro_export]
-macro_rules! build_vec {
+macro_rules! build_exp {
   ($vec:expr, $loc:expr) => {
-    SchemeData::Vec(SchemeVec {
+    SchemeData::Exp(SchemeExp {
       value: $vec,
       loc: $loc,
     })
@@ -147,7 +147,7 @@ impl SchemeData {
       SchemeData::List(x) => x.loc.clone(),
       SchemeData::Continuation(x) => x.loc.clone(),
       SchemeData::Procedure(x) => x.loc.clone(),
-      SchemeData::Vec(x) => x.loc.clone(),
+      SchemeData::Exp(x) => x.loc.clone(),
       _ => None,
     }
   }
@@ -161,7 +161,7 @@ impl SchemeData {
       SchemeData::List(x) => x.loc = Some(new_loc),
       SchemeData::Continuation(x) => x.loc = Some(new_loc),
       SchemeData::Procedure(x) => x.loc = Some(new_loc),
-      SchemeData::Vec(x) => x.loc = Some(new_loc),
+      SchemeData::Exp(x) => x.loc = Some(new_loc),
       _ => panic!(),
     };
     self
@@ -204,7 +204,7 @@ impl SchemeData {
   pub fn parse_list_from_end(
     list: &mut Vec<TokenItem>,
     left_paren_loc: Location,
-  ) -> Result<SchemeVec, ParseError> {
+  ) -> Result<SchemeExp, ParseError> {
     let mut scheme_data_list: Vec<SchemeData> = vec![];
 
     while let Some(TokenItem { token, loc }) = list.pop() {
@@ -218,11 +218,11 @@ impl SchemeData {
         TokenType::Boolean(value) => build_boolean!(value, Some(loc)),
         TokenType::Quote => {
           if let Some(peek) = list.last() {
-            let mut quote_vec = match peek.token {
+            let mut quote_exp = match peek.token {
               TokenType::LParen => SchemeData::parse_list_from_end(list, loc)?,
               _ => SchemeData::parse_list_from_end(&mut vec![list.pop().unwrap()], loc)?,
             };
-            SchemeData::build_list_from_vec(&mut quote_vec.value)
+            SchemeData::build_list_from_vec(&mut quote_exp.value)
           } else {
             return Err(ParseError {
               msg: "Quote parsing error!".to_string(),
@@ -230,11 +230,11 @@ impl SchemeData {
           }
         }
         TokenType::LParen => {
-          let paren_vec = SchemeData::parse_list_from_end(list, loc)?;
-          SchemeData::Vec(paren_vec)
+          let paren_exp = SchemeData::parse_list_from_end(list, loc)?;
+          SchemeData::Exp(paren_exp)
         }
         TokenType::RParen => {
-          return Ok(SchemeVec {
+          return Ok(SchemeExp {
             value: scheme_data_list,
             loc: Some(Location {
               line_start: left_paren_loc.line_start,
@@ -256,7 +256,7 @@ impl SchemeData {
       let last_loc = last_data
         .get_loc()
         .unwrap_or(SchemeData::build_default_loc());
-      Ok(SchemeVec {
+      Ok(SchemeExp {
         value: scheme_data_list,
         loc: Some(Location {
           line_start: left_paren_loc.line_start,
@@ -273,7 +273,7 @@ impl SchemeData {
   }
 }
 
-pub fn parse(mut list: Vec<TokenItem>) -> Result<SchemeVec, ParseError> {
+pub fn parse(mut list: Vec<TokenItem>) -> Result<SchemeExp, ParseError> {
   list.reverse();
   SchemeData::parse_list_from_end(&mut list, SchemeData::build_default_loc())
 }
@@ -286,14 +286,14 @@ mod tests {
   #[test]
   fn test_add() {
     let tokens = tokenize("(+ 1 2)").unwrap_or(vec![]);
-    let data = parse(tokens).unwrap_or(SchemeVec {
+    let data = parse(tokens).unwrap_or(SchemeExp {
       value: vec![],
       loc: None,
     });
     assert_eq!(
       data,
-      SchemeVec {
-        value: vec![SchemeData::Vec(SchemeVec {
+      SchemeExp {
+        value: vec![SchemeData::Exp(SchemeExp {
           value: vec![
             build_identifier!(
               "+".to_string(),
