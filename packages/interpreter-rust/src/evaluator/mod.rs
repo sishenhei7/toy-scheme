@@ -25,10 +25,10 @@ pub trait IEvaluator {
   fn can_match(&self, data: &SchemeExp) -> bool;
   fn evaluate(
     &self,
-    // data: &SchemeData,
-    // env: Rc<RefCell<Env>>,
-    // cont: &SchemeCont,
-    // base_evaluator: Evaluator,
+    data: &SchemeExp,
+    env: &Rc<RefCell<Env>>,
+    cont: &SchemeCont,
+    base_evaluator: &Evaluator,
   ) -> SchemeData;
 }
 
@@ -59,17 +59,17 @@ impl Evaluator {
       SchemeData::Exp(x) => self.evaluate_exp(x, env, cont),
       SchemeData::Identifier(identifier) => match env.borrow_mut().get(&identifier.value) {
         Some(x) => Ok(SchemeCont {
-          func: cont.func.clone(),
+          func: cont.func,
           loc: data.get_loc(),
-          data: Some(Box::new(x.clone())),
+          data: Some(Box::new(x)),
           env: Some(env.clone()),
         }),
         None => Err(EvaluateError),
       },
       _ => Ok(SchemeCont {
-        func: cont.func.clone(),
+        func: cont.func,
         loc: data.get_loc(),
-        data: Some(Box::new(data.clone())),
+        data: Some(Box::new(*data)),
         env: Some(env.clone()),
       }),
     }
@@ -83,7 +83,7 @@ impl Evaluator {
     for i_evaluator in self.i_evaluators {
       if i_evaluator.can_match(data) {
         return Ok(SchemeCont {
-          func: |_| i_evaluator.evaluate(data, env, cont),
+          func: Box::new(|_| i_evaluator.evaluate(data, env, cont, self)),
           loc: data.loc.clone(),
           data: None,
           env: Some(env.clone()),
