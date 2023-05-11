@@ -5,10 +5,11 @@ mod begin;
 mod buildin;
 mod call_cc;
 mod cond;
+mod cont;
 mod define;
-mod if_eval;
+mod if_clause;
 mod lambda;
-mod let_eval;
+mod let_clause;
 mod proc;
 mod set;
 
@@ -41,9 +42,9 @@ impl Evaluator {
         Box::new(call_cc::CallCcEvaluator),
         Box::new(cond::CondEvaluator),
         Box::new(define::DefineEvaluator),
-        Box::new(if_eval::IfEvalEvaluator),
+        Box::new(if_clause::IfEvalEvaluator),
         Box::new(lambda::LambdaEvaluator),
-        Box::new(let_eval::LetEvalEvaluator),
+        Box::new(let_clause::LetEvalEvaluator),
         Box::new(proc::ProcEvaluator),
         Box::new(set::SetEvaluator),
       ],
@@ -69,7 +70,7 @@ impl Evaluator {
       _ => Ok(SchemeCont {
         func: cont.func,
         loc: data.get_loc(),
-        data: Some(Box::new(*data)),
+        data: Some(Box::new(data.clone())),
         env: Some(env.clone()),
       }),
     }

@@ -1,13 +1,23 @@
-use crate::evaluator::IEvaluator;
-use crate::parser::SchemeData;
+use std::cell::RefCell;
+use std::rc::Rc;
+
+use crate::env::Env;
+use crate::evaluator::{Evaluator, IEvaluator};
+use crate::parser::{SchemeCont, SchemeData, SchemeExp};
 
 pub struct BuildinEvaluator;
 
 impl IEvaluator for BuildinEvaluator {
-  fn can_match(&self) -> bool {
+  fn can_match(&self, data: &SchemeExp) -> bool {
     true
   }
-  fn evaluate(&self) -> SchemeData {
+  fn evaluate(
+    &self,
+    data: &SchemeExp,
+    env: &Rc<RefCell<Env>>,
+    cont: &SchemeCont,
+    base_evaluator: &Evaluator,
+  ) -> SchemeData {
     SchemeData::Nil
   }
 }

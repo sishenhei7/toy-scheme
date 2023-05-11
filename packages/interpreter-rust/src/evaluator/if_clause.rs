@@ -5,9 +5,9 @@ use crate::env::Env;
 use crate::evaluator::{Evaluator, IEvaluator};
 use crate::parser::{SchemeCont, SchemeData, SchemeExp};
 
-pub struct CondEvaluator;
+pub struct IfEvalEvaluator;
 
-impl IEvaluator for CondEvaluator {
+impl IEvaluator for IfEvalEvaluator {
   fn can_match(&self, data: &SchemeExp) -> bool {
     true
   }
