@@ -52,9 +52,9 @@ impl<'a> Evaluator<'a> {
   }
   pub fn evaluate(
     &self,
-    data: &SchemeData,
-    env: &Rc<RefCell<Env>>,
-    cont: &SchemeCont,
+    data: &'a SchemeData,
+    env: &'a Rc<RefCell<Env>>,
+    cont: &'a SchemeCont,
   ) -> Result<SchemeCont, EvaluateError> {
     match data {
       SchemeData::Exp(x) => self.evaluate_exp(x, env, cont),

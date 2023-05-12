@@ -37,6 +37,7 @@ pub struct SchemeList {
 
 // 由于 rust 暂时还不支持 type 作为 trait，
 // 所以这里暂时不把 SchemeCont 放到 SchemeData 里面去
+// (因为 SchemeData 需要有Debug, PartialEq, Clone特性)
 pub struct SchemeCont {
   pub func: Box<dyn FnMut(SchemeData) -> SchemeData>,
   pub env: Option<Rc<RefCell<Env>>>,
