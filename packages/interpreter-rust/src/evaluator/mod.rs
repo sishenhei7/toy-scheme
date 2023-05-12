@@ -16,24 +16,24 @@ mod set;
 use crate::env::Env;
 use crate::parser::{SchemeCont, SchemeData, SchemeExp};
 
-struct Evaluator {
-  i_evaluators: Vec<Box<dyn IEvaluator>>,
+struct Evaluator<'a> {
+  i_evaluators: Vec<Box<dyn IEvaluator<'a>>>,
 }
 
 struct EvaluateError;
 
-pub trait IEvaluator {
+pub trait IEvaluator<'a> {
   fn can_match(&self, data: &SchemeExp) -> bool;
   fn evaluate(
     &self,
     data: &SchemeExp,
     env: &Rc<RefCell<Env>>,
     cont: &SchemeCont,
-    base_evaluator: &Evaluator,
+    base_evaluator: &'a Evaluator,
   ) -> SchemeData;
 }
 
-impl Evaluator {
+impl<'a> Evaluator<'a> {
   pub fn new() -> Self {
     Evaluator {
       i_evaluators: vec![
@@ -77,11 +77,11 @@ impl Evaluator {
   }
   pub fn evaluate_exp(
     &self,
-    data: &SchemeExp,
-    env: &Rc<RefCell<Env>>,
-    cont: &SchemeCont,
+    data: &'a SchemeExp,
+    env: &'a Rc<RefCell<Env>>,
+    cont: &'a SchemeCont,
   ) -> Result<SchemeCont, EvaluateError> {
-    for i_evaluator in self.i_evaluators {
+    for i_evaluator in self.i_evaluators.iter() {
       if i_evaluator.can_match(data) {
         return Ok(SchemeCont {
           func: Box::new(|_| i_evaluator.evaluate(data, env, cont, self)),
