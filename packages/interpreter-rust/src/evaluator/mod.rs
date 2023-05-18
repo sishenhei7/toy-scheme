@@ -14,7 +14,7 @@ mod proc;
 mod set;
 
 use crate::env::Env;
-use crate::parser::{SchemeCont, SchemeData, SchemeExp};
+use crate::parser::{SchemeCont, SchemeData, SchemeExp, Closure};
 
 struct Evaluator<'a> {
   i_evaluators: Vec<Box<dyn IEvaluator<'a>>>,
@@ -84,7 +84,7 @@ impl<'a> Evaluator<'a> {
     for i_evaluator in self.i_evaluators.iter() {
       if i_evaluator.can_match(data) {
         return Ok(SchemeCont {
-          func: Box::new(|_| i_evaluator.evaluate(data, env, cont, self)),
+          func: Closure::new(|_| i_evaluator.evaluate(data, env, cont, self)),
           loc: data.loc.clone(),
           data: None,
           env: Some(env.clone()),

@@ -2,6 +2,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use crate::env::Env;
+use crate::closure::Closure;
 use crate::lexer::{Location, TokenItem, TokenType};
 
 // TODO: make these attributes private
@@ -38,8 +39,9 @@ pub struct SchemeList {
 // 由于 rust 暂时还不支持 type 作为 trait，
 // 所以这里暂时不把 SchemeCont 放到 SchemeData 里面去
 // (因为 SchemeData 需要有Debug, PartialEq, Clone特性)
+#[derive(Debug, PartialEq, Clone)]
 pub struct SchemeCont {
-  pub func: Box<dyn FnMut(SchemeData) -> SchemeData>,
+  pub func: Closure,
   pub env: Option<Rc<RefCell<Env>>>,
   pub data: Option<Box<SchemeData>>,
   pub loc: Option<Location>,

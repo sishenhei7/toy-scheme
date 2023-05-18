@@ -1,6 +1,7 @@
 pub mod env;
 pub mod lexer;
 pub mod parser;
+pub mod closure;
 pub mod evaluator;
 
 use napi_derive::napi;
