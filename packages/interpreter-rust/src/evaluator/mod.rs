@@ -13,27 +13,28 @@ mod let_clause;
 mod proc;
 mod set;
 
+use crate::closure::Closure;
 use crate::env::Env;
-use crate::parser::{SchemeCont, SchemeData, SchemeExp, Closure};
+use crate::parser::{SchemeCont, SchemeData, SchemeExp};
 
-struct Evaluator<'a> {
-  i_evaluators: Vec<Box<dyn IEvaluator<'a>>>,
+struct Evaluator {
+  i_evaluators: Vec<Box<dyn IEvaluator>>,
 }
 
 struct EvaluateError;
 
-pub trait IEvaluator<'a> {
+pub trait IEvaluator {
   fn can_match(&self, data: &SchemeExp) -> bool;
   fn evaluate(
     &self,
     data: &SchemeExp,
     env: &Rc<RefCell<Env>>,
     cont: &SchemeCont,
-    base_evaluator: &'a Evaluator,
+    base_evaluator: &Evaluator,
   ) -> SchemeData;
 }
 
-impl<'a> Evaluator<'a> {
+impl Evaluator {
   pub fn new() -> Self {
     Evaluator {
       i_evaluators: vec![
@@ -52,15 +53,15 @@ impl<'a> Evaluator<'a> {
   }
   pub fn evaluate(
     &self,
-    data: &'a SchemeData,
-    env: &'a Rc<RefCell<Env>>,
-    cont: &'a SchemeCont,
+    data: &SchemeData,
+    env: &Rc<RefCell<Env>>,
+    cont: &SchemeCont,
   ) -> Result<SchemeCont, EvaluateError> {
     match data {
       SchemeData::Exp(x) => self.evaluate_exp(x, env, cont),
       SchemeData::Identifier(identifier) => match env.borrow_mut().get(&identifier.value) {
         Some(x) => Ok(SchemeCont {
-          func: cont.func,
+          func: cont.func.clone(),
           loc: data.get_loc(),
           data: Some(Box::new(x)),
           env: Some(env.clone()),
@@ -68,7 +69,7 @@ impl<'a> Evaluator<'a> {
         None => Err(EvaluateError),
       },
       _ => Ok(SchemeCont {
-        func: cont.func,
+        func: cont.func.clone(),
         loc: data.get_loc(),
         data: Some(Box::new(data.clone())),
         env: Some(env.clone()),
@@ -77,9 +78,9 @@ impl<'a> Evaluator<'a> {
   }
   pub fn evaluate_exp(
     &self,
-    data: &'a SchemeExp,
-    env: &'a Rc<RefCell<Env>>,
-    cont: &'a SchemeCont,
+    data: &SchemeExp,
+    env: &Rc<RefCell<Env>>,
+    cont: &SchemeCont,
   ) -> Result<SchemeCont, EvaluateError> {
     for i_evaluator in self.i_evaluators.iter() {
       if i_evaluator.can_match(data) {

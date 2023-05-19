@@ -1,8 +1,8 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use crate::env::Env;
 use crate::closure::Closure;
+use crate::env::Env;
 use crate::lexer::{Location, TokenItem, TokenType};
 
 // TODO: make these attributes private
@@ -36,9 +36,6 @@ pub struct SchemeList {
   pub loc: Option<Location>,
 }
 
-// 由于 rust 暂时还不支持 type 作为 trait，
-// 所以这里暂时不把 SchemeCont 放到 SchemeData 里面去
-// (因为 SchemeData 需要有Debug, PartialEq, Clone特性)
 #[derive(Debug, PartialEq, Clone)]
 pub struct SchemeCont {
   pub func: Closure,
@@ -71,6 +68,7 @@ pub enum SchemeData {
   String(SchemeString),
   Boolean(SchemeBoolean),
   List(SchemeList),
+  Continuation(SchemeCont),
   Procedure(SchemeProc),
   Exp(SchemeExp), // only for schemedata wrapper
 }
@@ -148,6 +146,7 @@ impl SchemeData {
       SchemeData::String(x) => x.loc.clone(),
       SchemeData::Boolean(x) => x.loc.clone(),
       SchemeData::List(x) => x.loc.clone(),
+      SchemeData::Continuation(x) => x.loc.clone(),
       SchemeData::Procedure(x) => x.loc.clone(),
       SchemeData::Exp(x) => x.loc.clone(),
       _ => None,
@@ -161,6 +160,7 @@ impl SchemeData {
       SchemeData::String(x) => x.loc = Some(new_loc),
       SchemeData::Boolean(x) => x.loc = Some(new_loc),
       SchemeData::List(x) => x.loc = Some(new_loc),
+      SchemeData::Continuation(x) => x.loc = Some(new_loc),
       SchemeData::Procedure(x) => x.loc = Some(new_loc),
       SchemeData::Exp(x) => x.loc = Some(new_loc),
       _ => panic!(),
