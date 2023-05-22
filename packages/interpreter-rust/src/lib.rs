@@ -27,7 +27,8 @@ impl Interpreter {
     let token_list = tokenize(&program).or(Err(InterpreterError))?;
     let scheme_exp = parse(token_list).or(Err(InterpreterError))?;
     let evaluator = Evaluator::new();
-    let node = evaluator.evaluate_exp(&scheme_exp, &Rc::new(RefCell::new(Env::new())), &SchemeCont { func: Closure::new(|x| x), env: None, data: None, loc: None }).or(Err(InterpreterError))?;
+    let initial_cont = SchemeCont { func: Closure::new(|x| x), env: None, data: None, loc: None };
+    let node = evaluator.evaluate_exp(&scheme_exp, &Rc::new(RefCell::new(Env::new())), &initialCont).or(Err(InterpreterError))?;
     Ok(Self { node })
   }
 }
