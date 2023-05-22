@@ -17,7 +17,7 @@ use crate::closure::Closure;
 use crate::env::Env;
 use crate::parser::{SchemeCont, SchemeData, SchemeExp};
 
-struct Evaluator {
+pub struct Evaluator {
   i_evaluators: Vec<Box<dyn IEvaluator>>,
 }
 
