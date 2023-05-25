@@ -14,12 +14,23 @@ pub enum TokenType {
   EOL,
 }
 
-#[derive(Debug, PartialEq, Clone, Default)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Location {
   pub line_start: usize,
   pub column_start: usize,
   pub line_end: usize,
   pub column_end: usize,
+}
+
+impl Default for Location {
+  fn default() -> Self {
+    Self {
+      line_start: 1,
+      column_start: 1,
+      line_end: 1,
+      column_end: 1,
+    }
+  }
 }
 
 #[derive(Debug, PartialEq)]

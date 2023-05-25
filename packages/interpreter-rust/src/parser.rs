@@ -166,15 +166,6 @@ impl SchemeData {
     self
   }
 
-  pub fn build_default_loc() -> Location {
-    Location {
-      line_start: 1,
-      column_start: 1,
-      line_end: 1,
-      column_end: 1,
-    }
-  }
-
   pub fn build_list_from_vec(vec: &mut Vec<SchemeData>) -> SchemeData {
     let mut data = SchemeData::Nil;
     let last_loc = if let Some(last) = vec.last() {
@@ -250,7 +241,7 @@ impl SchemeData {
     return if let Some(last_data) = scheme_data_list.last() {
       let last_loc = last_data
         .get_loc()
-        .unwrap_or(SchemeData::build_default_loc());
+        .unwrap_or(Default::default());
       Ok(SchemeExp {
         value: scheme_data_list,
         loc: Some(Location {
@@ -268,7 +259,7 @@ impl SchemeData {
 
 pub fn parse(mut list: Vec<TokenItem>) -> Result<SchemeExp, Error> {
   list.reverse();
-  SchemeData::parse_list_from_end(&mut list, SchemeData::build_default_loc())
+  SchemeData::parse_list_from_end(&mut list, Default::default())
 }
 
 #[cfg(test)]
