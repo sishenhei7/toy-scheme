@@ -6,24 +6,25 @@ pub mod parser;
 
 use std::cell::RefCell;
 use std::rc::Rc;
-use anyhow::Error;
 
+use anyhow::Error;
 // use napi_derive::napi;
 use closure::*;
+use env::*;
 use evaluator::*;
 use lexer::*;
 use parser::*;
-use env::*;
 
 // #[napi(custom_finalize)]
 pub struct Interpreter {
   node: SchemeCont,
+  evaluator: Evaluator,
 }
 
 struct StepResponse {
   range: Option<Location>,
   stack: Vec<String>,
-  scope: Vec<String>
+  scope: Vec<String>,
 }
 
 impl Interpreter {
@@ -32,9 +33,18 @@ impl Interpreter {
     let token_list = tokenize(&program)?;
     let scheme_exp = parse(token_list)?;
     let evaluator = Evaluator::new();
-    let initial_cont = SchemeCont { func: Closure::new(|x| x), env: None, data: None, loc: None };
-    let node = evaluator.evaluate_exp(&scheme_exp, &Rc::new(RefCell::new(Env::new())), &initial_cont)?;
-    Ok(Self { node })
+    let initial_cont = SchemeCont {
+      func: Closure::new(|x| x),
+      env: None,
+      data: None,
+      loc: None,
+    };
+    let node = evaluator.evaluate_exp(
+      &scheme_exp,
+      &Rc::new(RefCell::new(Env::new())),
+      &initial_cont,
+    )?;
+    Ok(Self { node, evaluator })
   }
 
   // pub fn run(&self) -> String {
