@@ -1,11 +1,12 @@
 use std::cell::RefCell;
 use std::rc::Rc;
+
 use anyhow::Error;
 
 use crate::{
   closure::Closure,
   env::Env,
-  lexer::{Location, TokenItem, TokenType}
+  lexer::{Location, TokenItem, TokenType},
 };
 
 // TODO: make these attributes private
@@ -232,16 +233,12 @@ impl SchemeData {
             }),
           });
         }
-        _ => {
-          return Err(Error::msg("Unexpected token!"))
-        }
+        _ => return Err(Error::msg("Unexpected token!")),
       })
     }
 
     return if let Some(last_data) = scheme_data_list.last() {
-      let last_loc = last_data
-        .get_loc()
-        .unwrap_or(Default::default());
+      let last_loc = last_data.get_loc().unwrap_or(Default::default());
       Ok(SchemeExp {
         value: scheme_data_list,
         loc: Some(Location {

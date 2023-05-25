@@ -72,7 +72,9 @@ pub fn tokenize(program: &str) -> Result<Vec<TokenItem>, Error> {
       '(' => (1, TokenType::LParen),
       ')' => (1, TokenType::RParen),
       '#' => {
-        let next = char_list.get(cursor + 1).ok_or(Error::msg("Token error: boolean!"))?;
+        let next = char_list
+          .get(cursor + 1)
+          .ok_or(Error::msg("Token error: boolean!"))?;
         (
           2,
           TokenType::Boolean(if *next == 't' { true } else { false }),

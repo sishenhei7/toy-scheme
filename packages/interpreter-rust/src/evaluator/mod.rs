@@ -12,12 +12,13 @@ mod set;
 
 use std::cell::RefCell;
 use std::rc::Rc;
+
 use anyhow::Error;
 
 use crate::{
   closure::Closure,
   env::Env,
-  parser::{SchemeCont, SchemeData, SchemeExp}
+  parser::{SchemeCont, SchemeData, SchemeExp},
 };
 
 pub struct Evaluator {

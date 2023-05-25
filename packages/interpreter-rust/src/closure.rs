@@ -2,9 +2,7 @@ use std::cell::RefCell;
 use std::fmt;
 use std::rc::Rc;
 
-use crate::{
-  parser::SchemeData
-};
+use crate::parser::SchemeData;
 
 pub struct Closure(Rc<RefCell<dyn FnMut(SchemeData) -> SchemeData>>);
 

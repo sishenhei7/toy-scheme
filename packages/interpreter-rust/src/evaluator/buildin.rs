@@ -4,7 +4,7 @@ use std::rc::Rc;
 use crate::{
   env::Env,
   evaluator::{Evaluator, IEvaluator},
-  parser::{SchemeCont, SchemeData, SchemeExp}
+  parser::{SchemeCont, SchemeData, SchemeExp},
 };
 
 pub struct BuildinEvaluator;
