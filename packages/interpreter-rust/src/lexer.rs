@@ -1,3 +1,5 @@
+use anyhow::Error;
+
 #[derive(Debug, PartialEq)]
 pub enum TokenType {
   Quote,
@@ -26,11 +28,7 @@ pub struct TokenItem {
   pub loc: Location,
 }
 
-pub struct TokenError {
-  msg: String,
-}
-
-pub fn tokenize(program: &str) -> Result<Vec<TokenItem>, TokenError> {
+pub fn tokenize(program: &str) -> Result<Vec<TokenItem>, Error> {
   let mut cursor = 0;
   let mut line = 1;
   let mut column = 1;
@@ -42,12 +40,10 @@ pub fn tokenize(program: &str) -> Result<Vec<TokenItem>, TokenError> {
     list: &mut Vec<char>,
     mut start: usize,
     stop_check_fn: fn(char) -> bool,
-  ) -> Result<String, TokenError> {
+  ) -> Result<String, Error> {
     let mut content = String::new();
     while start < list.len() {
-      let peek = list.get(start).ok_or(TokenError {
-        msg: "Token error!".to_string(),
-      })?;
+      let peek = list.get(start).ok_or(Error::msg("Token error!"))?;
       if stop_check_fn(*peek) {
         break;
       }
@@ -58,18 +54,14 @@ pub fn tokenize(program: &str) -> Result<Vec<TokenItem>, TokenError> {
   }
 
   while cursor < len {
-    let ch = char_list.get(cursor).ok_or(TokenError {
-      msg: "Token error!".to_string(),
-    })?;
+    let ch = char_list.get(cursor).ok_or(Error::msg("Token error!"))?;
     let (n, token) = match ch {
       '\n' => (1, TokenType::EOL),
       '\'' => (1, TokenType::Quote),
       '(' => (1, TokenType::LParen),
       ')' => (1, TokenType::RParen),
       '#' => {
-        let next = char_list.get(cursor + 1).ok_or(TokenError {
-          msg: "Token error: boolean!".to_string(),
-        })?;
+        let next = char_list.get(cursor + 1).ok_or(Error::msg("Token error: boolean!"))?;
         (
           2,
           TokenType::Boolean(if *next == 't' { true } else { false }),

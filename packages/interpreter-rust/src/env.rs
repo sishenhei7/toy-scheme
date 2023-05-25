@@ -2,7 +2,9 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 
-use crate::parser::{SchemeBoolean, SchemeData, SchemeNumber, SchemeString};
+use crate::{
+  parser::{SchemeBoolean, SchemeData, SchemeNumber, SchemeString}
+};
 
 #[derive(Debug, PartialEq)]
 pub struct Stackframe {

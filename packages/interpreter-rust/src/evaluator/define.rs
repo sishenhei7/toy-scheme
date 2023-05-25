@@ -1,9 +1,11 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use crate::env::Env;
-use crate::evaluator::{Evaluator, IEvaluator};
-use crate::parser::{SchemeCont, SchemeData, SchemeExp};
+use crate::{
+  env::Env,
+  evaluator::{Evaluator, IEvaluator},
+  parser::{SchemeCont, SchemeData, SchemeExp}
+};
 
 pub struct DefineEvaluator;
 

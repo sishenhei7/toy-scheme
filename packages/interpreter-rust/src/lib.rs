@@ -6,6 +6,7 @@ pub mod parser;
 
 use std::cell::RefCell;
 use std::rc::Rc;
+use anyhow::Error;
 
 // use napi_derive::napi;
 use closure::*;
@@ -19,8 +20,6 @@ pub struct Interpreter {
   node: SchemeCont,
 }
 
-pub struct InterpreterError;
-
 struct StepResponse {
   range: Option<Location>,
   stack: Vec<String>,
@@ -29,12 +28,12 @@ struct StepResponse {
 
 impl Interpreter {
   // #[napi(constructor)]
-  pub fn new(program: String) -> Result<Self, InterpreterError> {
-    let token_list = tokenize(&program).or(Err(InterpreterError))?;
-    let scheme_exp = parse(token_list).or(Err(InterpreterError))?;
+  pub fn new(program: String) -> Result<Self, Error> {
+    let token_list = tokenize(&program)?;
+    let scheme_exp = parse(token_list)?;
     let evaluator = Evaluator::new();
     let initial_cont = SchemeCont { func: Closure::new(|x| x), env: None, data: None, loc: None };
-    let node = evaluator.evaluate_exp(&scheme_exp, &Rc::new(RefCell::new(Env::new())), &initial_cont).or(Err(InterpreterError))?;
+    let node = evaluator.evaluate_exp(&scheme_exp, &Rc::new(RefCell::new(Env::new())), &initial_cont)?;
     Ok(Self { node })
   }
 

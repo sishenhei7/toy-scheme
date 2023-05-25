@@ -1,6 +1,3 @@
-use std::cell::RefCell;
-use std::rc::Rc;
-
 mod begin;
 mod buildin;
 mod call_cc;
@@ -13,15 +10,19 @@ mod let_clause;
 mod proc;
 mod set;
 
-use crate::closure::Closure;
-use crate::env::Env;
-use crate::parser::{SchemeCont, SchemeData, SchemeExp};
+use std::cell::RefCell;
+use std::rc::Rc;
+use anyhow::Error;
+
+use crate::{
+  closure::Closure,
+  env::Env,
+  parser::{SchemeCont, SchemeData, SchemeExp}
+};
 
 pub struct Evaluator {
   i_evaluators: Vec<Box<dyn IEvaluator>>,
 }
-
-struct EvaluateError;
 
 pub trait IEvaluator {
   fn can_match(&self, data: &SchemeExp) -> bool;
@@ -56,7 +57,7 @@ impl Evaluator {
     data: &SchemeData,
     env: &Rc<RefCell<Env>>,
     cont: &SchemeCont,
-  ) -> Result<SchemeCont, EvaluateError> {
+  ) -> Result<SchemeCont, Error> {
     match data {
       SchemeData::Exp(x) => self.evaluate_exp(x, env, cont),
       SchemeData::Identifier(identifier) => match env.borrow_mut().get(&identifier.value) {
@@ -66,7 +67,7 @@ impl Evaluator {
           data: Some(Box::new(x)),
           env: Some(env.clone()),
         }),
-        None => Err(EvaluateError),
+        None => Err(Error::msg("Evaluate Error!")),
       },
       _ => Ok(SchemeCont {
         func: cont.func.clone(),
@@ -81,7 +82,7 @@ impl Evaluator {
     data: &SchemeExp,
     env: &Rc<RefCell<Env>>,
     cont: &SchemeCont,
-  ) -> Result<SchemeCont, EvaluateError> {
+  ) -> Result<SchemeCont, Error> {
     for i_evaluator in self.i_evaluators.iter() {
       if i_evaluator.can_match(data) {
         return Ok(SchemeCont {
@@ -92,6 +93,6 @@ impl Evaluator {
         });
       }
     }
-    Err(EvaluateError)
+    Err(Error::msg("Evaluate expression error!"))
   }
 }

@@ -1,9 +1,12 @@
 use std::cell::RefCell;
 use std::rc::Rc;
+use anyhow::Error;
 
-use crate::closure::Closure;
-use crate::env::Env;
-use crate::lexer::{Location, TokenItem, TokenType};
+use crate::{
+  closure::Closure,
+  env::Env,
+  lexer::{Location, TokenItem, TokenType}
+};
 
 // TODO: make these attributes private
 #[derive(Debug, PartialEq, Clone)]
@@ -71,11 +74,6 @@ pub enum SchemeData {
   Continuation(SchemeCont),
   Procedure(SchemeProc),
   Exp(SchemeExp), // only for schemedata wrapper
-}
-
-#[derive(Debug)]
-pub struct ParseError {
-  msg: String,
 }
 
 #[macro_export]
@@ -205,7 +203,7 @@ impl SchemeData {
   pub fn parse_list_from_end(
     list: &mut Vec<TokenItem>,
     left_paren_loc: Location,
-  ) -> Result<SchemeExp, ParseError> {
+  ) -> Result<SchemeExp, Error> {
     let mut scheme_data_list: Vec<SchemeData> = vec![];
 
     while let Some(TokenItem { token, loc }) = list.pop() {
@@ -225,9 +223,7 @@ impl SchemeData {
             };
             SchemeData::build_list_from_vec(&mut quote_exp.value)
           } else {
-            return Err(ParseError {
-              msg: "Quote parsing error!".to_string(),
-            });
+            return Err(Error::msg("Quote parsing error!"));
           }
         }
         TokenType::LParen => {
@@ -246,9 +242,7 @@ impl SchemeData {
           });
         }
         _ => {
-          return Err(ParseError {
-            msg: "Unexpected token!".to_string(),
-          })
+          return Err(Error::msg("Unexpected token!"))
         }
       })
     }
@@ -267,14 +261,12 @@ impl SchemeData {
         }),
       })
     } else {
-      Err(ParseError {
-        msg: "Parsing null!".to_string(),
-      })
+      Err(Error::msg("Parsing null!"))
     };
   }
 }
 
-pub fn parse(mut list: Vec<TokenItem>) -> Result<SchemeExp, ParseError> {
+pub fn parse(mut list: Vec<TokenItem>) -> Result<SchemeExp, Error> {
   list.reverse();
   SchemeData::parse_list_from_end(&mut list, SchemeData::build_default_loc())
 }
