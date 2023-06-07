@@ -5,37 +5,43 @@ use std::rc::Rc;
 use crate::parser::{SchemeBoolean, SchemeData, SchemeNumber, SchemeString};
 
 #[derive(Debug, PartialEq)]
-pub struct Stackframe {
+pub struct BaseStackframe {
   data: SchemeData,
-  parent: Option<Rc<Stackframe>>,
+  parent: Option<Stackframe>,
 }
 
 #[derive(Debug, PartialEq)]
-pub struct Env {
+pub struct BaseEnv {
   scope: HashMap<String, SchemeData>,
-  parent: Option<Rc<RefCell<Env>>>,
-  stackframe: Option<Rc<Stackframe>>,
+  parent: Option<Env>,
+  stackframe: Option<Stackframe>,
 }
+
+#[derive(Debug, PartialEq)]
+pub struct Stackframe(Rc<RefCell<Box<BaseStackframe>>>);
+
+#[derive(Debug, PartialEq)]
+pub struct Env(Rc<RefCell<Box<BaseEnv>>>);
 
 impl Env {
   pub fn new() -> Self {
-    Env {
+    Self(Rc::new(RefCell::new(Box::new(BaseEnv {
       scope: HashMap::new(),
       parent: None,
       stackframe: None,
-    }
+    }))))
   }
 
   pub fn extend(parent_env: Env, stackframe: Option<Rc<Stackframe>>) -> Env {
-    Env {
+    Env(Rc::new(RefCell::new(Box::new(BaseEnv {
       scope: HashMap::new(),
-      parent: Some(Rc::new(RefCell::new(parent_env))),
-      stackframe,
-    }
+      parent: Some(parent_env),
+      stackframe: None,
+    }))))
   }
 
   pub fn get(&self, key: &str) -> Option<SchemeData> {
-    match self.scope.get(key) {
+    match self.0.scope.get(key) {
       Some(x) => Some(x.clone()),
       None => self.parent.as_ref().and_then(|x| x.borrow().get(key)),
     }

@@ -4,11 +4,11 @@ use std::rc::Rc;
 
 use crate::parser::SchemeData;
 
-pub struct Closure(Rc<RefCell<dyn FnMut(SchemeData) -> SchemeData>>);
+pub struct Closure(Rc<RefCell<Box<dyn FnMut(SchemeData) -> SchemeData>>>);
 
 impl Closure {
   pub fn new(func: impl FnMut(SchemeData) -> SchemeData) -> Closure {
-    Closure(Rc::new(RefCell::new(func)))
+    Closure(Rc::new(RefCell::new(Box::new(func))))
   }
   pub fn copy(&self) -> Closure {
     Closure(self.0.clone())

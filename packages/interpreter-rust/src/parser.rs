@@ -44,15 +44,15 @@ pub struct SchemeList {
 pub struct SchemeCont {
   pub func: Closure,
   pub env: Option<Rc<RefCell<Env>>>,
-  pub data: Option<Box<SchemeData>>,
+  pub data: Option<SchemeData>,
   pub loc: Option<Location>,
 }
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct SchemeProc {
   pub name: String,
-  pub params: Box<SchemeData>,
-  pub body: Box<SchemeData>,
+  pub params: SchemeData,
+  pub body: SchemeData,
   pub env: Rc<RefCell<Env>>,
   pub loc: Option<Location>,
 }
@@ -65,8 +65,8 @@ pub struct SchemeExp {
 
 // TODO: scheme 里面的 data 都是保存在 heap 里面的，我们这里需要用 Rc 和 RefCell 包裹吗？
 #[derive(Debug, PartialEq, Clone)]
-pub enum SchemeData {
-  Nil, // only for SchemeData::List
+pub enum BaseSchemeData {
+  Nil,
   Identifier(SchemeIdentifier),
   Number(SchemeNumber),
   String(SchemeString),
@@ -74,8 +74,11 @@ pub enum SchemeData {
   List(SchemeList),
   Continuation(SchemeCont),
   Procedure(SchemeProc),
-  Exp(SchemeExp), // only for schemedata wrapper
+  Exp(SchemeExp),
 }
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct SchemeData(Rc<RefCell<Box<BaseSchemeData>>>);
 
 #[macro_export]
 macro_rules! build_identifier {
