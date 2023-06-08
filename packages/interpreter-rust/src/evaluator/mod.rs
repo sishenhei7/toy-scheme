@@ -18,7 +18,7 @@ use anyhow::Error;
 use crate::{
   closure::Closure,
   env::Env,
-  parser::{SchemeCont, SchemeData, SchemeExp},
+  parser::{BaseSchemeData, SchemeCont, SchemeData, SchemeExp},
 };
 
 pub struct Evaluator {
@@ -30,7 +30,7 @@ pub trait IEvaluator {
   fn evaluate(
     &self,
     data: &SchemeExp,
-    env: &Rc<RefCell<Env>>,
+    env: &Env,
     cont: &SchemeCont,
     base_evaluator: &Evaluator,
   ) -> SchemeData;
@@ -56,32 +56,32 @@ impl Evaluator {
   pub fn evaluate(
     &self,
     data: &SchemeData,
-    env: &Rc<RefCell<Env>>,
+    env: &Env,
     cont: &SchemeCont,
   ) -> Result<SchemeCont, Error> {
-    match data {
-      SchemeData::Exp(x) => self.evaluate_exp(x, env, cont),
-      SchemeData::Identifier(identifier) => match env.borrow_mut().get(&identifier.value) {
+    match data.get_base_data() {
+      BaseSchemeData::Exp(x) => self.evaluate_exp(&x, env, cont),
+      BaseSchemeData::Identifier(identifier) => match env.get(&identifier.value) {
         Some(x) => Ok(SchemeCont {
           func: cont.func.clone(),
           loc: data.get_loc(),
-          data: Some(Box::new(x)),
-          env: Some(env.clone()),
+          data: Some(x),
+          env: env.clone(),
         }),
         None => Err(Error::msg("Evaluate Error!")),
       },
       _ => Ok(SchemeCont {
         func: cont.func.clone(),
         loc: data.get_loc(),
-        data: Some(Box::new(data.clone())),
-        env: Some(env.clone()),
+        data: Some(data.clone()),
+        env: env.clone(),
       }),
     }
   }
   pub fn evaluate_exp(
     &self,
     data: &SchemeExp,
-    env: &Rc<RefCell<Env>>,
+    env: &Env,
     cont: &SchemeCont,
   ) -> Result<SchemeCont, Error> {
     for i_evaluator in self.i_evaluators.iter() {
@@ -90,7 +90,7 @@ impl Evaluator {
           func: Closure::new(|_| i_evaluator.evaluate(data, env, cont, self)),
           loc: data.loc.clone(),
           data: None,
-          env: Some(env.clone()),
+          env: env.clone(),
         });
       }
     }

@@ -2,7 +2,11 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 
-use crate::parser::{SchemeBoolean, SchemeData, SchemeNumber, SchemeString};
+use crate::{
+  build_boxing,
+  boxing::Boxing,
+  parser::{BaseSchemeData, SchemeBoolean, SchemeData, SchemeNumber, SchemeString},
+};
 
 #[derive(Debug, PartialEq)]
 pub struct BaseStackframe {
@@ -18,54 +22,62 @@ pub struct BaseEnv {
 }
 
 #[derive(Debug, PartialEq)]
-pub struct Stackframe(Rc<RefCell<Box<BaseStackframe>>>);
+pub struct Stackframe(Boxing<BaseStackframe>);
 
-#[derive(Debug, PartialEq)]
-pub struct Env(Rc<RefCell<Box<BaseEnv>>>);
+#[derive(Debug, PartialEq, Clone)]
+pub struct Env(Boxing<BaseEnv>);
 
 impl Env {
   pub fn new() -> Self {
-    Self(Rc::new(RefCell::new(Box::new(BaseEnv {
+    Self(build_boxing!(BaseEnv {
       scope: HashMap::new(),
       parent: None,
       stackframe: None,
-    }))))
+    }))
   }
 
   pub fn extend(parent_env: Env, stackframe: Option<Rc<Stackframe>>) -> Env {
-    Env(Rc::new(RefCell::new(Box::new(BaseEnv {
+    Env(build_boxing!(BaseEnv {
       scope: HashMap::new(),
       parent: Some(parent_env),
       stackframe: None,
-    }))))
+    }))
+  }
+
+  // 为什么这里不是 &mut self ?
+  pub fn get_scope(&self) -> HashMap<String, SchemeData> {
+    self.0.borrow().scope
+  }
+
+  pub fn get_parent(&self) -> Option<Env> {
+    self.0.borrow_mut().parent.clone()
   }
 
   pub fn get(&self, key: &str) -> Option<SchemeData> {
-    match self.0.scope.get(key) {
+    match self.get_scope().get(key) {
       Some(x) => Some(x.clone()),
-      None => self.parent.as_ref().and_then(|x| x.borrow().get(key)),
+      None => self.get_parent()?.get(key),
     }
   }
 
   pub fn set(&mut self, key: &str, val: SchemeData) -> Option<SchemeData> {
-    match self.scope.get(key) {
-      Some(_) => self.scope.insert(key.to_string(), val),
-      None => self
-        .parent
-        .as_ref()
-        .and_then(|x| x.borrow_mut().set(key, val)),
+    let mut scope = self.get_scope();
+    match scope.get(key) {
+      Some(_) => scope.insert(key.to_string(), val),
+      None => self.get_parent()?.set(key, val)
     }
   }
 
   pub fn define(&mut self, key: &str, val: SchemeData) -> Option<SchemeData> {
-    match self.scope.get(key) {
+    let mut scope = self.get_scope();
+    match scope.get(key) {
       Some(_) => None,
-      None => self.scope.insert(key.to_string(), val),
+      None => scope.insert(key.to_string(), val),
     }
   }
 
   pub fn modify(&mut self, key: &str, val: SchemeData) -> Option<SchemeData> {
-    self.scope.insert(key.to_string(), val)
+    self.get_scope().insert(key.to_string(), val)
   }
 }
 

@@ -4,6 +4,8 @@ use std::rc::Rc;
 use anyhow::Error;
 
 use crate::{
+  build_boxing,
+  boxing::Boxing,
   closure::Closure,
   env::Env,
   lexer::{Location, TokenItem, TokenType},
@@ -36,14 +38,14 @@ pub struct SchemeBoolean {
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct SchemeList {
-  pub value: (Box<SchemeData>, Box<SchemeData>),
+  pub value: (SchemeData, SchemeData),
   pub loc: Option<Location>,
 }
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct SchemeCont {
   pub func: Closure,
-  pub env: Option<Rc<RefCell<Env>>>,
+  pub env: Env,
   pub data: Option<SchemeData>,
   pub loc: Option<Location>,
 }
@@ -53,7 +55,7 @@ pub struct SchemeProc {
   pub name: String,
   pub params: SchemeData,
   pub body: SchemeData,
-  pub env: Rc<RefCell<Env>>,
+  pub env: Env,
   pub loc: Option<Location>,
 }
 
@@ -63,7 +65,6 @@ pub struct SchemeExp {
   pub loc: Option<Location>,
 }
 
-// TODO: scheme 里面的 data 都是保存在 heap 里面的，我们这里需要用 Rc 和 RefCell 包裹吗？
 #[derive(Debug, PartialEq, Clone)]
 pub enum BaseSchemeData {
   Nil,
@@ -78,100 +79,121 @@ pub enum BaseSchemeData {
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct SchemeData(Rc<RefCell<Box<BaseSchemeData>>>);
+pub struct SchemeData(Boxing<BaseSchemeData>);
 
 #[macro_export]
 macro_rules! build_identifier {
   ($value:expr, $loc:expr) => {
-    SchemeData::Identifier(SchemeIdentifier {
-      value: $value,
-      loc: $loc,
-    })
+    SchemeData::new(
+      BaseSchemeData::Identifier(SchemeIdentifier {
+        value: $value,
+        loc: $loc,
+      })
+    )
   };
 }
 
 #[macro_export]
 macro_rules! build_number {
   ($value:expr, $loc:expr) => {
-    SchemeData::Number(SchemeNumber {
-      value: $value,
-      loc: $loc,
-    })
+    SchemeData::new(
+      BaseSchemeData::Number(SchemeNumber {
+        value: $value,
+        loc: $loc,
+      })
+    )
   };
 }
 
 #[macro_export]
 macro_rules! build_string {
   ($value:expr, $loc:expr) => {
-    SchemeData::String(SchemeString {
-      value: $value,
-      loc: $loc,
-    })
+    SchemeData::new(
+      BaseSchemeData::String(SchemeString {
+        value: $value,
+        loc: $loc,
+      })
+    )
   };
 }
 
 #[macro_export]
 macro_rules! build_boolean {
   ($value:expr, $loc:expr) => {
-    SchemeData::Boolean(SchemeBoolean {
-      value: $value,
-      loc: $loc,
-    })
+    SchemeData::new(
+      BaseSchemeData::Boolean(SchemeBoolean {
+        value: $value,
+        loc: $loc,
+      })
+    )
   };
 }
 
 #[macro_export]
 macro_rules! build_list {
   ($car:expr, $cdr:expr, $loc:expr) => {
-    SchemeData::List(SchemeList {
-      value: (Box::new($car), Box::new($cdr)),
-      loc: $loc,
-    })
+    SchemeData::new(
+      BaseSchemeData::List(SchemeList {
+        value: ($car, $cdr),
+        loc: $loc,
+      })
+    )
   };
 }
 
 #[macro_export]
 macro_rules! build_exp {
   ($vec:expr, $loc:expr) => {
-    SchemeData::Exp(SchemeExp {
-      value: $vec,
-      loc: $loc,
-    })
+    SchemeData::new(
+      BaseSchemeData::Exp(SchemeExp {
+        value: $vec,
+        loc: $loc,
+      })
+    )
   };
 }
 
 impl SchemeData {
+  pub fn new(data: BaseSchemeData) -> Self {
+    Self(build_boxing!(data))
+  }
+
+  pub fn get_base_data(&self) -> BaseSchemeData {
+    *self.0.borrow()
+  }
+
   pub fn get_loc(&self) -> Option<Location> {
-    match self {
-      SchemeData::Identifier(x) => x.loc.clone(),
-      SchemeData::Number(x) => x.loc.clone(),
-      SchemeData::String(x) => x.loc.clone(),
-      SchemeData::Boolean(x) => x.loc.clone(),
-      SchemeData::List(x) => x.loc.clone(),
-      SchemeData::Continuation(x) => x.loc.clone(),
-      SchemeData::Procedure(x) => x.loc.clone(),
-      SchemeData::Exp(x) => x.loc.clone(),
+    match self.get_base_data() {
+      BaseSchemeData::Identifier(x) => x.loc.clone(),
+      BaseSchemeData::Number(x) => x.loc.clone(),
+      BaseSchemeData::String(x) => x.loc.clone(),
+      BaseSchemeData::Boolean(x) => x.loc.clone(),
+      BaseSchemeData::List(x) => x.loc.clone(),
+      BaseSchemeData::Continuation(x) => x.loc.clone(),
+      BaseSchemeData::Procedure(x) => x.loc.clone(),
+      BaseSchemeData::Exp(x) => x.loc.clone(),
       _ => None,
     }
   }
 
+  // 为什么这里 match 里面需要加 mut ?
   pub fn set_loc(&mut self, new_loc: Location) -> &Self {
-    match self {
-      SchemeData::Identifier(x) => x.loc = Some(new_loc),
-      SchemeData::Number(x) => x.loc = Some(new_loc),
-      SchemeData::String(x) => x.loc = Some(new_loc),
-      SchemeData::Boolean(x) => x.loc = Some(new_loc),
-      SchemeData::List(x) => x.loc = Some(new_loc),
-      SchemeData::Continuation(x) => x.loc = Some(new_loc),
-      SchemeData::Procedure(x) => x.loc = Some(new_loc),
-      SchemeData::Exp(x) => x.loc = Some(new_loc),
+    match self.get_base_data() {
+      BaseSchemeData::Identifier(mut x) => x.loc = Some(new_loc),
+      BaseSchemeData::Number(mut x) => x.loc = Some(new_loc),
+      BaseSchemeData::String(mut x) => x.loc = Some(new_loc),
+      BaseSchemeData::Boolean(mut x) => x.loc = Some(new_loc),
+      BaseSchemeData::List(mut x) => x.loc = Some(new_loc),
+      BaseSchemeData::Continuation(mut x) => x.loc = Some(new_loc),
+      BaseSchemeData::Procedure(mut x) => x.loc = Some(new_loc),
+      BaseSchemeData::Exp(mut x) => x.loc = Some(new_loc),
       _ => panic!(),
     };
     self
   }
 
   pub fn build_list_from_vec(vec: &mut Vec<SchemeData>) -> SchemeData {
-    let mut data = SchemeData::Nil;
+    let mut data = SchemeData::new(BaseSchemeData::Nil);
     let last_loc = if let Some(last) = vec.last() {
       last.get_loc().unwrap_or(Default::default())
     } else {
@@ -180,15 +202,16 @@ impl SchemeData {
 
     while let Some(item) = vec.pop() {
       if let Some(loc) = item.get_loc() {
-        data = SchemeData::List(SchemeList {
-          value: (Box::new(item), Box::new(data)),
-          loc: Some(Location {
+        data = build_list!(
+          item,
+          data,
+          Some(Location {
             line_start: loc.line_start,
             column_start: loc.column_start,
             line_end: last_loc.line_end,
             column_end: last_loc.column_end,
-          }),
-        })
+          })
+        )
       }
     }
 
@@ -223,7 +246,7 @@ impl SchemeData {
         }
         TokenType::LParen => {
           let paren_exp = SchemeData::parse_list_from_end(list, loc)?;
-          SchemeData::Exp(paren_exp)
+          SchemeData::new(BaseSchemeData::Exp(paren_exp))
         }
         TokenType::RParen => {
           return Ok(SchemeExp {
@@ -277,8 +300,8 @@ mod tests {
     assert_eq!(
       data,
       SchemeExp {
-        value: vec![SchemeData::Exp(SchemeExp {
-          value: vec![
+        value: vec![build_exp!(
+          vec![
             build_identifier!(
               "+".to_string(),
               Some(Location {
@@ -307,13 +330,13 @@ mod tests {
               })
             )
           ],
-          loc: Some(Location {
+          Some(Location {
             line_start: 1,
             column_start: 1,
             line_end: 1,
             column_end: 8
           })
-        })],
+        )],
         loc: Some(Location {
           line_start: 1,
           column_start: 1,
