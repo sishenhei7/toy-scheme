@@ -2,13 +2,13 @@ use std::cell::RefCell;
 use std::fmt;
 use std::rc::Rc;
 
-use crate::parser::SchemeData;
+use crate::{boxing::Boxing, build_boxing, parser::SchemeData};
 
-pub struct Closure(Rc<RefCell<Box<dyn FnMut(SchemeData) -> SchemeData>>>);
+pub struct Closure(Boxing<dyn FnMut(SchemeData) -> SchemeData>);
 
 impl Closure {
   pub fn new(func: impl FnMut(SchemeData) -> SchemeData) -> Closure {
-    Closure(Rc::new(RefCell::new(Box::new(func))))
+    Closure(build_boxing!(func))
   }
   pub fn copy(&self) -> Closure {
     Closure(self.0.clone())

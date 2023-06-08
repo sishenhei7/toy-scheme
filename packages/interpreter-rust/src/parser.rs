@@ -4,8 +4,8 @@ use std::rc::Rc;
 use anyhow::Error;
 
 use crate::{
-  build_boxing,
   boxing::Boxing,
+  build_boxing,
   closure::Closure,
   env::Env,
   lexer::{Location, TokenItem, TokenType},
@@ -79,77 +79,65 @@ pub enum BaseSchemeData {
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct SchemeData(Boxing<BaseSchemeData>);
+pub struct SchemeData(pub Boxing<BaseSchemeData>);
 
 #[macro_export]
 macro_rules! build_identifier {
   ($value:expr, $loc:expr) => {
-    SchemeData::new(
-      BaseSchemeData::Identifier(SchemeIdentifier {
-        value: $value,
-        loc: $loc,
-      })
-    )
+    SchemeData::new(BaseSchemeData::Identifier(SchemeIdentifier {
+      value: $value,
+      loc: $loc,
+    }))
   };
 }
 
 #[macro_export]
 macro_rules! build_number {
   ($value:expr, $loc:expr) => {
-    SchemeData::new(
-      BaseSchemeData::Number(SchemeNumber {
-        value: $value,
-        loc: $loc,
-      })
-    )
+    SchemeData::new(BaseSchemeData::Number(SchemeNumber {
+      value: $value,
+      loc: $loc,
+    }))
   };
 }
 
 #[macro_export]
 macro_rules! build_string {
   ($value:expr, $loc:expr) => {
-    SchemeData::new(
-      BaseSchemeData::String(SchemeString {
-        value: $value,
-        loc: $loc,
-      })
-    )
+    SchemeData::new(BaseSchemeData::String(SchemeString {
+      value: $value,
+      loc: $loc,
+    }))
   };
 }
 
 #[macro_export]
 macro_rules! build_boolean {
   ($value:expr, $loc:expr) => {
-    SchemeData::new(
-      BaseSchemeData::Boolean(SchemeBoolean {
-        value: $value,
-        loc: $loc,
-      })
-    )
+    SchemeData::new(BaseSchemeData::Boolean(SchemeBoolean {
+      value: $value,
+      loc: $loc,
+    }))
   };
 }
 
 #[macro_export]
 macro_rules! build_list {
   ($car:expr, $cdr:expr, $loc:expr) => {
-    SchemeData::new(
-      BaseSchemeData::List(SchemeList {
-        value: ($car, $cdr),
-        loc: $loc,
-      })
-    )
+    SchemeData::new(BaseSchemeData::List(SchemeList {
+      value: ($car, $cdr),
+      loc: $loc,
+    }))
   };
 }
 
 #[macro_export]
 macro_rules! build_exp {
   ($vec:expr, $loc:expr) => {
-    SchemeData::new(
-      BaseSchemeData::Exp(SchemeExp {
-        value: $vec,
-        loc: $loc,
-      })
-    )
+    SchemeData::new(BaseSchemeData::Exp(SchemeExp {
+      value: $vec,
+      loc: $loc,
+    }))
   };
 }
 
@@ -158,35 +146,31 @@ impl SchemeData {
     Self(build_boxing!(data))
   }
 
-  pub fn get_base_data(&self) -> BaseSchemeData {
-    *self.0.borrow()
-  }
-
   pub fn get_loc(&self) -> Option<Location> {
-    match self.get_base_data() {
-      BaseSchemeData::Identifier(x) => x.loc.clone(),
-      BaseSchemeData::Number(x) => x.loc.clone(),
-      BaseSchemeData::String(x) => x.loc.clone(),
-      BaseSchemeData::Boolean(x) => x.loc.clone(),
-      BaseSchemeData::List(x) => x.loc.clone(),
-      BaseSchemeData::Continuation(x) => x.loc.clone(),
-      BaseSchemeData::Procedure(x) => x.loc.clone(),
-      BaseSchemeData::Exp(x) => x.loc.clone(),
+    match *self.0.borrow() {
+      BaseSchemeData::Identifier(ref x) => x.loc.clone(),
+      BaseSchemeData::Number(ref x) => x.loc.clone(),
+      BaseSchemeData::String(ref x) => x.loc.clone(),
+      BaseSchemeData::Boolean(ref x) => x.loc.clone(),
+      BaseSchemeData::List(ref x) => x.loc.clone(),
+      BaseSchemeData::Continuation(ref x) => x.loc.clone(),
+      BaseSchemeData::Procedure(ref x) => x.loc.clone(),
+      BaseSchemeData::Exp(ref x) => x.loc.clone(),
       _ => None,
     }
   }
 
   // 为什么这里 match 里面需要加 mut ?
   pub fn set_loc(&mut self, new_loc: Location) -> &Self {
-    match self.get_base_data() {
-      BaseSchemeData::Identifier(mut x) => x.loc = Some(new_loc),
-      BaseSchemeData::Number(mut x) => x.loc = Some(new_loc),
-      BaseSchemeData::String(mut x) => x.loc = Some(new_loc),
-      BaseSchemeData::Boolean(mut x) => x.loc = Some(new_loc),
-      BaseSchemeData::List(mut x) => x.loc = Some(new_loc),
-      BaseSchemeData::Continuation(mut x) => x.loc = Some(new_loc),
-      BaseSchemeData::Procedure(mut x) => x.loc = Some(new_loc),
-      BaseSchemeData::Exp(mut x) => x.loc = Some(new_loc),
+    match *self.0.borrow_mut() {
+      BaseSchemeData::Identifier(ref mut x) => x.loc = Some(new_loc),
+      BaseSchemeData::Number(ref mut x) => x.loc = Some(new_loc),
+      BaseSchemeData::String(ref mut x) => x.loc = Some(new_loc),
+      BaseSchemeData::Boolean(ref mut x) => x.loc = Some(new_loc),
+      BaseSchemeData::List(ref mut x) => x.loc = Some(new_loc),
+      BaseSchemeData::Continuation(ref mut x) => x.loc = Some(new_loc),
+      BaseSchemeData::Procedure(ref mut x) => x.loc = Some(new_loc),
+      BaseSchemeData::Exp(ref mut x) => x.loc = Some(new_loc),
       _ => panic!(),
     };
     self

@@ -3,8 +3,8 @@ use std::collections::HashMap;
 use std::rc::Rc;
 
 use crate::{
-  build_boxing,
   boxing::Boxing,
+  build_boxing,
   parser::{BaseSchemeData, SchemeBoolean, SchemeData, SchemeNumber, SchemeString},
 };
 
@@ -36,17 +36,16 @@ impl Env {
     }))
   }
 
-  pub fn extend(parent_env: Env, stackframe: Option<Rc<Stackframe>>) -> Env {
+  pub fn extend(parent_env: Env, stackframe: Option<Stackframe>) -> Env {
     Env(build_boxing!(BaseEnv {
       scope: HashMap::new(),
       parent: Some(parent_env),
-      stackframe: None,
+      stackframe,
     }))
   }
 
-  // 为什么这里不是 &mut self ?
-  pub fn get_scope(&self) -> HashMap<String, SchemeData> {
-    self.0.borrow().scope
+  pub fn copy(&self) -> Env {
+    Env(self.0.clone())
   }
 
   pub fn get_parent(&self) -> Option<Env> {
@@ -54,30 +53,28 @@ impl Env {
   }
 
   pub fn get(&self, key: &str) -> Option<SchemeData> {
-    match self.get_scope().get(key) {
+    match self.0.borrow().scope.get(key) {
       Some(x) => Some(x.clone()),
       None => self.get_parent()?.get(key),
     }
   }
 
   pub fn set(&mut self, key: &str, val: SchemeData) -> Option<SchemeData> {
-    let mut scope = self.get_scope();
-    match scope.get(key) {
-      Some(_) => scope.insert(key.to_string(), val),
-      None => self.get_parent()?.set(key, val)
+    match self.0.borrow().scope.get(key) {
+      Some(_) => self.0.borrow_mut().scope.insert(key.to_string(), val),
+      None => self.get_parent()?.set(key, val),
     }
   }
 
   pub fn define(&mut self, key: &str, val: SchemeData) -> Option<SchemeData> {
-    let mut scope = self.get_scope();
-    match scope.get(key) {
+    match self.0.borrow().scope.get(key) {
       Some(_) => None,
-      None => scope.insert(key.to_string(), val),
+      None => self.0.borrow_mut().scope.insert(key.to_string(), val),
     }
   }
 
   pub fn modify(&mut self, key: &str, val: SchemeData) -> Option<SchemeData> {
-    self.get_scope().insert(key.to_string(), val)
+    self.0.borrow_mut().scope.insert(key.to_string(), val)
   }
 }
 

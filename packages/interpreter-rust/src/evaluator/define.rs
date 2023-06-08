@@ -4,7 +4,7 @@ use std::rc::Rc;
 use crate::{
   env::Env,
   evaluator::{Evaluator, IEvaluator},
-  parser::{SchemeCont, SchemeData, SchemeExp},
+  parser::{BaseSchemeData, SchemeCont, SchemeData, SchemeExp},
 };
 
 pub struct DefineEvaluator;
@@ -16,10 +16,10 @@ impl IEvaluator for DefineEvaluator {
   fn evaluate(
     &self,
     data: &SchemeExp,
-    env: &Rc<RefCell<Env>>,
+    env: &Env,
     cont: &SchemeCont,
     base_evaluator: &Evaluator,
   ) -> SchemeData {
-    SchemeData::Nil
+    SchemeData::new(BaseSchemeData::Nil)
   }
 }

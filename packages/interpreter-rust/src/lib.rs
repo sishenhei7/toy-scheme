@@ -1,9 +1,9 @@
+pub mod boxing;
 pub mod closure;
 pub mod env;
 pub mod evaluator;
 pub mod lexer;
 pub mod parser;
-pub mod boxing;
 
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -37,15 +37,11 @@ impl Interpreter {
     let initial_env = Env::new();
     let initial_cont = SchemeCont {
       func: Closure::new(|x| x),
-      env: initial_env,
+      env: initial_env.clone(),
       data: None,
       loc: None,
     };
-    let node = evaluator.evaluate_exp(
-      &scheme_exp,
-      &initial_env,
-      &initial_cont,
-    )?;
+    let node = evaluator.evaluate_exp(&scheme_exp, &initial_env, &initial_cont)?;
     Ok(Self { node, evaluator })
   }
 

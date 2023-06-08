@@ -59,13 +59,13 @@ impl Evaluator {
     env: &Env,
     cont: &SchemeCont,
   ) -> Result<SchemeCont, Error> {
-    match data.get_base_data() {
-      BaseSchemeData::Exp(x) => self.evaluate_exp(&x, env, cont),
-      BaseSchemeData::Identifier(identifier) => match env.get(&identifier.value) {
-        Some(x) => Ok(SchemeCont {
+    match *data.0.borrow() {
+      BaseSchemeData::Exp(ref x) => self.evaluate_exp(x, env, cont),
+      BaseSchemeData::Identifier(ref identifier) => match env.get(&identifier.value) {
+        Some(ref x) => Ok(SchemeCont {
           func: cont.func.clone(),
           loc: data.get_loc(),
-          data: Some(x),
+          data: Some(x.clone()),
           env: env.clone(),
         }),
         None => Err(Error::msg("Evaluate Error!")),
