@@ -32,7 +32,6 @@ pub trait IEvaluator {
     data: &SchemeExp,
     env: &Env,
     cont: &SchemeCont,
-    base_evaluator: &Evaluator,
   ) -> SchemeData;
 }
 
@@ -86,8 +85,11 @@ impl Evaluator {
   ) -> Result<SchemeCont, Error> {
     for i_evaluator in self.i_evaluators.iter() {
       if i_evaluator.can_match(data) {
+        let data_copy = data.clone();
+        let env_copy = env.clone();
+        let cont_copy = cont.clone();
         return Ok(SchemeCont {
-          func: Closure::new(|_| i_evaluator.evaluate(data, env, cont, self)),
+          func: Closure::new(move |_| (&data_copy, &env_copy, &cont_copy)),
           loc: data.loc.clone(),
           data: None,
           env: env.clone(),

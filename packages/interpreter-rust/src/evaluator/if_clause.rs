@@ -18,7 +18,6 @@ impl IEvaluator for IfEvalEvaluator {
     data: &SchemeExp,
     env: &Env,
     cont: &SchemeCont,
-    base_evaluator: &Evaluator,
   ) -> SchemeData {
     SchemeData::new(BaseSchemeData::Nil)
   }
