@@ -7,6 +7,7 @@ pub mod parser;
 
 use std::cell::RefCell;
 use std::rc::Rc;
+use once_cell::sync::Lazy;
 
 use anyhow::Error;
 // use napi_derive::napi;
@@ -16,10 +17,11 @@ use evaluator::*;
 use lexer::*;
 use parser::*;
 
+static EVALUATOR: Lazy<Evaluator> = Lazy::new(|| Evaluator::new());
+
 // #[napi(custom_finalize)]
 pub struct Interpreter {
-  node: SchemeCont,
-  evaluator: Evaluator,
+  node: SchemeCont
 }
 
 struct StepResponse {
@@ -33,7 +35,6 @@ impl Interpreter {
   pub fn new(program: String) -> Result<Self, Error> {
     let token_list = tokenize(&program)?;
     let scheme_exp = parse(token_list)?;
-    let evaluator = Evaluator::new();
     let initial_env = Env::new();
     let initial_cont = SchemeCont {
       func: Closure::new(|x| x),
@@ -41,8 +42,8 @@ impl Interpreter {
       data: None,
       loc: None,
     };
-    let node = evaluator.evaluate_exp(&scheme_exp, &initial_env, &initial_cont)?;
-    Ok(Self { node, evaluator })
+    let node = EVALUATOR.evaluate_exp(&scheme_exp, &initial_env, &initial_cont)?;
+    Ok(Self { node })
   }
 
   // pub fn run(&self) -> String {

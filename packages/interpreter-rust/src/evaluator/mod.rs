@@ -21,8 +21,21 @@ use crate::{
   parser::{BaseSchemeData, SchemeCont, SchemeData, SchemeExp},
 };
 
+// static SUB_EVALUATORS: Vec<Box<dyn IEvaluator>> = vec![
+//   Box::new(begin::BeginEvaluator),
+//   Box::new(buildin::BuildinEvaluator),
+//   Box::new(call_cc::CallCcEvaluator),
+//   Box::new(cond::CondEvaluator),
+//   Box::new(define::DefineEvaluator),
+//   Box::new(if_clause::IfEvalEvaluator),
+//   Box::new(lambda::LambdaEvaluator),
+//   Box::new(let_clause::LetEvalEvaluator),
+//   Box::new(proc::ProcEvaluator),
+//   Box::new(set::SetEvaluator),
+// ];
+
 pub struct Evaluator {
-  i_evaluators: Vec<Box<dyn IEvaluator>>,
+  i_evaluators: Vec<Box<dyn IEvaluator + Send + Sync>>,
 }
 
 pub trait IEvaluator {
@@ -53,7 +66,7 @@ impl Evaluator {
     }
   }
   pub fn evaluate(
-    &self,
+    &'static self,
     data: &SchemeData,
     env: &Env,
     cont: &SchemeCont,
@@ -78,7 +91,7 @@ impl Evaluator {
     }
   }
   pub fn evaluate_exp(
-    &self,
+    &'static self,
     data: &SchemeExp,
     env: &Env,
     cont: &SchemeCont,
@@ -88,8 +101,9 @@ impl Evaluator {
         let data_copy = data.clone();
         let env_copy = env.clone();
         let cont_copy = cont.clone();
+        let evaluator = i_evaluator.clone();
         return Ok(SchemeCont {
-          func: Closure::new(move |_| (&data_copy, &env_copy, &cont_copy)),
+          func: Closure::new(move |_| evaluator.evaluate(&data_copy, &env_copy, &cont_copy)),
           loc: data.loc.clone(),
           data: None,
           env: env.clone(),
