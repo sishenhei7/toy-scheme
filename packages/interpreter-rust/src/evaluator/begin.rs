@@ -1,24 +1,20 @@
-use std::cell::RefCell;
-use std::rc::Rc;
-
 use crate::{
   env::Env,
-  evaluator::{IEvaluator},
+  closure::Closure,
   parser::{BaseSchemeData, SchemeCont, SchemeData, SchemeExp},
 };
 
-pub struct BeginEvaluator;
+use super::evaluate_exp;
 
-impl IEvaluator for BeginEvaluator {
-  fn can_match(&self, data: &SchemeExp) -> bool {
-    true
-  }
-  fn evaluate(
-    &self,
-    data: &SchemeExp,
-    env: &Env,
-    cont: &SchemeCont,
-  ) -> SchemeData {
-    SchemeData::new(BaseSchemeData::Nil)
-  }
+pub fn evaluate(data: &SchemeExp, env: &Env, cont: &SchemeCont) -> Option<SchemeCont> {
+  // let data_copy = data.clone();
+  // let env_copy = env.clone();
+  // let cont_copy = env.clone();
+  Some(SchemeCont {
+    // func: Closure::new(move |_| evaluate_exp(&data_copy, &env_copy, &cont_copy)),
+    func: Closure::new(|x| x),
+    loc: data.loc.clone(),
+    data: None,
+    env: env.clone(),
+  })
 }

@@ -11,7 +11,6 @@ mod proc;
 mod set;
 
 use anyhow::Error;
-use once_cell::sync::Lazy;
 
 use crate::{
   closure::Closure,
@@ -28,19 +27,6 @@ pub trait IEvaluator {
     cont: &SchemeCont,
   ) -> SchemeData;
 }
-
-static SUB_EVALUATORS: Lazy<Vec<Box<dyn IEvaluator + Send + Sync>>> = Lazy::new(|| vec![
-  Box::new(begin::BeginEvaluator),
-  Box::new(buildin::BuildinEvaluator),
-  Box::new(call_cc::CallCcEvaluator),
-  Box::new(cond::CondEvaluator),
-  Box::new(define::DefineEvaluator),
-  Box::new(if_clause::IfEvalEvaluator),
-  Box::new(lambda::LambdaEvaluator),
-  Box::new(let_clause::LetEvalEvaluator),
-  Box::new(proc::ProcEvaluator),
-  Box::new(set::SetEvaluator),
-]);
 
 pub fn evaluate(
   data: &SchemeData,
@@ -72,19 +58,58 @@ pub fn evaluate_exp(
   env: &Env,
   cont: &SchemeCont,
 ) -> Result<SchemeCont, Error> {
-  for i_evaluator in SUB_EVALUATORS.iter() {
-    if i_evaluator.can_match(data) {
-      let data_copy = data.clone();
-      let env_copy = env.clone();
-      let cont_copy = cont.clone();
-      let evaluator = i_evaluator.clone();
-      return Ok(SchemeCont {
-        func: Closure::new(move |_| evaluator.evaluate(&data_copy, &env_copy, &cont_copy)),
-        loc: data.loc.clone(),
-        data: None,
-        env: env.clone(),
-      });
+  match data.value.get(0) {
+    Some(x) => {
+      match *x.0.borrow() {
+        BaseSchemeData::Identifier(ref sym) => {
+          // evaluate(data: &SchemeExp, env: &Env, cont: &SchemeCont) -> SchemeData
+          let new_cont = match sym.value.as_str() {
+            "begin" => begin::evaluate(&data, &env, &cont),
+            "call-with-current-continuation" => call_cc::evaluate(&data, &env, &cont),
+            "cond" => cond::evaluate(&data, &env, &cont),
+            "cont" => cont::evaluate(&data, &env, &cont),
+            "define" => define::evaluate(&data, &env, &cont),
+            "if" => if_clause::evaluate(&data, &env, &cont),
+            "lambda" => lambda::evaluate(&data, &env, &cont),
+            "let" => let_clause::evaluate_let(&data, &env, &cont),
+            "let*" => let_clause::evaluate_letstar(&data, &env, &cont),
+            "letrc" => let_clause::evaluate_letrc(&data, &env, &cont),
+            "proc" => proc::evaluate(&data, &env, &cont),
+            "set!" => set::evaluate(&data, &env, &cont),
+            _ => buildin::evaluate(&data, &env, &cont)
+          };
+
+          if let Some(cont) = new_cont {
+            return Ok(cont)
+          };
+
+          Err(Error::msg("Evaluate expression error!"))
+        },
+        BaseSchemeData::Continuation(ref _cont) => {
+          // cont
+          let new_cont = cont::evaluate(&data, &env, &cont);
+
+          if let Some(cont) = new_cont {
+            return Ok(cont)
+          };
+
+          Err(Error::msg("Evaluate expression error!"))
+        }
+        BaseSchemeData::Procedure(ref _proc) => {
+          // proc
+          let new_cont = proc::evaluate(&data, &env, &cont);
+
+          if let Some(cont) = new_cont {
+            return Ok(cont)
+          };
+
+          Err(Error::msg("Evaluate expression error!"))
+        },
+        // TODO: 这里有点问题，后续看怎么做？？？？
+        BaseSchemeData::Exp(ref x) => evaluate_exp(x, env, cont),
+        _ => Err(Error::msg("Evaluate expression error!"))
+      }
     }
+    None => Err(Error::msg("Evaluate expression error!"))
   }
-  Err(Error::msg("Evaluate expression error!"))
 }

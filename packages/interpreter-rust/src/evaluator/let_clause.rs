@@ -1,24 +1,32 @@
-use std::cell::RefCell;
-use std::rc::Rc;
-
 use crate::{
   env::Env,
-  evaluator::{IEvaluator},
+  closure::Closure,
   parser::{BaseSchemeData, SchemeCont, SchemeData, SchemeExp},
 };
 
-pub struct LetEvalEvaluator;
+pub fn evaluate_let(data: &SchemeExp, env: &Env, cont: &SchemeCont) -> Option<SchemeCont> {
+  Some(SchemeCont {
+    func: Closure::new(|x| x),
+    loc: data.loc.clone(),
+    data: None,
+    env: env.clone(),
+  })
+}
 
-impl IEvaluator for LetEvalEvaluator {
-  fn can_match(&self, data: &SchemeExp) -> bool {
-    true
-  }
-  fn evaluate(
-    &self,
-    data: &SchemeExp,
-    env: &Env,
-    cont: &SchemeCont,
-  ) -> SchemeData {
-    SchemeData::new(BaseSchemeData::Nil)
-  }
+pub fn evaluate_letstar(data: &SchemeExp, env: &Env, cont: &SchemeCont) -> Option<SchemeCont> {
+  Some(SchemeCont {
+    func: Closure::new(|x| x),
+    loc: data.loc.clone(),
+    data: None,
+    env: env.clone(),
+  })
+}
+
+pub fn evaluate_letrc(data: &SchemeExp, env: &Env, cont: &SchemeCont) -> Option<SchemeCont> {
+  Some(SchemeCont {
+    func: Closure::new(|x| x),
+    loc: data.loc.clone(),
+    data: None,
+    env: env.clone(),
+  })
 }
