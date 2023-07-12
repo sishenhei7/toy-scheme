@@ -3,7 +3,7 @@ use std::rc::Rc;
 
 use crate::{
   env::Env,
-  evaluator::{Evaluator, IEvaluator},
+  evaluator::{IEvaluator},
   parser::{BaseSchemeData, SchemeCont, SchemeData, SchemeExp},
 };
 

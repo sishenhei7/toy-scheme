@@ -13,11 +13,9 @@ use anyhow::Error;
 // use napi_derive::napi;
 use closure::*;
 use env::*;
-use evaluator::*;
+use evaluator::evaluate_exp;
 use lexer::*;
 use parser::*;
-
-static EVALUATOR: Lazy<Evaluator> = Lazy::new(|| Evaluator::new());
 
 // #[napi(custom_finalize)]
 pub struct Interpreter {
@@ -42,7 +40,7 @@ impl Interpreter {
       data: None,
       loc: None,
     };
-    let node = EVALUATOR.evaluate_exp(&scheme_exp, &initial_env, &initial_cont)?;
+    let node = evaluate_exp(&scheme_exp, &initial_env, &initial_cont)?;
     Ok(Self { node })
   }
 
