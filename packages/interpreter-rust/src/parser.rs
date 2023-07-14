@@ -202,6 +202,24 @@ impl SchemeData {
     data
   }
 
+  pub fn build_exp_from_vec(vec: Vec<SchemeData>) -> Option<SchemeExp> {
+    if vec.is_empty() {
+      return None;
+    }
+
+    let first_loc = vec.get(0)?.get_loc()?;
+    let last_loc = vec.get(vec.len() - 1)?.get_loc()?;
+    Some(SchemeExp {
+      value: vec,
+      loc: Some(Location {
+        line_start: first_loc.line_start,
+        column_start: first_loc.column_start,
+        line_end: last_loc.line_end,
+        column_end: last_loc.column_end
+      })
+    })
+  }
+
   pub fn parse_list_from_end(
     list: &mut Vec<TokenItem>,
     left_paren_loc: Location,
