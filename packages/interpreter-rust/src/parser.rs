@@ -45,8 +45,10 @@ pub struct SchemeList {
 #[derive(Debug, PartialEq, Clone)]
 pub struct SchemeCont {
   pub func: Closure,
-  pub env: Env,
+  // resume 这个 continuation 用
   pub data: Option<SchemeData>,
+  // 展示用
+  pub env: Env,
   pub loc: Option<Location>,
 }
 

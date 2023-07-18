@@ -2,18 +2,28 @@ use std::cell::RefCell;
 use std::fmt;
 use std::rc::Rc;
 
-use crate::{boxing::Boxing, build_boxing, parser::SchemeData};
+use anyhow::Error;
 
-pub struct Closure(Boxing<dyn FnMut(SchemeData) -> SchemeData>);
+use crate::{
+  boxing::Boxing,
+  build_boxing,
+  parser::{
+    SchemeData,
+    SchemeCont
+  },
+  evaluator::EvaluateResponse
+};
+
+pub struct Closure(Boxing<dyn FnMut(SchemeData) -> Result<EvaluateResponse, Error>>);
 
 impl Closure {
-  pub fn new(func: impl FnMut(SchemeData) -> SchemeData + 'static) -> Closure {
+  pub fn new(func: impl FnMut(SchemeData) -> Result<EvaluateResponse, Error> + 'static) -> Closure {
     Closure(build_boxing!(func))
   }
   pub fn copy(&self) -> Closure {
     Closure(self.0.clone())
   }
-  pub fn call(&self, val: SchemeData) -> SchemeData {
+  pub fn call(&self, val: SchemeData) -> Result<EvaluateResponse, Error> {
     self.0.borrow_mut()(val)
   }
 }

@@ -13,13 +13,13 @@ use anyhow::Error;
 // use napi_derive::napi;
 use closure::*;
 use env::*;
-use evaluator::evaluate_exp;
 use lexer::*;
 use parser::*;
+use evaluator::{ evaluate_exp, EvaluateResponse };
 
 // #[napi(custom_finalize)]
 pub struct Interpreter {
-  node: SchemeCont
+  node: EvaluateResponse
 }
 
 struct StepResponse {
@@ -35,9 +35,9 @@ impl Interpreter {
     let scheme_exp = parse(token_list)?;
     let initial_env = Env::new();
     let initial_cont = SchemeCont {
-      func: Closure::new(|x| x),
-      env: initial_env.clone(),
+      func: Closure::new(|x| Ok(EvaluateResponse::Data(x))),
       data: None,
+      env: initial_env.clone(),
       loc: None,
     };
     let node = evaluate_exp(&scheme_exp, &initial_env, &initial_cont)?;
