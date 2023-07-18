@@ -11,9 +11,8 @@ use super::{
   EvaluateResponse
 };
 
-// TODO: 想好 evaluate 返回什么，closure 返回什么，什么时候返回 option，什么时候返回 result
 pub fn evaluate(data: &SchemeExp, env: &Env, cont: &SchemeCont) -> Result<EvaluateResponse, Error> {
-  let new_data = SchemeData::build_exp_from_vec(data.value[1..].to_vec()).ok_or(Error::msg("Evaluate Error!"))?;
+  let new_data = SchemeData::build_exp_from_vec(data.value[1..].to_vec()).ok_or(Error::msg("Evaluate Begin Error!"))?;
   let data_copy = new_data.clone();
   let env_copy = env.clone();
   let cont_copy = cont.clone();
