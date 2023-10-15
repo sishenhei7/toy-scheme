@@ -1,3 +1,5 @@
+#![feature(iter_advance_by)]
+
 pub mod boxing;
 pub mod closure;
 pub mod env;
