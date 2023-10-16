@@ -148,7 +148,6 @@ impl SchemeData {
     }
   }
 
-  // 为什么这里 match 里面需要加 mut ?
   pub fn set_loc(&mut self, new_loc: Location) -> &Self {
     match self {
       SchemeData::Identifier(ref mut x) => x.loc = Some(new_loc),
@@ -169,24 +168,21 @@ impl SchemeData {
     let last_loc = if let Some(last) = vec.last() {
       last.get_loc().unwrap_or(Default::default())
     } else {
-      Default::default()
+      return data
     };
-
-    while let Some(item) = vec.pop() {
-      if let Some(loc) = item.get_loc() {
-        data = build_list!(
-          Box::new(item),
-          Box::new(data),
-          Some(Location {
-            line_start: loc.line_start,
-            column_start: loc.column_start,
-            line_end: last_loc.line_end,
-            column_end: last_loc.column_end,
-          })
-        )
-      }
+    for x in vec.iter().rev() {
+      let loc = x.get_loc().unwrap_or(Default::default());
+      data = build_list!(
+        Box::new(x.clone()),
+        Box::new(data),
+        Some(Location {
+          line_start: loc.line_start,
+          column_start: loc.column_start,
+          line_end: last_loc.line_end,
+          column_end: last_loc.column_end,
+        })
+      )
     }
-
     data
   }
 
@@ -195,8 +191,8 @@ impl SchemeData {
       return None;
     }
 
-    let first_loc = vec.get(0)?.get_loc()?;
-    let last_loc = vec.get(vec.len() - 1)?.get_loc()?;
+    let first_loc = vec.first()?.get_loc()?;
+    let last_loc = vec.last()?.get_loc()?;
     Some(build_exp!(
       vec,
       Some(Location {
