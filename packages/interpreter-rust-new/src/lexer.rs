@@ -47,15 +47,15 @@ pub struct Lexer<'a> {
 }
 
 impl<'a> Lexer<'a> {
-  pub fn new(input: &str) -> Self {
+  pub fn new(input: &'a str) -> Self {
     Lexer {
       iter: input.chars(),
-      cur_line: 0,
-      cur_column: 0,
+      cur_line: 1,
+      cur_column: 1,
     }
   }
 
-  pub fn from(input: &str) -> Self {
+  pub fn from(input: &'a str) -> Self {
     Lexer::new(input)
   }
 
@@ -68,17 +68,18 @@ impl<'a> Lexer<'a> {
   }
 
   fn advance(&mut self, column: usize, line: usize) -> () {
-    self.iter.advance_by(column);
+    self.iter.advance_by(column).unwrap_or(());
     self.cur_line += line;
     self.cur_column += column;
   }
 
   fn get_content<F>(&self, predict: F) -> Option<String>
   where
-    F: FnOnce(&char) -> bool
+    F: Fn(&char) -> bool
   {
     let content = self
       .iter
+      .clone()
       .take_while(|x| predict(x))
       .collect::<String>();
     Some(content).filter(|x| !x.is_empty())
@@ -112,7 +113,7 @@ impl<'a> Lexer<'a> {
     let token_type = match self.cur() {
       Some('(') => TokenType::LParen,
       Some(')') => TokenType::RParen,
-      None => return None,
+      _ => return None,
     };
     let token = self.to_token(token_type, 1);
     self.advance(1, 0);
@@ -147,7 +148,7 @@ impl<'a> Lexer<'a> {
       .unwrap_or("\"\"".to_string());
     let offset = content.len();
     let str = &content[1..offset - 1];
-    let token = self.to_token(TokenType::Comment(str.to_string()), offset);
+    let token = self.to_token(TokenType::String(str.to_string()), offset);
     self.advance(offset, 0);
     Some(token)
   }
@@ -157,7 +158,7 @@ impl<'a> Lexer<'a> {
       .get_content(|&c| c.is_whitespace())
       .unwrap_or("".to_string());
     let offset = content.len();
-    let token = self.to_token(TokenType::Comment(content), offset);
+    let token = self.to_token(TokenType::WhiteSpace, offset);
     self.advance(offset, 0);
     Some(token)
   }
@@ -305,7 +306,7 @@ mod tests {
 
   #[test]
   fn test_add() {
-    let tokens = tokenize("(+ 1 2)").unwrap_or(vec![]);
+    let tokens = Lexer::new("(+ 1 2)").collect::<Vec<TokenItem>>();
     assert_eq!(
       tokens,
       vec![
