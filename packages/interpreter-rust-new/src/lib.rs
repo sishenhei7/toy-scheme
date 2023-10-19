@@ -1,9 +1,8 @@
 #![feature(iter_advance_by)]
 
 pub mod boxing;
-// pub mod closure;
 pub mod env;
-// pub mod evaluator;
+pub mod evaluator;
 pub mod lexer;
 pub mod parser;
 
@@ -13,7 +12,6 @@ use once_cell::sync::Lazy;
 
 use anyhow::Error;
 // use napi_derive::napi;
-// use closure::*;
 use env::*;
 use lexer::*;
 use parser::*;
