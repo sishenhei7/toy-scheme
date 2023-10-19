@@ -53,28 +53,32 @@ impl Env {
   }
 
   pub fn get(&self, key: &str) -> Option<SchemeData> {
-    match self.0.borrow().scope.get(key) {
+    let scope = &self.0.borrow_mut().scope;
+    match scope.get(key) {
       Some(x) => Some(x.clone()),
       None => self.get_parent()?.get(key),
     }
   }
 
   pub fn set(&mut self, key: &str, val: SchemeData) -> Option<SchemeData> {
-    match self.0.borrow().scope.get(key) {
-      Some(_) => self.0.borrow_mut().scope.insert(key.to_string(), val),
+    let scope = &mut self.0.borrow_mut().scope;
+    match scope.get(key) {
+      Some(_) => scope.insert(key.to_string(), val),
       None => self.get_parent()?.set(key, val),
     }
   }
 
   pub fn define(&mut self, key: &str, val: SchemeData) -> Option<SchemeData> {
-    match self.0.borrow().scope.get(key) {
+    let scope = &mut self.0.borrow_mut().scope;
+    match scope.get(key) {
       Some(_) => None,
-      None => self.0.borrow_mut().scope.insert(key.to_string(), val),
+      None => scope.insert(key.to_string(), val),
     }
   }
 
   pub fn modify(&mut self, key: &str, val: SchemeData) -> Option<SchemeData> {
-    self.0.borrow_mut().scope.insert(key.to_string(), val)
+    let scope = &mut self.0.borrow_mut().scope;
+    scope.insert(key.to_string(), val)
   }
 }
 
