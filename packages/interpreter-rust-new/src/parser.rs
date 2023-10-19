@@ -1,6 +1,3 @@
-use std::cell::RefCell;
-use std::rc::Rc;
-
 use anyhow::Error;
 
 use crate::{
@@ -274,11 +271,11 @@ pub fn parse(mut list: Vec<TokenItem>) -> Result<SchemeExp, Error> {
 #[cfg(test)]
 mod tests {
   use super::*;
-  use crate::lexer::tokenize;
+  use crate::lexer::Lexer;
 
   #[test]
   fn test_add() {
-    let tokens = tokenize("(+ 1 2)").unwrap_or(vec![]);
+    let tokens = Lexer::new("(+ 1 2)").collect::<Vec<TokenItem>>();
     let data = parse(tokens).unwrap_or(SchemeExp {
       value: vec![],
       loc: None,

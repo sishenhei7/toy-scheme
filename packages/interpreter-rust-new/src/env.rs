@@ -5,7 +5,7 @@ use std::rc::Rc;
 use crate::{
   boxing::Boxing,
   build_boxing,
-  parser::{BaseSchemeData, SchemeBoolean, SchemeData, SchemeNumber, SchemeString},
+  parser::{SchemeBoolean, SchemeData, SchemeNumber, SchemeString},
 };
 
 #[derive(Debug, PartialEq)]

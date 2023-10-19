@@ -1,9 +1,9 @@
 #![feature(iter_advance_by)]
 
 pub mod boxing;
-pub mod closure;
+// pub mod closure;
 pub mod env;
-pub mod evaluator;
+// pub mod evaluator;
 pub mod lexer;
 pub mod parser;
 
@@ -13,15 +13,15 @@ use once_cell::sync::Lazy;
 
 use anyhow::Error;
 // use napi_derive::napi;
-use closure::*;
+// use closure::*;
 use env::*;
 use lexer::*;
 use parser::*;
-use evaluator::{ evaluate_exp, EvaluateResponse };
+// use evaluator::{ evaluate_exp, EvaluateResponse };
 
 // #[napi(custom_finalize)]
 pub struct Interpreter {
-  node: EvaluateResponse
+  // node: EvaluateResponse
 }
 
 struct StepResponse {
@@ -33,17 +33,18 @@ struct StepResponse {
 impl Interpreter {
   // #[napi(constructor)]
   pub fn new(program: String) -> Result<Self, Error> {
-    let token_list = tokenize(&program)?;
-    let scheme_exp = parse(token_list)?;
-    let initial_env = Env::new();
-    let initial_cont = SchemeCont {
-      func: Closure::new(|x| Ok(EvaluateResponse::Data(x))),
-      data: None,
-      env: initial_env.clone(),
-      loc: None,
-    };
-    let node = evaluate_exp(&scheme_exp, &initial_env, &initial_cont)?;
-    Ok(Self { node })
+    Ok(Self {})
+    // let token_list = tokenize(&program)?;
+    // let scheme_exp = parse(token_list)?;
+    // let initial_env = Env::new();
+    // let initial_cont = SchemeCont {
+    //   func: Closure::new(|x| Ok(EvaluateResponse::Data(x))),
+    //   data: None,
+    //   env: initial_env.clone(),
+    //   loc: None,
+    // };
+    // let node = evaluate_exp(&scheme_exp, &initial_env, &initial_cont)?;
+    // Ok(Self { node })
   }
 
   // pub fn run(&self) -> String {

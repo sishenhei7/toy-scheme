@@ -1,5 +1,3 @@
-use anyhow::Error;
-
 #[derive(Debug, PartialEq)]
 pub enum TokenType {
   Quote,
