@@ -75,6 +75,8 @@ impl Evaluator {
     }
   }
 
+  // 从第一个开始进行匹配 begin、callcc 等，没匹配到则视为单独的求值
+  // 从左往右一次求值，最后一个的结果是这个 exp 的值
   pub fn parse(&self) -> Option<Cell> {
     None
   }
