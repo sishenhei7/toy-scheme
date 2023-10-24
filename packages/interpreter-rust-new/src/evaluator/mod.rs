@@ -20,9 +20,9 @@ use crate::{
 };
 
 #[derive(Debug)]
-pub enum EvaluatorList {
+pub enum CellName {
+  Value,
   Begin,
-  Buildin(Buildin),
   Callcc,
   Cond,
   Cont,
@@ -31,29 +31,29 @@ pub enum EvaluatorList {
   Lambda,
   LetClause,
   Proc,
-  Set,
-}
-
-#[derive(Debug)]
-pub enum Buildin {
-  Cons,
-  IsNull,
-  Car,
-  Cdr,
-  Cadr,
-  Equal,
-  MoreThan,
-  LessThan,
-  Add,
+  Set
 }
 
 pub struct Cell {
-  pub env: Env,
-  pub name: String,
+  pub name: CellName,
   pub params: Vec<SchemeData>,
+  pub env: Env,
+  pub loc: Option<Location>,
   pub next: Option<Box<Cell>>,
-  pub prev: Option<Box<Cell>>,
-  pub loc: Location
+  pub prev: Option<Box<Cell>>
+}
+
+impl Cell {
+  pub fn new(name: CellName, params: Vec<SchemeData>, env: Env, loc: Option<Location>) -> Self {
+    Self {
+      name,
+      params,
+      env,
+      loc,
+      next: None,
+      prev: None
+    }
+  }
 }
 
 pub struct Evaluator {
@@ -77,11 +77,87 @@ impl Evaluator {
 
   // 从第一个开始进行匹配 begin、callcc 等，没匹配到则视为单独的求值
   // 从左往右一次求值，最后一个的结果是这个 exp 的值
-  pub fn parse(&self) -> Option<Cell> {
+  pub fn parse(&self, node: SchemeData, env: Env) -> Option<Cell> {
+    match node {
+      SchemeData::Identifier(ref _x) => self.parse_identifier(node, env),
+      SchemeData::Number(ref _x) => Some(Cell::new(
+        CellName::Value,
+        vec![node.clone()],
+        env.copy(),
+        node.get_loc()
+      )),
+      SchemeData::String(ref _x) => Some(Cell::new(
+        CellName::Value,
+        vec![node.clone()],
+        env.copy(),
+        node.get_loc()
+      )),
+      SchemeData::Boolean(ref _x) => Some(Cell::new(
+        CellName::Value,
+        vec![node.clone()],
+        env.copy(),
+        node.get_loc()
+      )),
+      SchemeData::List(ref _x) => Some(Cell::new(
+        CellName::Value,
+        vec![node.clone()],
+        env.copy(),
+        node.get_loc()
+      )),
+      SchemeData::Continuation(ref _x) => None,
+      SchemeData::Procedure(ref _x) => None,
+      SchemeData::Exp(ref x) => self.parse_exp(x.clone(), env),
+      _ => None,
+    }
+  }
+
+  // use VecDeque ?
+  pub fn parse_exp(&self, node: SchemeExp, env: Env) -> Option<Cell> {
+    let mut last_cell = None;
+    while let Some(&data) = node.value.first() {
+      let cell = match data {
+        SchemeData::Identifier(ref x) => {
+          match x.value.as_str() {
+            "begin" => self.parse_begin(node, env),
+            _ => None
+          }
+        },
+        SchemeData::Number(ref _x) => {
+          Some(Cell::new(
+            CellName::Value,
+            vec![data.clone()],
+            env.copy(),
+            data.get_loc()
+          ))
+        },
+        SchemeData::String(ref _x) => Some(Cell::new(
+          CellName::Value,
+          vec![data.clone()],
+          env.copy(),
+          data.get_loc()
+        )),
+        SchemeData::Boolean(ref _x) => Some(Cell::new(
+          CellName::Value,
+          vec![data.clone()],
+          env.copy(),
+          data.get_loc()
+        )),
+        SchemeData::List(ref _x) => Some(Cell::new(
+          CellName::Value,
+          vec![data.clone()],
+          env.copy(),
+          data.get_loc()
+        )),
+        SchemeData::Continuation(ref _x) => None,
+        SchemeData::Procedure(ref _x) => None,
+        SchemeData::Exp(ref x) => self.parse_exp(x.clone(), env),
+        _ => None
+      };
+    };
     None
   }
 
-  pub fn parse_exp(&self) -> Option<Cell> {
+  pub fn parse_identifier(&self, node: SchemeData, env: Env) -> Option<Cell> {
     None
   }
 }
