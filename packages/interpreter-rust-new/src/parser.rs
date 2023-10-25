@@ -1,3 +1,4 @@
+use std::collections::VecDeque;
 use anyhow::Error;
 
 use crate::{
@@ -53,7 +54,7 @@ pub struct SchemeProc {
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct SchemeExp {
-  pub value: Vec<SchemeData>,
+  pub value: VecDeque<SchemeData>,
   pub loc: Option<Location>,
 }
 
@@ -160,18 +161,13 @@ impl SchemeData {
     self
   }
 
-  pub fn build_list_from_vec(vec: &mut Vec<SchemeData>) -> SchemeData {
-    let mut data = SchemeData::Nil;
-    let last_loc = if let Some(last) = vec.last() {
-      last.get_loc().unwrap_or(Default::default())
-    } else {
-      return data
-    };
-    for x in vec.iter().rev() {
+  pub fn build_list_from_vec(vec: &mut VecDeque<SchemeData>) -> SchemeData {
+    vec.iter().fold(SchemeData::Nil, |acc, x| {
       let loc = x.get_loc().unwrap_or(Default::default());
-      data = build_list!(
+      let last_loc = acc.get_loc().unwrap_or(loc.clone());
+      build_list!(
         Box::new(x.clone()),
-        Box::new(data),
+        Box::new(acc),
         Some(Location {
           line_start: loc.line_start,
           column_start: loc.column_start,
@@ -179,34 +175,12 @@ impl SchemeData {
           column_end: last_loc.column_end,
         })
       )
-    }
-    data
+    })
   }
 
-  pub fn build_exp_from_vec(vec: Vec<SchemeData>) -> Option<SchemeData> {
-    if vec.is_empty() {
-      return None;
-    }
-
-    let first_loc = vec.first()?.get_loc()?;
-    let last_loc = vec.last()?.get_loc()?;
-    Some(build_exp!(
-      vec,
-      Some(Location {
-        line_start: first_loc.line_start,
-        column_start: first_loc.column_start,
-        line_end: last_loc.line_end,
-        column_end: last_loc.column_end
-      })
-    ))
-  }
-
-  pub fn parse_list_from_end(
-    list: &mut Vec<TokenItem>,
-    left_paren_loc: Location,
-  ) -> Result<SchemeExp, Error> {
-    let mut scheme_data_list: Vec<SchemeData> = vec![];
-
+  // this will consume the list
+  pub fn parse_token_list(list: &mut Vec<TokenItem>, start_loc: Location) -> Result<SchemeExp, Error> {
+    let mut scheme_data_list = vec![];
     while let Some(TokenItem { token, loc }) = list.pop() {
       scheme_data_list.push(match token {
         // ignore WhiteSpace and EOL
@@ -217,10 +191,11 @@ impl SchemeData {
         TokenType::String(value) => build_string!(value, Some(loc)),
         TokenType::Boolean(value) => build_boolean!(value, Some(loc)),
         TokenType::Quote => {
+          // 'xxxx 和 '(xx, xxx)
           if let Some(peek) = list.last() {
             let mut quote_exp = match peek.token {
-              TokenType::LParen => SchemeData::parse_list_from_end(list, loc)?,
-              _ => SchemeData::parse_list_from_end(&mut vec![list.pop().unwrap()], loc)?,
+              TokenType::LParen => SchemeData::parse_token_list(list, loc)?,
+              _ => SchemeData::parse_token_list(&mut vec![list.pop().unwrap()], loc)?,
             };
             SchemeData::build_list_from_vec(&mut quote_exp.value)
           } else {
@@ -228,15 +203,15 @@ impl SchemeData {
           }
         }
         TokenType::LParen => {
-          let paren_exp = SchemeData::parse_list_from_end(list, loc)?;
+          let paren_exp = SchemeData::parse_token_list(list, loc)?;
           SchemeData::Exp(paren_exp)
         }
         TokenType::RParen => {
           return Ok(SchemeExp {
-            value: scheme_data_list,
+            value: VecDeque::from(scheme_data_list),
             loc: Some(Location {
-              line_start: left_paren_loc.line_start,
-              column_start: left_paren_loc.column_start,
+              line_start: start_loc.line_start,
+              column_start: start_loc.column_start,
               line_end: loc.line_end,
               column_end: loc.column_end,
             }),
@@ -249,10 +224,10 @@ impl SchemeData {
     return if let Some(last_data) = scheme_data_list.last() {
       let last_loc = last_data.get_loc().unwrap_or(Default::default());
       Ok(SchemeExp {
-        value: scheme_data_list,
+        value: VecDeque::from(scheme_data_list),
         loc: Some(Location {
-          line_start: left_paren_loc.line_start,
-          column_start: left_paren_loc.column_start,
+          line_start: start_loc.line_start,
+          column_start: start_loc.column_start,
           line_end: last_loc.line_end,
           column_end: last_loc.column_end,
         }),
@@ -263,9 +238,9 @@ impl SchemeData {
   }
 }
 
-pub fn parse(mut list: Vec<TokenItem>) -> Result<SchemeExp, Error> {
-  list.reverse();
-  SchemeData::parse_list_from_end(&mut list, Default::default())
+// list is moved
+pub fn parse(list: Vec<TokenItem>) -> Result<SchemeExp, Error> {
+  SchemeData::parse_token_list(&mut list.into_iter().rev().collect(), Default::default())
 }
 
 #[cfg(test)]
@@ -277,14 +252,14 @@ mod tests {
   fn test_add() {
     let tokens = Lexer::new("(+ 1 2)").collect::<Vec<TokenItem>>();
     let data = parse(tokens).unwrap_or(SchemeExp {
-      value: vec![],
+      value: VecDeque::new(),
       loc: None,
     });
     assert_eq!(
       data,
       SchemeExp {
-        value: vec![build_exp!(
-          vec![
+        value: VecDeque::from([build_exp!(
+          VecDeque::from([
             build_identifier!(
               "+".to_string(),
               Some(Location {
@@ -312,14 +287,14 @@ mod tests {
                 column_end: 7
               })
             )
-          ],
+          ]),
           Some(Location {
             line_start: 1,
             column_start: 1,
             line_end: 1,
             column_end: 8
           })
-        )],
+        )]),
         loc: Some(Location {
           line_start: 1,
           column_start: 1,

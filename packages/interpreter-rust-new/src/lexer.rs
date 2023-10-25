@@ -1,4 +1,4 @@
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum TokenType {
   Quote,
   LParen,
@@ -31,7 +31,7 @@ impl Default for Location {
   }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct TokenItem {
   pub token: TokenType,
   pub loc: Location,
