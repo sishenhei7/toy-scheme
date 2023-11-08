@@ -39,8 +39,7 @@ pub struct Cell {
   pub params: Vec<SchemeData>,
   pub env: Env,
   pub loc: Option<Location>,
-  pub next: Option<Box<Cell>>,
-  pub prev: Option<Box<Cell>>
+  pub next: Option<Box<Cell>>
 }
 
 impl Cell {
@@ -50,8 +49,7 @@ impl Cell {
       params,
       env,
       loc,
-      next: None,
-      prev: None
+      next: None
     }
   }
 }
@@ -59,8 +57,9 @@ impl Cell {
 pub struct Evaluator {
   pub initial_input: SchemeData,
   pub initial_env: Env,
-  pub cell_chain: Option<Cell>,
-  pub cell_map:HashMap<usize, Cell>,
+  pub head: Option<Box<Cell>>,
+  pub tail: Option<Box<Cell>>,
+  pub cell_map: HashMap<usize, Option<Box<Cell>>>,
   pub cid: usize
 }
 
@@ -69,10 +68,23 @@ impl Evaluator {
     Self {
       initial_input: input.clone(),
       initial_env: Env::new(),
-      cell_chain: None,
+      head: None,
+      tail: None,
       cell_map: HashMap::new(),
       cid: 1
     }
+  }
+
+  pub fn append(&mut self, value: Option<Box<Cell>>) -> () {
+    match self.tail.as_mut() {
+      Some(x) => {
+        x.next = value
+      },
+      None => {}
+    }
+    self.tail = value;
+    self.cid += 1;
+    self.cell_map.insert(self.cid, value);
   }
 
   // 从第一个开始进行匹配 begin、callcc 等，没匹配到则视为单独的求值
@@ -113,9 +125,9 @@ impl Evaluator {
   }
 
   // use VecDeque ?
+  // 从左往右一次求值，最后一个的结果是这个 exp 的值
   // this consumes the node
   pub fn parse_exp(&self, node: SchemeExp, env: Env) -> Option<Cell> {
-    let mut last_cell = None;
     while let Some(&data) = node.value.first() {
       let cell = match data {
         SchemeData::Identifier(ref x) => {
@@ -156,6 +168,7 @@ impl Evaluator {
         _ => None
       };
     };
+
     None
   }
 
