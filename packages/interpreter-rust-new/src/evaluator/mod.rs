@@ -22,6 +22,7 @@ use crate::{
 #[derive(Debug)]
 pub enum CellName {
   Value,
+  Identifier,
   Begin,
   Callcc,
   Cond,
@@ -75,16 +76,17 @@ impl Evaluator {
     }
   }
 
-  pub fn append(&mut self, value: Option<Box<Cell>>) -> () {
+  pub fn append(&mut self, value: Option<Box<Cell>>) -> usize {
     match self.tail.as_mut() {
       Some(x) => {
         x.next = value
       },
       None => {}
     }
-    self.tail = value;
+    self.tail = value.take();
     self.cid += 1;
     self.cell_map.insert(self.cid, value);
+    self.cid
   }
 
   // 从第一个开始进行匹配 begin、callcc 等，没匹配到则视为单独的求值
@@ -92,7 +94,12 @@ impl Evaluator {
   // this consumes the node
   pub fn parse(&self, node: SchemeData, env: Env) -> Option<Cell> {
     match node {
-      SchemeData::Identifier(ref _x) => self.parse_identifier(node, env),
+      SchemeData::Identifier(ref _x) => Some(Cell::new(
+        CellName::Identifier,
+        vec![node.clone()],
+        env.copy(),
+        node.get_loc()
+      )),
       SchemeData::Number(ref _x) => Some(Cell::new(
         CellName::Value,
         vec![node.clone()],
@@ -128,51 +135,21 @@ impl Evaluator {
   // 从左往右一次求值，最后一个的结果是这个 exp 的值
   // this consumes the node
   pub fn parse_exp(&self, node: SchemeExp, env: Env) -> Option<Cell> {
-    while let Some(&data) = node.value.first() {
-      let cell = match data {
-        SchemeData::Identifier(ref x) => {
-          match x.value.as_str() {
-            "begin" => self.parse_begin(node, env),
-            _ => None
-          }
-        },
-        SchemeData::Number(ref _x) => {
-          Some(Cell::new(
-            CellName::Value,
-            vec![data.clone()],
-            env.copy(),
-            data.get_loc()
-          ))
-        },
-        SchemeData::String(ref _x) => Some(Cell::new(
-          CellName::Value,
-          vec![data.clone()],
-          env.copy(),
-          data.get_loc()
-        )),
-        SchemeData::Boolean(ref _x) => Some(Cell::new(
-          CellName::Value,
-          vec![data.clone()],
-          env.copy(),
-          data.get_loc()
-        )),
-        SchemeData::List(ref _x) => Some(Cell::new(
-          CellName::Value,
-          vec![data.clone()],
-          env.copy(),
-          data.get_loc()
-        )),
-        SchemeData::Continuation(ref _x) => None,
-        SchemeData::Procedure(ref _x) => None,
-        SchemeData::Exp(ref x) => self.parse_exp(x.clone(), env),
-        _ => None
-      };
-    };
-
-    None
+    match node.value.front() {
+      // 匹配上了语法
+      Some(SchemeData::Identifier(ref x)) => {
+        match x.value.as_str() {
+          "begin" => self.parse_begin(node.clone(), env.copy()),
+          _ => None
+        }
+      },
+      // 没匹配上语法，则从左到右依次 parse
+      _ => self.parse_from_left(node, env)
+    }
   }
 
-  pub fn parse_identifier(&self, node: SchemeData, env: Env) -> Option<Cell> {
+  // 从左到右一次求值，返回最后一个
+  pub fn parse_from_left(&self, node: SchemeExp, env: Env) -> Option<Cell> {
     None
   }
 }
