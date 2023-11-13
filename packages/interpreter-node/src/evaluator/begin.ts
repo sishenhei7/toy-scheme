@@ -7,7 +7,7 @@ import type { IEvaluator, Evaluator } from './index'
  * (begin
  *    (set! amount m)
  *    (set! amount n)
- *    amout)
+ *    amount)
  */
 export default class BeginEvaluator implements IEvaluator {
   constructor(private evaluator: Evaluator) {}
