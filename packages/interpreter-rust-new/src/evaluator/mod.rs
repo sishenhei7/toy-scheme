@@ -40,7 +40,7 @@ pub struct Cell {
   pub params: Vec<SchemeData>,
   pub env: Env,
   pub loc: Option<Location>,
-  pub next: Option<Box<Cell>>
+  pub next: Option<usize>
 }
 
 impl Cell {
@@ -55,11 +55,13 @@ impl Cell {
   }
 }
 
+// 由于所有权的原因，cell 不方便同时放入 head、tail、cell_map、next 里面(用Rc也可以)
+// 所以考虑把所有的 cell 放入 cell_map，head、tail、next 里面只存索引
 pub struct Evaluator {
   pub initial_input: SchemeData,
   pub initial_env: Env,
-  pub head: Option<Box<Cell>>,
-  pub tail: Option<Box<Cell>>,
+  pub head: Option<usize>,
+  pub tail: Option<usize>,
   pub cell_map: HashMap<usize, Option<Box<Cell>>>,
   pub cid: usize
 }
@@ -77,16 +79,22 @@ impl Evaluator {
   }
 
   pub fn append(&mut self, value: Option<Box<Cell>>) -> usize {
-    match self.tail.as_mut() {
-      Some(x) => {
-        x.next = value
-      },
-      None => {}
-    }
-    self.tail = value.take();
     self.cid += 1;
     self.cell_map.insert(self.cid, value);
+    self.modify_tail_next(self.cid);
+    self.tail = Some(self.cid);
     self.cid
+  }
+
+  fn modify_tail_next(&mut self, cid: usize) -> () {
+    // 修改 next 的指向
+    if let Some(x) = self.tail {
+      if let Some(y) = self.cell_map.get_mut(&x) {
+        if let Some(z) = y {
+          z.next = Some(cid)
+        }
+      }
+    };
   }
 
   // 从第一个开始进行匹配 begin、callcc 等，没匹配到则视为单独的求值
@@ -148,7 +156,7 @@ impl Evaluator {
     }
   }
 
-  // 从左到右一次求值，返回最后一个
+  // 从左到右依次求值，返回最后一个
   pub fn parse_from_left(&self, node: SchemeExp, env: Env) -> Option<Cell> {
     None
   }
