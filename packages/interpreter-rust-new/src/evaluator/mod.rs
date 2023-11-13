@@ -100,55 +100,66 @@ impl Evaluator {
   // 从第一个开始进行匹配 begin、callcc 等，没匹配到则视为单独的求值
   // 从左往右一次求值，最后一个的结果是这个 exp 的值
   // this consumes the node
-  pub fn parse(&self, node: SchemeData, env: Env) -> Option<Cell> {
+  pub fn parse(&mut self, node: SchemeData, env: Env) -> () {
     match node {
-      SchemeData::Identifier(ref _x) => Some(Cell::new(
-        CellName::Identifier,
-        vec![node.clone()],
-        env.copy(),
-        node.get_loc()
-      )),
-      SchemeData::Number(ref _x) => Some(Cell::new(
-        CellName::Value,
-        vec![node.clone()],
-        env.copy(),
-        node.get_loc()
-      )),
-      SchemeData::String(ref _x) => Some(Cell::new(
-        CellName::Value,
-        vec![node.clone()],
-        env.copy(),
-        node.get_loc()
-      )),
-      SchemeData::Boolean(ref _x) => Some(Cell::new(
-        CellName::Value,
-        vec![node.clone()],
-        env.copy(),
-        node.get_loc()
-      )),
-      SchemeData::List(ref _x) => Some(Cell::new(
-        CellName::Value,
-        vec![node.clone()],
-        env.copy(),
-        node.get_loc()
-      )),
-      SchemeData::Continuation(ref _x) => None,
-      SchemeData::Procedure(ref _x) => None,
+      SchemeData::Identifier(ref _x) => {
+        self.append(Some(Box::new(Cell::new(
+          CellName::Identifier,
+          vec![node.clone()],
+          env.copy(),
+          node.get_loc()
+        ))));
+      },
+      SchemeData::Number(ref _x) => {
+        self.append(Some(Box::new(Cell::new(
+          CellName::Value,
+          vec![node.clone()],
+          env.copy(),
+          node.get_loc()
+        ))));
+      },
+      SchemeData::String(ref _x) => {
+        self.append(Some(Box::new(Cell::new(
+          CellName::Value,
+          vec![node.clone()],
+          env.copy(),
+          node.get_loc()
+        ))));
+      },
+      SchemeData::Boolean(ref _x) => {
+        self.append(Some(Box::new(Cell::new(
+          CellName::Value,
+          vec![node.clone()],
+          env.copy(),
+          node.get_loc()
+        ))));
+      },
+      SchemeData::List(ref _x) => {
+        self.append(Some(Box::new(Cell::new(
+          CellName::Value,
+          vec![node.clone()],
+          env.copy(),
+          node.get_loc()
+        ))));
+      },
+      SchemeData::Continuation(ref _x) => (),
+      SchemeData::Procedure(ref _x) => (),
       SchemeData::Exp(ref x) => self.parse_exp(x.clone(), env),
-      _ => None,
+      _ => (),
     }
   }
 
   // use VecDeque ?
   // 从左往右一次求值，最后一个的结果是这个 exp 的值
   // this consumes the node
-  pub fn parse_exp(&self, node: SchemeExp, env: Env) -> Option<Cell> {
+  pub fn parse_exp(&mut self, node: SchemeExp, env: Env) -> () {
     match node.value.front() {
       // 匹配上了语法
       Some(SchemeData::Identifier(ref x)) => {
         match x.value.as_str() {
           "begin" => self.parse_begin(node.clone(), env.copy()),
-          _ => None
+          "call-with-current-continuation" => self.parse_call_cc(node.clone(), env.copy()),
+          _ => ()
         }
       },
       // 没匹配上语法，则从左到右依次 parse
@@ -157,8 +168,10 @@ impl Evaluator {
   }
 
   // 从左到右依次求值，返回最后一个
-  pub fn parse_from_left(&self, node: SchemeExp, env: Env) -> Option<Cell> {
-    None
+  pub fn parse_from_left(&mut self, node: SchemeExp, env: Env) -> () {
+    for node in node.value.into_iter() {
+      self.parse(node, env.copy())
+    }
   }
 }
 
