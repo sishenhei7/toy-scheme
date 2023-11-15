@@ -10,8 +10,10 @@ use super::{ Evaluator, Cell };
  *    amount)
  */
 impl Evaluator {
-  pub fn parse_begin(&self, node: SchemeExp, env: Env) -> () {
-    ()
+  pub fn parse_begin(&mut self, node: SchemeExp, env: Env) -> () {
+    let mut queue = node.value;
+    queue.pop_front();
+    self.parse_from_left(queue, env)
   }
 
   pub fn eval_begin(&mut self) -> Option<Cell> {

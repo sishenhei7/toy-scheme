@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, VecDeque};
 
 mod begin;
 mod buildin;
@@ -157,19 +157,19 @@ impl Evaluator {
       // 匹配上了语法
       Some(SchemeData::Identifier(ref x)) => {
         match x.value.as_str() {
-          "begin" => self.parse_begin(node.clone(), env.copy()),
-          "call-with-current-continuation" => self.parse_call_cc(node.clone(), env.copy()),
+          "begin" => self.parse_begin(node, env.copy()),
+          "call-with-current-continuation" => self.parse_call_cc(node, env.copy()),
           _ => ()
         }
       },
       // 没匹配上语法，则从左到右依次 parse
-      _ => self.parse_from_left(node, env)
+      _ => self.parse_from_left(node.value, env)
     }
   }
 
   // 从左到右依次求值，返回最后一个
-  pub fn parse_from_left(&mut self, node: SchemeExp, env: Env) -> () {
-    for node in node.value.into_iter() {
+  pub fn parse_from_left(&mut self, queue: VecDeque<SchemeData>, env: Env) -> () {
+    for node in queue.into_iter() {
       self.parse(node, env.copy())
     }
   }
