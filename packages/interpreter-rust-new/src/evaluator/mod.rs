@@ -159,6 +159,13 @@ impl Evaluator {
         match x.value.as_str() {
           "begin" => self.parse_begin(node, env.copy()),
           "call-with-current-continuation" => self.parse_call_cc(node, env.copy()),
+          "cond" => self.parse_cond(node, env.copy()),
+          "cont" => self.parse_cont(node, env.copy()),
+          "define" => self.parse_define(node, env.copy()),
+          "if" => self.parse_if_clause(node, env.copy()),
+          "lambda" => self.parse_lambda(node, env.copy()),
+          "let" | "let*" | "letrec" => self.parse_let_clause(node, env.copy()),
+          "set!" => self.parse_set(node, env.copy()),
           _ => ()
         }
       },
