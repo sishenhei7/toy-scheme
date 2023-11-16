@@ -10,8 +10,8 @@ use super::{ Evaluator, Cell };
  *     (else        clauses_else))
  */
 impl Evaluator {
-  pub fn parse_cond(&self, node: SchemeExp, env: Env) -> () {
-    ()
+  pub fn parse_cond(&self, node: SchemeExp, env: Env) -> usize {
+    panic!()
   }
 
   pub fn eval_cond(&mut self) -> Option<Cell> {

@@ -8,8 +8,8 @@ use super::{ Evaluator, Cell };
  * (vhello "Hello world")
  */
 impl Evaluator {
-  pub fn parse_proc(&self, node: SchemeExp, env: Env) -> () {
-    ()
+  pub fn parse_proc(&self, node: SchemeExp, env: Env) -> usize {
+    panic!()
   }
 
   pub fn eval_proc(&mut self) -> Option<Cell> {

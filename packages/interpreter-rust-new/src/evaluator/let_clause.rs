@@ -18,8 +18,8 @@ use super::{ Evaluator, Cell };
  *  (iter ls 0))
  */
 impl Evaluator {
-  pub fn parse_let_clause(&self, node: SchemeExp, env: Env) -> () {
-    ()
+  pub fn parse_let_clause(&self, node: SchemeExp, env: Env) -> usize {
+    panic!()
   }
 
   pub fn eval_let_clause(&mut self) -> Option<Cell> {

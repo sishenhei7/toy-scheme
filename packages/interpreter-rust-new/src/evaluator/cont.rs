@@ -7,8 +7,8 @@ use super::{ Evaluator, Cell };
  * (cont xx)
  */
 impl Evaluator {
-  pub fn parse_cont(&self, node: SchemeExp, env: Env) -> () {
-    ()
+  pub fn parse_cont(&self, node: SchemeExp, env: Env) -> usize {
+    panic!()
   }
 
   pub fn eval_cont(&mut self) -> Option<Cell> {

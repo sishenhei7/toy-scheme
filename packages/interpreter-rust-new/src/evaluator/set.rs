@@ -7,8 +7,8 @@ use super::{ Evaluator, Cell };
  * (set! var (* var 10))
  */
 impl Evaluator {
-  pub fn parse_set(&self, node: SchemeExp, env: Env) -> () {
-    ()
+  pub fn parse_set(&self, node: SchemeExp, env: Env) -> usize {
+    panic!()
   }
 
   pub fn eval_set(&mut self) -> Option<Cell> {

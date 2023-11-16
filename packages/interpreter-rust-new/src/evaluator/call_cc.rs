@@ -10,8 +10,8 @@ use super::{ Evaluator, Cell };
  *      (return element)))
  */
 impl Evaluator {
-  pub fn parse_call_cc(&self, node: SchemeExp, env: Env) -> () {
-    ()
+  pub fn parse_call_cc(&self, node: SchemeExp, env: Env) -> usize {
+    panic!()
   }
 
   pub fn eval_call_cc(&mut self) -> Option<Cell> {

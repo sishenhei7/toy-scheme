@@ -100,7 +100,7 @@ impl Evaluator {
   // 从第一个开始进行匹配 begin、callcc 等，没匹配到则视为单独的求值
   // 从左往右一次求值，最后一个的结果是这个 exp 的值
   // this consumes the node
-  pub fn parse(&mut self, node: SchemeData, env: Env) -> () {
+  pub fn parse(&mut self, node: SchemeData, env: Env) -> usize {
     match node {
       SchemeData::Identifier(ref _x) => {
         self.append(Some(Box::new(Cell::new(
@@ -108,7 +108,7 @@ impl Evaluator {
           vec![node.clone()],
           env.copy(),
           node.get_loc()
-        ))));
+        ))))
       },
       SchemeData::Number(ref _x) => {
         self.append(Some(Box::new(Cell::new(
@@ -116,7 +116,7 @@ impl Evaluator {
           vec![node.clone()],
           env.copy(),
           node.get_loc()
-        ))));
+        ))))
       },
       SchemeData::String(ref _x) => {
         self.append(Some(Box::new(Cell::new(
@@ -124,7 +124,7 @@ impl Evaluator {
           vec![node.clone()],
           env.copy(),
           node.get_loc()
-        ))));
+        ))))
       },
       SchemeData::Boolean(ref _x) => {
         self.append(Some(Box::new(Cell::new(
@@ -132,7 +132,7 @@ impl Evaluator {
           vec![node.clone()],
           env.copy(),
           node.get_loc()
-        ))));
+        ))))
       },
       SchemeData::List(ref _x) => {
         self.append(Some(Box::new(Cell::new(
@@ -140,19 +140,16 @@ impl Evaluator {
           vec![node.clone()],
           env.copy(),
           node.get_loc()
-        ))));
+        ))))
       },
-      SchemeData::Continuation(ref _x) => (),
-      SchemeData::Procedure(ref _x) => (),
+      SchemeData::Continuation(ref _x) => panic!(),
+      SchemeData::Procedure(ref _x) => panic!(),
       SchemeData::Exp(ref x) => self.parse_exp(x.clone(), env),
-      _ => (),
+      _ => panic!(),
     }
   }
 
-  // use VecDeque ?
-  // 从左往右一次求值，最后一个的结果是这个 exp 的值
-  // this consumes the node
-  pub fn parse_exp(&mut self, node: SchemeExp, env: Env) -> () {
+  pub fn parse_exp(&mut self, node: SchemeExp, env: Env) -> usize {
     match node.value.front() {
       // 匹配上了语法
       Some(SchemeData::Identifier(ref x)) => {
@@ -166,7 +163,7 @@ impl Evaluator {
           "lambda" => self.parse_lambda(node, env.copy()),
           "let" | "let*" | "letrec" => self.parse_let_clause(node, env.copy()),
           "set!" => self.parse_set(node, env.copy()),
-          _ => ()
+          _ => panic!()
         }
       },
       // 没匹配上语法，则从左到右依次 parse
@@ -175,10 +172,11 @@ impl Evaluator {
   }
 
   // 从左到右依次求值，返回最后一个
-  pub fn parse_from_left(&mut self, queue: VecDeque<SchemeData>, env: Env) -> () {
+  pub fn parse_from_left(&mut self, queue: VecDeque<SchemeData>, env: Env) -> usize {
     for node in queue.into_iter() {
-      self.parse(node, env.copy())
+      self.parse(node, env.copy());
     }
+    self.cid
   }
 }
 
