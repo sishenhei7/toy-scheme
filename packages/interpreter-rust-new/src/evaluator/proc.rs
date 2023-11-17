@@ -8,7 +8,7 @@ use super::{ Evaluator, Cell };
  * (vhello "Hello world")
  */
 impl Evaluator {
-  pub fn parse_proc(&self, node: SchemeExp, env: Env) -> usize {
+  pub fn parse_proc(&self, node: SchemeExp, env: Env, next: usize) -> usize {
     panic!()
   }
 

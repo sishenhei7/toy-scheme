@@ -7,10 +7,10 @@ use super::{ Evaluator, Cell };
  * (if predict then_value else_value)
  */
 impl Evaluator {
-  pub fn parse_if_clause(&mut self, mut node: SchemeExp, env: Env) -> usize {
+  pub fn parse_if_clause(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
     // parse predict
     match node.value.pop_front() {
-      Some(x) => self.parse(x, env.copy()),
+      Some(x) => self.parse(x, env.copy(), next),
       _ => panic!("Parse if clause error!")
     };
 

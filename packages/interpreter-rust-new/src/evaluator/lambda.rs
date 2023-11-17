@@ -7,7 +7,7 @@ use super::{ Evaluator, Cell };
  * (lambda (a b c) (+ a b c))
  */
 impl Evaluator {
-  pub fn parse_lambda(&self, node: SchemeExp, env: Env) -> usize {
+  pub fn parse_lambda(&self, node: SchemeExp, env: Env, next: usize) -> usize {
     panic!()
   }
 

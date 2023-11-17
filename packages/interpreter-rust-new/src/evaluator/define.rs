@@ -10,7 +10,7 @@ use super::{ Evaluator, Cell };
  * (define (hello name) (string-append "Hello " name "!"))
  */
 impl Evaluator {
-  pub fn parse_define(&self, node: SchemeExp, env: Env) -> usize {
+  pub fn parse_define(&self, node: SchemeExp, env: Env, next: usize) -> usize {
     panic!()
   }
 

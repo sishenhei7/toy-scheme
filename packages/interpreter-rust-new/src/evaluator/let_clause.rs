@@ -18,7 +18,7 @@ use super::{ Evaluator, Cell };
  *  (iter ls 0))
  */
 impl Evaluator {
-  pub fn parse_let_clause(&self, node: SchemeExp, env: Env) -> usize {
+  pub fn parse_let_clause(&self, node: SchemeExp, env: Env, next: usize) -> usize {
     panic!()
   }
 

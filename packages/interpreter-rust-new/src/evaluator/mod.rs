@@ -100,7 +100,7 @@ impl Evaluator {
   // 从第一个开始进行匹配 begin、callcc 等，没匹配到则视为单独的求值
   // 从左往右一次求值，最后一个的结果是这个 exp 的值
   // this consumes the node
-  pub fn parse(&mut self, node: SchemeData, env: Env) -> usize {
+  pub fn parse(&mut self, node: SchemeData, env: Env, next: usize) -> usize {
     match node {
       SchemeData::Identifier(ref _x) => {
         self.append(Some(Box::new(Cell::new(
@@ -144,37 +144,37 @@ impl Evaluator {
       },
       SchemeData::Continuation(ref _x) => panic!(),
       SchemeData::Procedure(ref _x) => panic!(),
-      SchemeData::Exp(ref x) => self.parse_exp(x.clone(), env),
+      SchemeData::Exp(ref x) => self.parse_exp(x.clone(), env, next),
       _ => panic!(),
     }
   }
 
-  pub fn parse_exp(&mut self, node: SchemeExp, env: Env) -> usize {
+  pub fn parse_exp(&mut self, node: SchemeExp, env: Env, next: usize) -> usize {
     match node.value.front() {
       // 匹配上了语法
       Some(SchemeData::Identifier(ref x)) => {
         match x.value.as_str() {
-          "begin" => self.parse_begin(node, env.copy()),
-          "call-with-current-continuation" => self.parse_call_cc(node, env.copy()),
-          "cond" => self.parse_cond(node, env.copy()),
-          "cont" => self.parse_cont(node, env.copy()),
-          "define" => self.parse_define(node, env.copy()),
-          "if" => self.parse_if_clause(node, env.copy()),
-          "lambda" => self.parse_lambda(node, env.copy()),
-          "let" | "let*" | "letrec" => self.parse_let_clause(node, env.copy()),
-          "set!" => self.parse_set(node, env.copy()),
+          "begin" => self.parse_begin(node, env.copy(), next),
+          "call-with-current-continuation" => self.parse_call_cc(node, env.copy(), next),
+          "cond" => self.parse_cond(node, env.copy(), next),
+          "cont" => self.parse_cont(node, env.copy(), next),
+          "define" => self.parse_define(node, env.copy(), next),
+          "if" => self.parse_if_clause(node, env.copy(), next),
+          "lambda" => self.parse_lambda(node, env.copy(), next),
+          "let" | "let*" | "letrec" => self.parse_let_clause(node, env.copy(), next),
+          "set!" => self.parse_set(node, env.copy(), next),
           _ => panic!()
         }
       },
       // 没匹配上语法，则从左到右依次 parse
-      _ => self.parse_from_left(node.value, env)
+      _ => self.parse_from_left(node.value, env, next)
     }
   }
 
   // 从左到右依次求值，返回最后一个
-  pub fn parse_from_left(&mut self, queue: VecDeque<SchemeData>, env: Env) -> usize {
+  pub fn parse_from_left(&mut self, queue: VecDeque<SchemeData>, env: Env, next: usize) -> usize {
     for node in queue.into_iter() {
-      self.parse(node, env.copy());
+      self.parse(node, env.copy(), next);
     }
     self.cid
   }

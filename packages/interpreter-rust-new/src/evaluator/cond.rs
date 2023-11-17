@@ -10,7 +10,7 @@ use super::{ Evaluator, Cell };
  *     (else        clauses_else))
  */
 impl Evaluator {
-  pub fn parse_cond(&self, node: SchemeExp, env: Env) -> usize {
+  pub fn parse_cond(&self, node: SchemeExp, env: Env, next: usize) -> usize {
     panic!()
   }
 
