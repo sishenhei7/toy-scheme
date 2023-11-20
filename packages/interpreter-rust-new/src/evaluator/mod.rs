@@ -40,29 +40,33 @@ pub struct Cell {
   pub params: Vec<SchemeData>,
   pub env: Env,
   pub loc: Option<Location>,
-  pub next: Option<usize>
+  pub next: Vec<usize>
 }
 
 impl Cell {
-  pub fn new(name: CellName, params: Vec<SchemeData>, env: Env, loc: Option<Location>) -> Self {
+  pub fn new(
+    name: CellName,
+    params: Vec<SchemeData>,
+    env: Env,
+    loc: Option<Location>,
+    next: Vec<usize>
+  ) -> Self {
     Self {
       name,
       params,
       env,
       loc,
-      next: None
+      next
     }
   }
 }
 
-// 由于所有权的原因，cell 不方便同时放入 head、tail、cell_map、next 里面(用Rc也可以)
-// 所以考虑把所有的 cell 放入 cell_map，head、tail、next 里面只存索引
+// 由于所有权的原因，cell 不方便同时放入 cell_map、next 里面(用Rc也可以)
+// 所以考虑把所有的 cell 放入 cell_map、next 里面只存索引
 pub struct Evaluator {
   pub initial_input: SchemeData,
   pub initial_env: Env,
-  pub head: Option<usize>,
-  pub tail: Option<usize>,
-  pub cell_map: HashMap<usize, Option<Box<Cell>>>,
+  pub cell_map: HashMap<usize, Cell>,
   pub cid: usize
 }
 
@@ -71,30 +75,15 @@ impl Evaluator {
     Self {
       initial_input: input.clone(),
       initial_env: Env::new(),
-      head: None,
-      tail: None,
       cell_map: HashMap::new(),
       cid: 1
     }
   }
 
-  pub fn append(&mut self, value: Option<Box<Cell>>) -> usize {
+  pub fn insert_map(&mut self, value: Cell) -> usize {
     self.cid += 1;
     self.cell_map.insert(self.cid, value);
-    self.modify_tail_next(self.cid);
-    self.tail = Some(self.cid);
     self.cid
-  }
-
-  fn modify_tail_next(&mut self, cid: usize) -> () {
-    // 修改 next 的指向
-    if let Some(x) = self.tail {
-      if let Some(y) = self.cell_map.get_mut(&x) {
-        if let Some(z) = y {
-          z.next = Some(cid)
-        }
-      }
-    };
   }
 
   // 从第一个开始进行匹配 begin、callcc 等，没匹配到则视为单独的求值
@@ -103,44 +92,49 @@ impl Evaluator {
   pub fn parse(&mut self, node: SchemeData, env: Env, next: usize) -> usize {
     match node {
       SchemeData::Identifier(ref _x) => {
-        self.append(Some(Box::new(Cell::new(
+        self.insert_map(Cell::new(
           CellName::Identifier,
           vec![node.clone()],
           env.copy(),
-          node.get_loc()
-        ))))
+          node.get_loc(),
+          vec![next]
+        ))
       },
       SchemeData::Number(ref _x) => {
-        self.append(Some(Box::new(Cell::new(
+        self.insert_map(Cell::new(
           CellName::Value,
           vec![node.clone()],
           env.copy(),
-          node.get_loc()
-        ))))
+          node.get_loc(),
+          vec![next]
+        ))
       },
       SchemeData::String(ref _x) => {
-        self.append(Some(Box::new(Cell::new(
+        self.insert_map(Cell::new(
           CellName::Value,
           vec![node.clone()],
           env.copy(),
-          node.get_loc()
-        ))))
+          node.get_loc(),
+          vec![next]
+        ))
       },
       SchemeData::Boolean(ref _x) => {
-        self.append(Some(Box::new(Cell::new(
+        self.insert_map(Cell::new(
           CellName::Value,
           vec![node.clone()],
           env.copy(),
-          node.get_loc()
-        ))))
+          node.get_loc(),
+          vec![next]
+        ))
       },
       SchemeData::List(ref _x) => {
-        self.append(Some(Box::new(Cell::new(
+        self.insert_map(Cell::new(
           CellName::Value,
           vec![node.clone()],
           env.copy(),
-          node.get_loc()
-        ))))
+          node.get_loc(),
+          vec![next]
+        ))
       },
       SchemeData::Continuation(ref _x) => panic!(),
       SchemeData::Procedure(ref _x) => panic!(),
