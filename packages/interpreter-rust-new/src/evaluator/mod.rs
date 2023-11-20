@@ -173,10 +173,10 @@ impl Evaluator {
 
   // 从左到右依次求值，返回最后一个
   pub fn parse_from_left(&mut self, queue: VecDeque<SchemeData>, env: Env, next: usize) -> usize {
-    for node in queue.into_iter() {
-      self.parse(node, env.copy(), next);
-    }
-    self.cid
+    queue.into_iter().rev().fold(
+      next,
+      |acc, cur| self.parse(cur, env.copy(), acc)
+    )
   }
 }
 
