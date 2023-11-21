@@ -1,6 +1,6 @@
 use crate::{parser::SchemeExp, env::Env};
 
-use super::{ Evaluator, Cell };
+use super::{ Evaluator, Unit };
 
 /**
  * 语法：
@@ -16,7 +16,7 @@ impl Evaluator {
     self.parse_from_left(queue, env, next)
   }
 
-  pub fn eval_begin(&mut self) -> Option<Cell> {
+  pub fn eval_begin(&mut self) -> Option<Unit> {
     None
   }
 }

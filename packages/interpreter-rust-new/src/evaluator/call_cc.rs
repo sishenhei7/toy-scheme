@@ -1,6 +1,6 @@
 use crate::{parser::SchemeExp, env::Env};
 
-use super::{ Evaluator, Cell };
+use super::{ Evaluator, Unit };
 
 /**
  * 语法（后面加一个 lambda 语句）：
@@ -14,7 +14,7 @@ impl Evaluator {
     panic!()
   }
 
-  pub fn eval_call_cc(&mut self) -> Option<Cell> {
+  pub fn eval_call_cc(&mut self) -> Option<Unit> {
     None
   }
 }

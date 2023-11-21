@@ -1,6 +1,6 @@
 use crate::{parser::{SchemeExp, SchemeData, SchemeProc}, env::Env};
 
-use super::{ Evaluator, Cell, CellName };
+use super::{ Evaluator, Unit, UnitName };
 
 /**
  * 语法：
@@ -16,9 +16,9 @@ impl Evaluator {
     let first = node.value.pop_front().unwrap();
 
     // 定义变量或函数
-    if let SchemeData::Identifier(_x) = first {
-      let set_cid = self.insert_map(Cell::new(
-        CellName::EnvSet,
+    if let SchemeData::Identifier(..) = first {
+      let set_cid = self.insert_map(Unit::new(
+        UnitName::EnvSet,
         vec![],
         env.copy(),
         None,
@@ -30,7 +30,7 @@ impl Evaluator {
 
     // 短形式定义函数
     let first_cloned = first.clone();
-    if let SchemeData::Exp(_x) = first {
+    if let SchemeData::Exp(..) = first {
       let mut second = node.value.pop_front().unwrap();
 
       if let SchemeData::Exp(ref mut y) = second {
@@ -45,16 +45,16 @@ impl Evaluator {
             loc: node.loc.clone()
           });
 
-          let set_cid = self.insert_map(Cell::new(
-            CellName::EnvSet,
+          let set_cid = self.insert_map(Unit::new(
+            UnitName::EnvSet,
             vec![],
             env.copy(),
             None,
             vec![next]
           ));
 
-          return self.insert_map(Cell::new(
-            CellName::Value,
+          return self.insert_map(Unit::new(
+            UnitName::Value,
             vec![proc],
             env.copy(),
             node.loc.clone(),
@@ -66,7 +66,7 @@ impl Evaluator {
     panic!("Parse define-clause error!")
   }
 
-  pub fn eval_define(&mut self) -> Option<Cell> {
+  pub fn eval_define(&mut self) -> Option<Unit> {
     None
   }
 }

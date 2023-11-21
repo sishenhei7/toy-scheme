@@ -20,24 +20,24 @@ use crate::{
 };
 
 #[derive(Debug)]
-pub enum CellName {
+pub enum UnitName {
   Value,        // 直接以 params[0] 返回
   EnvGet,       // 以 params[0].value 作为 key 到 env 里面查找
   EnvSet,       // 以 params[0].value 作为 key，params[1] 作为 value，存到 env
   IfElse        // 控制流，如果 params[0] 为真，则跳转 next[0]，否则跳转 next[1]
 }
 
-pub struct Cell {
-  pub name: CellName,
+pub struct Unit {
+  pub name: UnitName,
   pub params: Vec<SchemeData>,
   pub env: Env,
   pub loc: Option<Location>,
   pub next: Vec<usize>
 }
 
-impl Cell {
+impl Unit {
   pub fn new(
-    name: CellName,
+    name: UnitName,
     params: Vec<SchemeData>,
     env: Env,
     loc: Option<Location>,
@@ -58,7 +58,7 @@ impl Cell {
 pub struct Evaluator {
   pub initial_input: SchemeData,
   pub initial_env: Env,
-  pub cell_map: HashMap<usize, Cell>,
+  pub cell_map: HashMap<usize, Unit>,
   pub cid: usize
 }
 
@@ -72,7 +72,7 @@ impl Evaluator {
     }
   }
 
-  pub fn insert_map(&mut self, value: Cell) -> usize {
+  pub fn insert_map(&mut self, value: Unit) -> usize {
     self.cid += 1;
     self.cell_map.insert(self.cid, value);
     self.cid
@@ -84,8 +84,8 @@ impl Evaluator {
   pub fn parse(&mut self, node: SchemeData, env: Env, next: usize) -> usize {
     match node {
       SchemeData::Identifier(ref _x) => {
-        self.insert_map(Cell::new(
-          CellName::EnvGet,
+        self.insert_map(Unit::new(
+          UnitName::EnvGet,
           vec![node.clone()],
           env.copy(),
           node.get_loc(),
@@ -93,8 +93,8 @@ impl Evaluator {
         ))
       },
       SchemeData::Number(ref _x) => {
-        self.insert_map(Cell::new(
-          CellName::Value,
+        self.insert_map(Unit::new(
+          UnitName::Value,
           vec![node.clone()],
           env.copy(),
           node.get_loc(),
@@ -102,8 +102,8 @@ impl Evaluator {
         ))
       },
       SchemeData::String(ref _x) => {
-        self.insert_map(Cell::new(
-          CellName::Value,
+        self.insert_map(Unit::new(
+          UnitName::Value,
           vec![node.clone()],
           env.copy(),
           node.get_loc(),
@@ -111,8 +111,8 @@ impl Evaluator {
         ))
       },
       SchemeData::Boolean(ref _x) => {
-        self.insert_map(Cell::new(
-          CellName::Value,
+        self.insert_map(Unit::new(
+          UnitName::Value,
           vec![node.clone()],
           env.copy(),
           node.get_loc(),
@@ -120,8 +120,8 @@ impl Evaluator {
         ))
       },
       SchemeData::List(ref _x) => {
-        self.insert_map(Cell::new(
-          CellName::Value,
+        self.insert_map(Unit::new(
+          UnitName::Value,
           vec![node.clone()],
           env.copy(),
           node.get_loc(),

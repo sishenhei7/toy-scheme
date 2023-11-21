@@ -1,6 +1,6 @@
 use crate::{parser::SchemeExp, env::Env};
 
-use super::{ Evaluator, Cell, CellName };
+use super::{ Evaluator, Unit, UnitName };
 
 /**
  * 语法：
@@ -26,8 +26,8 @@ impl Evaluator {
       _ => panic!("Parse else-clause error!")
     };
 
-    let if_cid = self.insert_map(Cell::new(
-      CellName::IfElse,
+    let if_cid = self.insert_map(Unit::new(
+      UnitName::IfElse,
       vec![],
       env.copy(),
       None,
@@ -41,7 +41,7 @@ impl Evaluator {
     }
   }
 
-  pub fn eval_if_clause(&mut self) -> Option<Cell> {
+  pub fn eval_if_clause(&mut self) -> Option<Unit> {
     None
   }
 }

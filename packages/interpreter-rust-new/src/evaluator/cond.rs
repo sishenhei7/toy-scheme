@@ -6,7 +6,7 @@ use crate::{
   env::Env
 };
 
-use super::{ Evaluator, Cell, CellName };
+use super::{ Evaluator, Unit, UnitName };
 
 /**
  * 语法：
@@ -32,8 +32,8 @@ impl Evaluator {
           }
         } else {
           let value_cid = self.parse(value, env.copy(), next);
-          let cond_cid = self.insert_map(Cell::new(
-            CellName::IfElse,
+          let cond_cid = self.insert_map(Unit::new(
+            UnitName::IfElse,
             vec![],
             env.copy(),
             None,
@@ -47,7 +47,7 @@ impl Evaluator {
     })
   }
 
-  pub fn eval_cond(&mut self) -> Option<Cell> {
+  pub fn eval_cond(&mut self) -> Option<Unit> {
     None
   }
 }

@@ -1,6 +1,6 @@
 use crate::{parser::SchemeExp, env::Env};
 
-use super::{ Evaluator, Cell };
+use super::{ Evaluator, Unit };
 
 /**
  * 语法：
@@ -11,7 +11,7 @@ impl Evaluator {
     panic!()
   }
 
-  pub fn eval_cont(&mut self) -> Option<Cell> {
+  pub fn eval_cont(&mut self) -> Option<Unit> {
     None
   }
 }
