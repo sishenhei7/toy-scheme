@@ -30,7 +30,7 @@ impl Evaluator {
       CellName::IfElse,
       vec![],
       env.copy(),
-      node.loc.clone(),
+      None,
       vec![then_cid, else_cid]
     ));
 

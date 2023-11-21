@@ -36,10 +36,10 @@ impl Env {
     }))
   }
 
-  pub fn extend(parent_env: Env, stackframe: Option<Stackframe>) -> Env {
+  pub fn extend(&self, stackframe: Option<Stackframe>) -> Env {
     Env(build_boxing!(BaseEnv {
       scope: HashMap::new(),
-      parent: Some(parent_env),
+      parent: Some(self.clone()),
       stackframe,
     }))
   }

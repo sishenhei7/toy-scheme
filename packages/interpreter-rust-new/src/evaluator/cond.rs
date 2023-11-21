@@ -36,7 +36,7 @@ impl Evaluator {
             CellName::IfElse,
             vec![],
             env.copy(),
-            node.loc.clone(),
+            None,
             vec![value_cid, acc]
           ));
           return self.parse(predict, env.copy(), cond_cid)

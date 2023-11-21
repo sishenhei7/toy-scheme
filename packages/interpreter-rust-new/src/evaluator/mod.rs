@@ -21,9 +21,10 @@ use crate::{
 
 #[derive(Debug)]
 pub enum CellName {
-  Value,
-  Identifier,
-  IfElse
+  Value,        // 直接以 params[0] 返回
+  EnvGet,       // 以 params[0].value 作为 key 到 env 里面查找
+  EnvSet,       // 以 params[0].value 作为 key，params[1] 作为 value，存到 env
+  IfElse        // 控制流，如果 params[0] 为真，则跳转 next[0]，否则跳转 next[1]
 }
 
 pub struct Cell {
@@ -84,7 +85,7 @@ impl Evaluator {
     match node {
       SchemeData::Identifier(ref _x) => {
         self.insert_map(Cell::new(
-          CellName::Identifier,
+          CellName::EnvGet,
           vec![node.clone()],
           env.copy(),
           node.get_loc(),
