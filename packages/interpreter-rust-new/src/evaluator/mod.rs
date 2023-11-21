@@ -81,6 +81,7 @@ impl Evaluator {
   // 从第一个开始进行匹配 begin、callcc 等，没匹配到则视为单独的求值
   // 从左往右一次求值，最后一个的结果是这个 exp 的值
   // this consumes the node
+  // TODO: 把这里的 node 和 env 改成引用
   pub fn parse(&mut self, node: SchemeData, env: Env, next: usize) -> usize {
     match node {
       SchemeData::Identifier(ref _x) => {
