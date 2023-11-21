@@ -20,30 +20,26 @@ impl Evaluator {
     node.value.pop_front();
 
     node.value.into_iter().rev().fold(next, |acc, mut cur| {
-      if let SchemeData::Exp(ref mut x) = cur {
-        let predict = x.value.pop_front().unwrap();
-        let value = x.value.pop_front().unwrap();
-
-        if let SchemeData::Identifier(ref y) = predict {
-          if y.value == "else" {
-            return self.parse(value, env.copy(), next)
-          } else {
-            panic!("Parse cond-else error!")
-          }
+      let exp_list = cur.get_exp_list().expect("Parse cond-list error!");
+      let predict = exp_list.pop_front().expect("Parse cond-predict error!");
+      let value = exp_list.pop_front().expect("Parse cond-clause error!");
+      if let SchemeData::Identifier(ref y) = predict {
+        if y.value == "else" {
+          self.parse(value, env.copy(), next)
         } else {
-          let value_cid = self.parse(value, env.copy(), next);
-          let cond_cid = self.insert_map(Unit::new(
-            UnitName::IfElse,
-            vec![],
-            env.copy(),
-            None,
-            vec![value_cid, acc]
-          ));
-          return self.parse(predict, env.copy(), cond_cid)
+          panic!("Parse cond-else error!")
         }
+      } else {
+        let value_cid = self.parse(value, env.copy(), next);
+        let cond_cid = self.insert_map(Unit::new(
+          UnitName::IfElse,
+          vec![],
+          env.copy(),
+          None,
+          vec![value_cid, acc]
+        ));
+        self.parse(predict, env.copy(), cond_cid)
       }
-
-      panic!("Parse cond-clause error!")
     })
   }
 

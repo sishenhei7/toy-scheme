@@ -236,6 +236,30 @@ impl SchemeData {
       Err(Error::msg("Parsing null!"))
     };
   }
+
+  pub fn get_exp_list(&mut self) -> Option<&mut VecDeque<SchemeData>> {
+    if let SchemeData::Exp(x) = self {
+      Some(&mut x.value)
+    } else {
+      None
+    }
+  }
+
+  pub fn get_identifier_string(& self) -> Option<&String> {
+    if let SchemeData::Identifier(x) = self {
+      Some(&x.value)
+    } else {
+      None
+    }
+  }
+
+  pub fn get_proc(&mut self) -> Option<&mut SchemeProc> {
+    if let SchemeData::Procedure(x) = self {
+      Some(x)
+    } else {
+      None
+    }
+  }
 }
 
 // list is moved

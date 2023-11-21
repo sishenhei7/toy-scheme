@@ -10,8 +10,8 @@ impl Evaluator {
   pub fn parse_lambda(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
     node.value.pop_front();
 
-    let params = node.value.pop_front().unwrap();
-    let body = node.value.pop_front().unwrap();
+    let params = node.value.pop_front().expect("Parse lambda-params error!");
+    let body = node.value.pop_front().expect("Parse lambda-body error!");
     if matches!(params, SchemeData::Exp(..)) && matches!(body, SchemeData::Exp(..)) {
       let proc = SchemeData::Procedure(SchemeProc {
         name: "<<lambda>>".to_string(),

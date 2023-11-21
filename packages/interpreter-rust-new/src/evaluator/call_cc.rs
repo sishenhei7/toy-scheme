@@ -11,7 +11,7 @@ use super::{ Evaluator, Unit };
  */
 impl Evaluator {
   pub fn parse_call_cc(&self, node: SchemeExp, env: Env, next: usize) -> usize {
-    panic!()
+    self.cid
   }
 
   pub fn eval_call_cc(&mut self) -> Option<Unit> {
