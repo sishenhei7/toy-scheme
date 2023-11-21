@@ -1,6 +1,12 @@
-use crate::{parser::SchemeExp, env::Env};
+use crate::{
+  parser:: {
+    SchemeExp,
+    SchemeData
+  },
+  env::Env
+};
 
-use super::{ Evaluator, Cell };
+use super::{ Evaluator, Cell, CellName };
 
 /**
  * 语法：
@@ -10,8 +16,35 @@ use super::{ Evaluator, Cell };
  *     (else        clauses_else))
  */
 impl Evaluator {
-  pub fn parse_cond(&self, node: SchemeExp, env: Env, next: usize) -> usize {
-    panic!()
+  pub fn parse_cond(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
+    node.value.pop_front();
+
+    node.value.into_iter().rev().fold(next, |acc, mut cur| {
+      if let SchemeData::Exp(ref mut x) = cur {
+        let predict = x.value.pop_front().unwrap();
+        let value = x.value.pop_front().unwrap();
+
+        if let SchemeData::Identifier(ref y) = predict {
+          if y.value == "else" {
+            return self.parse(value, env.copy(), next)
+          } else {
+            panic!("Parse cond-else error!")
+          }
+        } else {
+          let value_cid = self.parse(value, env.copy(), next);
+          let cond_cid = self.insert_map(Cell::new(
+            CellName::IfElse,
+            vec![],
+            env.copy(),
+            node.loc.clone(),
+            vec![value_cid, acc]
+          ));
+          return self.parse(predict, env.copy(), cond_cid)
+        }
+      }
+
+      panic!("Parse cond-clause error!")
+    })
   }
 
   pub fn eval_cond(&mut self) -> Option<Cell> {

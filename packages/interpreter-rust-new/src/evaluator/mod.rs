@@ -23,16 +23,7 @@ use crate::{
 pub enum CellName {
   Value,
   Identifier,
-  Begin,
-  Callcc,
-  Cond,
-  Cont,
-  Define,
-  IfClause,
-  Lambda,
-  LetClause,
-  Proc,
-  Set
+  IfElse
 }
 
 pub struct Cell {
