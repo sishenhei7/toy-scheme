@@ -6,7 +6,7 @@ use crate::{
   env::Env
 };
 
-use super::{ Evaluator, Unit, UnitName };
+use super::{ Evaluator, Unit };
 
 /**
  * 语法：
@@ -32,11 +32,13 @@ impl Evaluator {
       } else {
         let value_cid = self.parse(value, env.copy(), next);
         let cond_cid = self.insert_map(Unit::new(
-          UnitName::IfElse,
-          vec![],
           env.copy(),
           None,
-          vec![value_cid, acc]
+          Box::new(move |mut x, _| {
+            let predict = x.get_boolean().expect("Cond-predict should be boolean!");
+            let next = if predict { value_cid } else { acc };
+            (next, SchemeData::Nil)
+          })
         ));
         self.parse(predict, env.copy(), cond_cid)
       }

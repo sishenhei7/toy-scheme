@@ -19,36 +19,22 @@ use crate::{
   parser::{SchemeCont, SchemeData, SchemeExp}, lexer::Location,
 };
 
-#[derive(Debug)]
-pub enum UnitName {
-  Value,        // 直接以 params[0] 返回
-  EnvGet,       // 以 params[0].value 作为 key 到 env 里面查找
-  EnvSet,       // 以 params[0].value 作为 key，params[1] 作为 value，存到 env
-  IfElse        // 控制流，如果 params[0] 为真，则跳转 next[0]，否则跳转 next[1]
-}
-
 pub struct Unit {
-  pub name: UnitName,
-  pub params: Vec<SchemeData>,
   pub env: Env,
   pub loc: Option<Location>,
-  pub next: Vec<usize>
+  pub computer: Box<dyn Fn(SchemeData, Env) -> (usize, SchemeData)>
 }
 
 impl Unit {
   pub fn new(
-    name: UnitName,
-    params: Vec<SchemeData>,
     env: Env,
     loc: Option<Location>,
-    next: Vec<usize>
+    computer: Box<dyn Fn(SchemeData, Env) -> (usize, SchemeData)>
   ) -> Self {
     Self {
-      name,
-      params,
       env,
       loc,
-      next
+      computer
     }
   }
 }
@@ -84,53 +70,29 @@ impl Evaluator {
   // TODO: 把这里的 node 和 env 改成引用
   pub fn parse(&mut self, node: SchemeData, env: Env, next: usize) -> usize {
     match node {
-      SchemeData::Identifier(ref _x) => {
+      SchemeData::Identifier(ref x) => {
+        let identifier = x.value.clone();
         self.insert_map(Unit::new(
-          UnitName::EnvGet,
-          vec![node.clone()],
           env.copy(),
           node.get_loc(),
-          vec![next]
+          Box::new(move |_, env| {
+            let node = env.get(&identifier).expect("Env get 错误！");
+            (next, node)
+          })
         ))
       },
-      SchemeData::Number(ref _x) => {
+      SchemeData::Number(..)
+        | SchemeData::String(..)
+        | SchemeData::Boolean(..)
+        | SchemeData::List(..) => {
         self.insert_map(Unit::new(
-          UnitName::Value,
-          vec![node.clone()],
           env.copy(),
           node.get_loc(),
-          vec![next]
+          Box::new(move |_, _| (next, node.clone()))
         ))
       },
-      SchemeData::String(ref _x) => {
-        self.insert_map(Unit::new(
-          UnitName::Value,
-          vec![node.clone()],
-          env.copy(),
-          node.get_loc(),
-          vec![next]
-        ))
-      },
-      SchemeData::Boolean(ref _x) => {
-        self.insert_map(Unit::new(
-          UnitName::Value,
-          vec![node.clone()],
-          env.copy(),
-          node.get_loc(),
-          vec![next]
-        ))
-      },
-      SchemeData::List(ref _x) => {
-        self.insert_map(Unit::new(
-          UnitName::Value,
-          vec![node.clone()],
-          env.copy(),
-          node.get_loc(),
-          vec![next]
-        ))
-      },
-      SchemeData::Continuation(ref _x) => panic!(),
-      SchemeData::Procedure(ref _x) => panic!(),
+      SchemeData::Continuation(..) => panic!(),
+      SchemeData::Procedure(..) => panic!(),
       SchemeData::Exp(ref x) => self.parse_exp(x.clone(), env, next),
       _ => panic!(),
     }

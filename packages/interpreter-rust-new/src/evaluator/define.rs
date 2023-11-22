@@ -1,6 +1,6 @@
 use crate::{parser::{SchemeExp, SchemeData, SchemeProc}, env::Env};
 
-use super::{ Evaluator, Unit, UnitName };
+use super::{ Evaluator, Unit };
 
 /**
  * 语法：
@@ -16,13 +16,15 @@ impl Evaluator {
     let first = node.value.pop_front().expect("Parse define-var error!");
 
     // 定义变量或函数
-    if let SchemeData::Identifier(..) = first {
+    if let SchemeData::Identifier(ref x) = first {
+      let identifier = x.value.clone();
       let set_cid = self.insert_map(Unit::new(
-        UnitName::EnvSet,
-        vec![],
         env.copy(),
         None,
-        vec![next]
+        Box::new(move |_, env| {
+          let node = env.get(&identifier).expect("Env get 错误！");
+          (next, node)
+        })
       ));
       let second: SchemeData = node.value.pop_front().expect("Parse define-value error!");
       return self.parse(second, env, set_cid)
@@ -35,6 +37,7 @@ impl Evaluator {
       let second_list = second.get_exp_list().expect("Parse define-proc error!");
       let name_node = second_list.pop_front().expect("Parse define-proc-name error!");
       let name = name_node.get_identifier_string().expect("Parse define-proc-name error!");
+      let name_copy = name.clone();
 
       let proc = SchemeData::Procedure(SchemeProc {
         name: name.to_string(),
@@ -44,21 +47,15 @@ impl Evaluator {
         loc: node.loc.clone()
       });
 
-      let set_cid = self.insert_map(Unit::new(
-        UnitName::EnvSet,
-        vec![],
+      return self.insert_map(Unit::new(
         env.copy(),
         None,
-        vec![next]
+        Box::new(move |_, mut env| {
+          // 这里的 proc.clone() 是否合法？
+          env.set(&name_copy, proc.clone());
+          (next, SchemeData::Nil)
+        })
       ));
-
-      return self.insert_map(Unit::new(
-        UnitName::Value,
-        vec![proc],
-        env.copy(),
-        node.loc.clone(),
-        vec![set_cid]
-      ))
     }
 
     panic!("Parse cond-else error!")

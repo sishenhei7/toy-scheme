@@ -1,6 +1,6 @@
-use crate::{parser::SchemeExp, env::Env};
+use crate::{parser::{SchemeExp, SchemeData}, env::Env};
 
-use super::{ Evaluator, Unit, UnitName };
+use super::{ Evaluator, Unit };
 
 /**
  * 语法：
@@ -10,35 +10,23 @@ impl Evaluator {
   pub fn parse_if_clause(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
     node.value.pop_front();
 
-    let predict_node = node.value.pop_front();
-    let then_node = node.value.pop_front();
-    let else_node = node.value.pop_front();
-
-    // parse then_value
-    let then_cid = match then_node {
-      Some(x) => self.parse(x, env.copy(), next),
-      _ => panic!("Parse then-clause error!")
-    };
-
-    // parse else_value
-    let else_cid = match else_node {
-      Some(x) => self.parse(x, env.copy(), next),
-      _ => panic!("Parse else-clause error!")
-    };
+    let predict_node = node.value.pop_front().expect("Parse predict-clause error!");
+    let then_node = node.value.pop_front().expect("Parse then-clause error!");
+    let else_node = node.value.pop_front().expect("Parse else-clause error!");
+    let then_cid = self.parse(then_node, env.copy(), next);
+    let else_cid = self.parse(else_node, env.copy(), next);
 
     let if_cid = self.insert_map(Unit::new(
-      UnitName::IfElse,
-      vec![],
       env.copy(),
       None,
-      vec![then_cid, else_cid]
+      Box::new(move |mut x, _| {
+        let predict = x.get_boolean().expect("Cond-predict should be boolean!");
+        let next = if predict { then_cid } else { else_cid };
+        (next, SchemeData::Nil)
+      })
     ));
 
-    // parse predict
-    match predict_node {
-      Some(x) => self.parse(x, env.copy(), if_cid),
-      _ => panic!("Parse predict-clause error!")
-    }
+    self.parse(predict_node, env.copy(), if_cid)
   }
 
   pub fn eval_if_clause(&mut self) -> Option<Unit> {

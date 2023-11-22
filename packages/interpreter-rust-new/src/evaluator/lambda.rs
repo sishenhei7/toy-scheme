@@ -1,6 +1,6 @@
 use crate::{parser::{SchemeExp, SchemeData, SchemeProc}, env::Env};
 
-use super::{ Evaluator, Unit, UnitName };
+use super::{ Evaluator, Unit };
 
 /**
  * 语法：
@@ -9,17 +9,16 @@ use super::{ Evaluator, Unit, UnitName };
 impl Evaluator {
   pub fn parse_lambda(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
     let loc = node.loc.clone();
-    let proc = SchemeData::Procedure(self.parse_lambda_to_proc(node, env.copy(), next));
+    let proc = SchemeData::Procedure(self.parse_lambda_to_proc(node, env.copy()));
     self.insert_map(Unit::new(
-      UnitName::Value,
-      vec![proc],
       env.copy(),
       loc,
-      vec![next]
+      // 这里的 proc.clone() 是否合法？
+      Box::new(move |_, _| (next, proc.clone()))
     ))
   }
 
-  pub fn parse_lambda_to_proc(&mut self, mut node: SchemeExp, env: Env, next: usize) -> SchemeProc {
+  pub fn parse_lambda_to_proc(&mut self, mut node: SchemeExp, env: Env) -> SchemeProc {
     node.value.pop_front();
 
     let params = node.value.pop_front().expect("Parse lambda-params error!");

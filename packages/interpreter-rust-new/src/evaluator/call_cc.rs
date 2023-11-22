@@ -17,7 +17,7 @@ impl Evaluator {
 
     let lambda = node.value.pop_front().expect("Parse callcc-lambda error!");
     if let SchemeData::Exp(x) = lambda {
-      let mut proc = self.parse_lambda_to_proc(x, env.clone(), next);
+      let mut proc = self.parse_lambda_to_proc(x, env.clone());
       let cont = SchemeData::Continuation(SchemeCont {
         value: next,
         loc: None

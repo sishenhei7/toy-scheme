@@ -260,6 +260,14 @@ impl SchemeData {
       None
     }
   }
+
+  pub fn get_boolean(&mut self) -> Option<bool> {
+    if let SchemeData::Boolean(x) = self {
+      Some(x.value)
+    } else {
+      None
+    }
+  }
 }
 
 // list is moved
