@@ -39,7 +39,7 @@ pub struct SchemeList {
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct SchemeCont {
-  pub value: f64, // 所有的 cont 都保存到一个数组里面去
+  pub value: usize, // 所有的 cont 都保存到一个数组里面去
   pub loc: Option<Location>,
 }
 

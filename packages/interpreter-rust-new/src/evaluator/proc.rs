@@ -1,3 +1,5 @@
+use std::collections::VecDeque;
+
 use crate::{parser::{SchemeExp, SchemeData, SchemeProc}, env::Env};
 
 use super::{ Evaluator, Unit };
@@ -13,10 +15,14 @@ impl Evaluator {
     let identifier = identifier_data.get_identifier_string().expect("Parse proc-identifier error!");
     let mut proc_data = env.get(&identifier).expect("Parse proc-data error!");
     let proc = proc_data.get_proc().expect("Parse proc-data error!");
+    let mut arguments_data = node.value.pop_front().expect("Parse proc-arguments error!");
+    let arguments = arguments_data.get_exp_list().expect("Parse proc-arguments error!");
+    self.parse_proc_with_arguments(proc, arguments, env, next)
+  }
+
+  pub fn parse_proc_with_arguments(&mut self, proc: &mut SchemeProc, arguments: &mut VecDeque<SchemeData>, env: Env, next: usize) -> usize {
     let proc_env = &mut proc.env;
     let params = proc.params.get_exp_list().expect("Parse proc-params error!");
-    let mut argumentsData = node.value.pop_front().expect("Parse proc-arguments error!");
-    let arguments = argumentsData.get_exp_list().expect("Parse proc-arguments error!");
 
     // parse params and arguments
     for (key, value) in params.iter().zip(arguments.iter()) {
