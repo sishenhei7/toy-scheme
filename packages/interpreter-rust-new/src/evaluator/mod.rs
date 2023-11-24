@@ -22,14 +22,14 @@ use crate::{
 pub struct Unit {
   pub env: Env,
   pub loc: Option<Location>,
-  pub computer: Box<dyn Fn(SchemeData, Env) -> (usize, SchemeData)>
+  pub computer: Box<dyn FnMut(SchemeData) -> (usize, SchemeData)>
 }
 
 impl Unit {
   pub fn new(
     env: Env,
     loc: Option<Location>,
-    computer: Box<dyn Fn(SchemeData, Env) -> (usize, SchemeData)>
+    computer: Box<dyn FnMut(SchemeData) -> (usize, SchemeData)>
   ) -> Self {
     Self {
       env,
@@ -72,11 +72,12 @@ impl Evaluator {
     match node {
       SchemeData::Identifier(ref x) => {
         let identifier = x.value.clone();
+        let env_copy = env.copy();
         self.insert_map(Unit::new(
           env.copy(),
           node.get_loc(),
-          Box::new(move |_, env| {
-            let node = env.get(&identifier).expect("Env get 错误！");
+          Box::new(move |_| {
+            let node = env_copy.get(&identifier).expect("Env get 错误！");
             (next, node)
           })
         ))
@@ -85,10 +86,11 @@ impl Evaluator {
         | SchemeData::String(..)
         | SchemeData::Boolean(..)
         | SchemeData::List(..) => {
+        let node_copy = node.clone();
         self.insert_map(Unit::new(
           env.copy(),
           node.get_loc(),
-          Box::new(move |_, _| (next, node.clone()))
+          Box::new(move |_| (next, node_copy.clone()))
         ))
       },
       SchemeData::Continuation(..) => panic!(),

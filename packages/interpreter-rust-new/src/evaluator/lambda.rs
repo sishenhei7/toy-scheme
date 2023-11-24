@@ -13,8 +13,7 @@ impl Evaluator {
     self.insert_map(Unit::new(
       env.copy(),
       loc,
-      // 这里的 proc.clone() 是否合法？
-      Box::new(move |_, _| (next, proc.clone()))
+      Box::new(move |_| (next, proc.clone()))
     ))
   }
 

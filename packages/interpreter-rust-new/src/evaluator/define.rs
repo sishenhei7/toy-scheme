@@ -18,12 +18,13 @@ impl Evaluator {
     // 定义变量或函数
     if let SchemeData::Identifier(ref x) = first {
       let identifier = x.value.clone();
+      let env_copy = env.copy();
       let set_cid = self.insert_map(Unit::new(
         env.copy(),
         None,
-        Box::new(move |_, env| {
-          let node = env.get(&identifier).expect("Env get 错误！");
-          (next, node)
+        Box::new(move |_| {
+          let node = env_copy.get(&identifier).expect("Env get 错误！");
+          (next, node.clone())
         })
       ));
       let second: SchemeData = node.value.pop_front().expect("Parse define-value error!");
@@ -46,13 +47,12 @@ impl Evaluator {
         env: env.extend(None),
         loc: node.loc.clone()
       });
-
+      let mut env_copy = env.copy();
       return self.insert_map(Unit::new(
         env.copy(),
         None,
-        Box::new(move |_, mut env| {
-          // 这里的 proc.clone() 是否合法？
-          env.set(&name_copy, proc.clone());
+        Box::new(move |_| {
+          env_copy.set(&name_copy, proc.clone());
           (next, SchemeData::Nil)
         })
       ));
