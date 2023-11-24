@@ -268,6 +268,14 @@ impl SchemeData {
       None
     }
   }
+
+  pub fn get_cont_value(&mut self) -> Option<usize> {
+    if let SchemeData::Continuation(x) = self {
+      Some(x.value)
+    } else {
+      None
+    }
+  }
 }
 
 // list is moved

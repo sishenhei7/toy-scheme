@@ -39,12 +39,12 @@ impl Unit {
   }
 }
 
-// 由于所有权的原因，cell 不方便同时放入 cell_map、next 里面(用Rc也可以)
-// 所以考虑把所有的 cell 放入 cell_map、next 里面只存索引
+// 由于所有权的原因，unit 不方便同时放入 unit_map、next 里面(用Rc也可以)
+// 所以考虑把所有的 unit 放入 unit_map、next 里面只存索引
 pub struct Evaluator {
   pub initial_input: SchemeData,
   pub initial_env: Env,
-  pub cell_map: HashMap<usize, Unit>,
+  pub unit_map: HashMap<usize, Unit>,
   pub cid: usize
 }
 
@@ -53,14 +53,14 @@ impl Evaluator {
     Self {
       initial_input: input.clone(),
       initial_env: Env::new(),
-      cell_map: HashMap::new(),
+      unit_map: HashMap::new(),
       cid: 1
     }
   }
 
   pub fn insert_map(&mut self, value: Unit) -> usize {
     self.cid += 1;
-    self.cell_map.insert(self.cid, value);
+    self.unit_map.insert(self.cid, value);
     self.cid
   }
 
@@ -106,7 +106,6 @@ impl Evaluator {
           "begin" => self.parse_begin(node, env.copy(), next),
           "call-with-current-continuation" => self.parse_call_cc(node, env.copy(), next),
           "cond" => self.parse_cond(node, env.copy(), next),
-          "cont" => self.parse_cont(node, env.copy(), next),
           "define" => self.parse_define(node, env.copy(), next),
           "if" => self.parse_if_clause(node, env.copy(), next),
           "lambda" => self.parse_lambda(node, env.copy(), next),
@@ -115,6 +114,7 @@ impl Evaluator {
           _ => panic!()
         }
       },
+      Some(SchemeData::Continuation(..)) => self.parse_cont(node, env.copy(), next),
       // 没匹配上语法，则从左到右依次 parse
       _ => self.parse_from_left(node.value, env, next)
     }
