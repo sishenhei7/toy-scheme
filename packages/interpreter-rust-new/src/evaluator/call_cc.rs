@@ -12,23 +12,19 @@ use super::{ Evaluator, Unit };
  *      (return element)))
  */
 impl Evaluator {
-  pub fn parse_call_cc(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
+  pub fn evaluate_call_cc(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
     node.value.pop_front();
 
     let lambda = node.value.pop_front().expect("Parse callcc-lambda error!");
     if let SchemeData::Exp(x) = lambda {
-      let mut proc = self.parse_lambda_to_proc(x, env.clone());
+      let mut proc = self.evaluate_lambda_to_proc(x, env.clone());
       let cont = SchemeData::Continuation(SchemeCont {
         value: next,
         loc: None
       });
-      return self.parse_proc_with_arguments(&mut proc, &mut VecDeque::from([cont]), env.copy(), next)
+      return self.evaluate_proc_with_arguments(&mut proc, &mut VecDeque::from([cont]), env.copy(), next)
     }
 
     panic!("Parse callcc error!")
-  }
-
-  pub fn eval_call_cc(&mut self) -> Option<Unit> {
-    None
   }
 }

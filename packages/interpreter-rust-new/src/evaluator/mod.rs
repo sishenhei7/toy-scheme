@@ -103,18 +103,18 @@ impl Evaluator {
       // 匹配上了语法
       Some(SchemeData::Identifier(ref x)) => {
         match x.value.as_str() {
-          "begin" => self.parse_begin(node, env.copy(), next),
-          "call-with-current-continuation" => self.parse_call_cc(node, env.copy(), next),
-          "cond" => self.parse_cond(node, env.copy(), next),
-          "define" => self.parse_define(node, env.copy(), next),
-          "if" => self.parse_if_clause(node, env.copy(), next),
-          "lambda" => self.parse_lambda(node, env.copy(), next),
-          "let" | "let*" | "letrec" => self.parse_let_clause(node, env.copy(), next),
-          "set!" => self.parse_set(node, env.copy(), next),
+          "begin" => self.evaluate_begin(node, env.copy(), next),
+          "call-with-current-continuation" => self.evaluate_call_cc(node, env.copy(), next),
+          "cond" => self.evaluate_cond(node, env.copy(), next),
+          "define" => self.evaluate_define(node, env.copy(), next),
+          "if" => self.evaluate_if(node, env.copy(), next),
+          "lambda" => self.evaluate_lambda(node, env.copy(), next),
+          "let" | "let*" | "letrec" => self.evaluate_let(node, env.copy(), next),
+          "set!" => self.evaluate_set(node, env.copy(), next),
           _ => panic!()
         }
       },
-      Some(SchemeData::Continuation(..)) => self.parse_cont(node, env.copy(), next),
+      Some(SchemeData::Continuation(..)) => self.evaluate_cont(node, env.copy(), next),
       // 没匹配上语法，则从左到右依次 parse
       _ => self.parse_from_left(node.value, env, next)
     }

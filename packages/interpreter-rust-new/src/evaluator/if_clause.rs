@@ -7,7 +7,7 @@ use super::{ Evaluator, Unit };
  * (if predict then_value else_value)
  */
 impl Evaluator {
-  pub fn parse_if_clause(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
+  pub fn evaluate_if(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
     node.value.pop_front();
 
     let predict_node = node.value.pop_front().expect("Parse predict-clause error!");
@@ -27,9 +27,5 @@ impl Evaluator {
     ));
 
     self.parse(predict_node, env.copy(), if_cid)
-  }
-
-  pub fn eval_if_clause(&mut self) -> Option<Unit> {
-    None
   }
 }

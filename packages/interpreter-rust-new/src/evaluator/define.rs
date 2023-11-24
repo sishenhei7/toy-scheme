@@ -10,7 +10,7 @@ use super::{ Evaluator, Unit };
  * (define (hello name) (string-append "Hello " name "!"))
  */
 impl Evaluator {
-  pub fn parse_define(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
+  pub fn evaluate_define(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
     node.value.pop_front();
 
     let first = node.value.pop_front().expect("Parse define-var error!");
@@ -59,9 +59,5 @@ impl Evaluator {
     }
 
     panic!("Parse cond-else error!")
-  }
-
-  pub fn eval_define(&mut self) -> Option<Unit> {
-    None
   }
 }

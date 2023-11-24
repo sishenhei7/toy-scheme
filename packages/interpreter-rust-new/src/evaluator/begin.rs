@@ -10,13 +10,9 @@ use super::{ Evaluator, Unit };
  *    amount)
  */
 impl Evaluator {
-  pub fn parse_begin(&mut self, node: SchemeExp, env: Env, next: usize) -> usize {
+  pub fn evaluate_begin(&mut self, node: SchemeExp, env: Env, next: usize) -> usize {
     let mut queue = node.value;
     queue.pop_front();
     self.parse_from_left(queue, env, next)
-  }
-
-  pub fn eval_begin(&mut self) -> Option<Unit> {
-    None
   }
 }

@@ -18,11 +18,7 @@ use super::{ Evaluator, Unit };
  *  (iter ls 0))
  */
 impl Evaluator {
-  pub fn parse_let_clause(&self, node: SchemeExp, env: Env, next: usize) -> usize {
+  pub fn evaluate_let(&self, node: SchemeExp, env: Env, next: usize) -> usize {
     panic!()
-  }
-
-  pub fn eval_let_clause(&mut self) -> Option<Unit> {
-    None
   }
 }

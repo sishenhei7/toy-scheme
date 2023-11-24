@@ -16,7 +16,7 @@ use super::{ Evaluator, Unit };
  *     (else        clauses_else))
  */
 impl Evaluator {
-  pub fn parse_cond(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
+  pub fn evaluate_cond(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
     node.value.pop_front();
 
     node.value.into_iter().rev().fold(next, |acc, mut cur| {
@@ -43,9 +43,5 @@ impl Evaluator {
         self.parse(predict, env.copy(), cond_cid)
       }
     })
-  }
-
-  pub fn eval_cond(&mut self) -> Option<Unit> {
-    None
   }
 }
