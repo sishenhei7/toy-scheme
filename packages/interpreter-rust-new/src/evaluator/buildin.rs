@@ -1,11 +1,11 @@
 use core::panic;
 
-use crate::{parser::SchemeExp, env::Env};
+use crate::{parser::{SchemeExp, SchemeData}, env::Env};
 
 use super::{ Evaluator, Unit };
 
 impl Evaluator {
-  pub fn evaluate_buildin(&mut self, mut node: SchemeExp, env: Env, next: usize) -> () {
+  pub fn evaluate_buildin(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
     let identifier_node = node.value.pop_front().expect("Evaluate buildin-symbol error!");
     let identifier = identifier_node.get_identifier_string().expect("Evaluate buildin-symbol error!");
     match identifier.as_ref() {
@@ -33,83 +33,100 @@ impl Evaluator {
     }
   }
 
-  pub fn evaluate_buildin_cons(&mut self, mut node: SchemeExp, env: Env, next: usize) -> () {
-    ()
+  pub fn evaluate_buildin_cons(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
+    if !node.value.is_empty() {
+      return self.cid
+    }
+
+    self.cid
+
+    // node.value.into_iter().rev().fold(next, |acc, cur| {
+    //   let env_copy = env.copy();
+    //   let cons_cid = self.insert_map(Unit::new(
+    //     env.copy(),
+    //     None,
+    //     Box::new(move |x| {
+
+    //       (acc, SchemeData::Nil)
+    //     })
+    //   ));
+    //   self.evaluate(cur, env, cons_cid)
+    // })
   }
 
-  pub fn evaluate_buildin_is_null(&mut self, mut node: SchemeExp, env: Env, next: usize) -> () {
-    ()
+  pub fn evaluate_buildin_is_null(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
+    self.cid
   }
 
-  pub fn evaluate_buildin_car(&mut self, mut node: SchemeExp, env: Env, next: usize) -> () {
-    ()
+  pub fn evaluate_buildin_car(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
+    self.cid
   }
 
-  pub fn evaluate_buildin_cdr(&mut self, mut node: SchemeExp, env: Env, next: usize) -> () {
-    ()
+  pub fn evaluate_buildin_cdr(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
+    self.cid
   }
 
-  pub fn evaluate_buildin_cadr(&mut self, mut node: SchemeExp, env: Env, next: usize) -> () {
-    ()
+  pub fn evaluate_buildin_cadr(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
+    self.cid
   }
 
-  pub fn evaluate_buildin_is_equal(&mut self, mut node: SchemeExp, env: Env, next: usize) -> () {
-    ()
+  pub fn evaluate_buildin_is_equal(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
+    self.cid
   }
 
-  pub fn evaluate_buildin_is_more_than(&mut self, mut node: SchemeExp, env: Env, next: usize) -> () {
-    ()
+  pub fn evaluate_buildin_is_more_than(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
+    self.cid
   }
 
-  pub fn evaluate_buildin_is_less_than(&mut self, mut node: SchemeExp, env: Env, next: usize) -> () {
-    ()
+  pub fn evaluate_buildin_is_less_than(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
+    self.cid
   }
 
-  pub fn evaluate_buildin_add(&mut self, mut node: SchemeExp, env: Env, next: usize) -> () {
-    ()
+  pub fn evaluate_buildin_add(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
+    self.cid
   }
 
-  pub fn evaluate_buildin_minus(&mut self, mut node: SchemeExp, env: Env, next: usize) -> () {
-    ()
+  pub fn evaluate_buildin_minus(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
+    self.cid
   }
 
-  pub fn evaluate_buildin_multiply(&mut self, mut node: SchemeExp, env: Env, next: usize) -> () {
-    ()
+  pub fn evaluate_buildin_multiply(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
+    self.cid
   }
 
-  pub fn evaluate_buildin_divide(&mut self, mut node: SchemeExp, env: Env, next: usize) -> () {
-    ()
+  pub fn evaluate_buildin_divide(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
+    self.cid
   }
 
-  pub fn evaluate_buildin_min(&mut self, mut node: SchemeExp, env: Env, next: usize) -> () {
-    ()
+  pub fn evaluate_buildin_min(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
+    self.cid
   }
 
-  pub fn evaluate_buildin_max(&mut self, mut node: SchemeExp, env: Env, next: usize) -> () {
-    ()
+  pub fn evaluate_buildin_max(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
+    self.cid
   }
 
-  pub fn evaluate_buildin_abs(&mut self, mut node: SchemeExp, env: Env, next: usize) -> () {
-    ()
+  pub fn evaluate_buildin_abs(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
+    self.cid
   }
 
-  pub fn evaluate_buildin_is_zero(&mut self, mut node: SchemeExp, env: Env, next: usize) -> () {
-    ()
+  pub fn evaluate_buildin_is_zero(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
+    self.cid
   }
 
-  pub fn evaluate_buildin_length(&mut self, mut node: SchemeExp, env: Env, next: usize) -> () {
-    ()
+  pub fn evaluate_buildin_length(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
+    self.cid
   }
 
-  pub fn evaluate_buildin_not(&mut self, mut node: SchemeExp, env: Env, next: usize) -> () {
-    ()
+  pub fn evaluate_buildin_not(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
+    self.cid
   }
 
-  pub fn evaluate_buildin_and(&mut self, mut node: SchemeExp, env: Env, next: usize) -> () {
-    ()
+  pub fn evaluate_buildin_and(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
+    self.cid
   }
 
-  pub fn evaluate_buildin_or(&mut self, mut node: SchemeExp, env: Env, next: usize) -> () {
-    ()
+  pub fn evaluate_buildin_or(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
+    self.cid
   }
 }

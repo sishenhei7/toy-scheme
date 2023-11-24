@@ -161,21 +161,23 @@ impl SchemeData {
     self
   }
 
-  pub fn build_list_from_vec(vec: &mut VecDeque<SchemeData>) -> SchemeData {
-    vec.iter().fold(SchemeData::Nil, |acc, x| {
-      let loc = x.get_loc().unwrap_or(Default::default());
-      let last_loc = acc.get_loc().unwrap_or(loc.clone());
-      build_list!(
-        Box::new(x.clone()),
-        Box::new(acc),
-        Some(Location {
-          line_start: loc.line_start,
-          column_start: loc.column_start,
-          line_end: last_loc.line_end,
-          column_end: last_loc.column_end,
-        })
-      )
-    })
+  pub fn cons(a: &SchemeData, b: &SchemeData) -> SchemeData {
+    let loc = a.get_loc().unwrap_or(Default::default());
+    let last_loc = b.get_loc().unwrap_or(loc.clone());
+    build_list!(
+      Box::new(a.clone()),
+      Box::new(b.clone()),
+      Some(Location {
+        line_start: loc.line_start,
+        column_start: loc.column_start,
+        line_end: last_loc.line_end,
+        column_end: last_loc.column_end,
+      })
+    )
+  }
+
+  pub fn cons_from_vec(vec: &mut VecDeque<SchemeData>) -> SchemeData {
+    vec.iter().fold(SchemeData::Nil, |acc, x| SchemeData::cons(x, &acc))
   }
 
   // this will consume the list
@@ -197,7 +199,7 @@ impl SchemeData {
               TokenType::LParen => SchemeData::parse_token_list(list, loc)?,
               _ => SchemeData::parse_token_list(&mut vec![list.pop().unwrap()], loc)?,
             };
-            SchemeData::build_list_from_vec(&mut quote_exp.value)
+            SchemeData::cons_from_vec(&mut quote_exp.value)
           } else {
             return Err(Error::msg("Quote parsing error!"));
           }
