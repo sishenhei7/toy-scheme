@@ -113,7 +113,7 @@ impl Evaluator {
           "lambda" => self.evaluate_lambda(node, env.copy(), next),
           "let" | "let*" | "letrec" => self.evaluate_let(node, env.copy(), next),
           "set!" => self.evaluate_set(node, env.copy(), next),
-          _ => panic!()
+          _ => self.evaluate_buildin(node, env, next)
         }
       },
       Some(SchemeData::Continuation(..)) => self.evaluate_cont(node, env.copy(), next),
