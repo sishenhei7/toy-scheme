@@ -68,7 +68,7 @@ impl Evaluator {
   // 从左往右一次求值，最后一个的结果是这个 exp 的值
   // this consumes the node
   // TODO: 把这里的 node 和 env 改成引用
-  pub fn parse(&mut self, node: SchemeData, env: Env, next: usize) -> usize {
+  pub fn evaluate(&mut self, node: SchemeData, env: Env, next: usize) -> usize {
     match node {
       SchemeData::Identifier(ref x) => {
         let identifier = x.value.clone();
@@ -95,12 +95,12 @@ impl Evaluator {
       },
       SchemeData::Continuation(..) => panic!(),
       SchemeData::Procedure(..) => panic!(),
-      SchemeData::Exp(ref x) => self.parse_exp(x.clone(), env, next),
+      SchemeData::Exp(ref x) => self.evaluate_exp(x.clone(), env, next),
       _ => panic!(),
     }
   }
 
-  pub fn parse_exp(&mut self, node: SchemeExp, env: Env, next: usize) -> usize {
+  pub fn evaluate_exp(&mut self, node: SchemeExp, env: Env, next: usize) -> usize {
     match node.value.front() {
       // 匹配上了语法
       Some(SchemeData::Identifier(ref x)) => {
@@ -118,15 +118,15 @@ impl Evaluator {
       },
       Some(SchemeData::Continuation(..)) => self.evaluate_cont(node, env.copy(), next),
       // 没匹配上语法，则从左到右依次 parse
-      _ => self.parse_from_left(node.value, env, next)
+      _ => self.evaluate_from_left(node.value, env, next)
     }
   }
 
   // 从左到右依次求值，返回最后一个
-  pub fn parse_from_left(&mut self, queue: VecDeque<SchemeData>, env: Env, next: usize) -> usize {
+  pub fn evaluate_from_left(&mut self, queue: VecDeque<SchemeData>, env: Env, next: usize) -> usize {
     queue.into_iter().rev().fold(
       next,
-      |acc, cur| self.parse(cur, env.copy(), acc)
+      |acc, cur| self.evaluate(cur, env.copy(), acc)
     )
   }
 }

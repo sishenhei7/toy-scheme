@@ -10,9 +10,9 @@ impl Evaluator {
   pub fn evaluate_set(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
     node.value.pop_front();
 
-    let name_node = node.value.pop_front().expect("Parse set-name error!");
-    let name = name_node.get_identifier_string().expect("Parse set-name error!");
-    let value_node = node.value.pop_front().expect("Parse set-value error!");
+    let name_node = node.value.pop_front().expect("Evaluate set-name error!");
+    let name = name_node.get_identifier_string().expect("Evaluate set-name error!");
+    let value_node = node.value.pop_front().expect("Evaluate set-value error!");
 
 
     let mut env_copy = env.copy();
@@ -26,6 +26,6 @@ impl Evaluator {
       })
     ));
 
-    self.parse(value_node, env, set_cid)
+    self.evaluate(value_node, env, set_cid)
   }
 }

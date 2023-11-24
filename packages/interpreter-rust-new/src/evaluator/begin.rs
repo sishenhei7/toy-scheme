@@ -13,6 +13,6 @@ impl Evaluator {
   pub fn evaluate_begin(&mut self, node: SchemeExp, env: Env, next: usize) -> usize {
     let mut queue = node.value;
     queue.pop_front();
-    self.parse_from_left(queue, env, next)
+    self.evaluate_from_left(queue, env, next)
   }
 }

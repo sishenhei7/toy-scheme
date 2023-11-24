@@ -20,8 +20,8 @@ impl Evaluator {
   pub fn evaluate_lambda_to_proc(&mut self, mut node: SchemeExp, env: Env) -> SchemeProc {
     node.value.pop_front();
 
-    let params = node.value.pop_front().expect("Parse lambda-params error!");
-    let body = node.value.pop_front().expect("Parse lambda-body error!");
+    let params = node.value.pop_front().expect("Evaluate lambda-params error!");
+    let body = node.value.pop_front().expect("Evaluate lambda-body error!");
 
     if matches!(params, SchemeData::Exp(..)) && matches!(body, SchemeData::Exp(..)) {
       return SchemeProc {
@@ -33,6 +33,6 @@ impl Evaluator {
       };
     }
 
-    panic!("Parse lambda-clause error!");
+    panic!("Evaluate lambda-clause error!");
   }
 }

@@ -10,11 +10,11 @@ impl Evaluator {
   pub fn evaluate_if(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
     node.value.pop_front();
 
-    let predict_node = node.value.pop_front().expect("Parse predict-clause error!");
-    let then_node = node.value.pop_front().expect("Parse then-clause error!");
-    let else_node = node.value.pop_front().expect("Parse else-clause error!");
-    let then_cid = self.parse(then_node, env.copy(), next);
-    let else_cid = self.parse(else_node, env.copy(), next);
+    let predict_node = node.value.pop_front().expect("Evaluate predict-clause error!");
+    let then_node = node.value.pop_front().expect("Evaluate then-clause error!");
+    let else_node = node.value.pop_front().expect("Evaluate else-clause error!");
+    let then_cid = self.evaluate(then_node, env.copy(), next);
+    let else_cid = self.evaluate(else_node, env.copy(), next);
 
     let if_cid = self.insert_map(Unit::new(
       env.copy(),
@@ -26,6 +26,6 @@ impl Evaluator {
       })
     ));
 
-    self.parse(predict_node, env.copy(), if_cid)
+    self.evaluate(predict_node, env.copy(), if_cid)
   }
 }

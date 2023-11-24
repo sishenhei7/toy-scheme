@@ -20,17 +20,17 @@ impl Evaluator {
     node.value.pop_front();
 
     node.value.into_iter().rev().fold(next, |acc, mut cur| {
-      let exp_list = cur.get_exp_list().expect("Parse cond-list error!");
-      let predict = exp_list.pop_front().expect("Parse cond-predict error!");
-      let value = exp_list.pop_front().expect("Parse cond-clause error!");
+      let exp_list = cur.get_exp_list().expect("Evaluate cond-list error!");
+      let predict = exp_list.pop_front().expect("Evaluate cond-predict error!");
+      let value = exp_list.pop_front().expect("Evaluate cond-clause error!");
       if let SchemeData::Identifier(ref y) = predict {
         if y.value == "else" {
-          self.parse(value, env.copy(), next)
+          self.evaluate(value, env.copy(), next)
         } else {
-          panic!("Parse cond-else error!")
+          panic!("Evaluate cond-else error!")
         }
       } else {
-        let value_cid = self.parse(value, env.copy(), next);
+        let value_cid = self.evaluate(value, env.copy(), next);
         let cond_cid = self.insert_map(Unit::new(
           env.copy(),
           None,
@@ -40,7 +40,7 @@ impl Evaluator {
             (next, SchemeData::Nil)
           })
         ));
-        self.parse(predict, env.copy(), cond_cid)
+        self.evaluate(predict, env.copy(), cond_cid)
       }
     })
   }
