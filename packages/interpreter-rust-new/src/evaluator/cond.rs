@@ -9,7 +9,7 @@ use crate::{
 use super::{ Evaluator, Unit };
 
 /**
- * 语法：
+ * 语法(**此表达式有返回值**)：
  * (cond
  *     (predicate_1 clauses_1)
  *     (predicate_2 clauses_2)
@@ -34,10 +34,11 @@ impl Evaluator {
         let cond_cid = self.insert_map(Unit::new(
           env.copy(),
           None,
-          Box::new(move |mut x| {
-            let predict = x.get_boolean().expect("Cond-predict should be boolean!");
+          Box::new(move |mut v| {
+            let mut item = v.pop().expect("Evaluate Unit-cond error!");
+            let predict = item.get_boolean().expect("Cond-predict should be boolean!");
             let next = if predict { value_cid } else { acc };
-            (next, SchemeData::Nil)
+            (next, v)
           })
         ));
         self.evaluate(predict, env.copy(), cond_cid)

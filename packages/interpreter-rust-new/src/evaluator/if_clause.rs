@@ -3,7 +3,7 @@ use crate::{parser::{SchemeExp, SchemeData}, env::Env};
 use super::{ Evaluator, Unit };
 
 /**
- * 语法：
+ * 语法(**此语句有返回值**)：
  * (if predict then_value else_value)
  */
 impl Evaluator {
@@ -19,10 +19,11 @@ impl Evaluator {
     let if_cid = self.insert_map(Unit::new(
       env.copy(),
       None,
-      Box::new(move |mut x| {
-        let predict = x.get_boolean().expect("Cond-predict should be boolean!");
+      Box::new(move |mut v| {
+        let mut item = v.pop().expect("Evaluate Unit-if error!");
+        let predict = item.get_boolean().expect("Cond-predict should be boolean!");
         let next = if predict { then_cid } else { else_cid };
-        (next, SchemeData::Nil)
+        (next, v)
       })
     ));
 

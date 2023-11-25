@@ -3,7 +3,7 @@ use crate::{parser::{SchemeExp, SchemeData}, env::Env};
 use super::{ Evaluator, Unit };
 
 /**
- * 语法：
+ * 语法(**此语句没有返回值，没有返回值的意思是，之前的和自己的返回值都丢弃！**)：
  * (set! var (* var 10))
  */
 impl Evaluator {
@@ -20,9 +20,10 @@ impl Evaluator {
     let set_cid = self.insert_map(Unit::new(
       env.copy(),
       None,
-      Box::new(move |x| {
-        env_copy.set(&name_copy, x.clone());
-        (next, SchemeData::Nil)
+      Box::new(move |mut v| {
+        let item = v.pop().expect("Evaluate Unit-let error!");
+        env_copy.set(&name_copy, item.clone());
+        (next, vec![])
       })
     ));
 

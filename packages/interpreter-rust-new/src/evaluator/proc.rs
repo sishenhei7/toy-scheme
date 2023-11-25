@@ -5,7 +5,7 @@ use crate::{parser::{SchemeExp, SchemeData, SchemeProc}, env::Env};
 use super::{ Evaluator, Unit };
 
 /**
- * 语法：
+ * 语法(**此语句有返回值**)：
  * 函数调用：
  * (vhello "Hello world")
  */

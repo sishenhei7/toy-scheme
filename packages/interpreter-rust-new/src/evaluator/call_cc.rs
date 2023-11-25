@@ -5,7 +5,7 @@ use crate::{parser::{SchemeExp, SchemeData, SchemeCont}, env::Env};
 use super::{ Evaluator, Unit };
 
 /**
- * 语法（后面加一个 lambda 语句）：
+ * 语法（后面加一个 lambda 语句）(**此表达式有返回值**)：
  * (call-with-current-continuation
  *    (lambda (resume-here)
  *      (set! control-state resume-here)

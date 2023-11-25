@@ -34,24 +34,22 @@ impl Evaluator {
   }
 
   pub fn evaluate_buildin_cons(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
-    if !node.value.is_empty() {
-      return self.cid
-    }
+    // let first_node = node.value.pop_front().expect("Evaluate buildin-cons error!");
+    // let second_node = node.value.pop_front().expect("Evaluate buildin-cons error!");
+
+    // let cons_cid = self.insert_map(Unit::new(
+    //   env.copy(),
+    //   None,
+    //   Box::new(move |x| {
+    //     // evaluator.evaluate(item, env, current_next)
+    //     (next, SchemeData::cons())
+    //   })
+    // ));
+
+    // let second_cid = self.evaluate(second_node, env, cons_cid);
+    // self.evaluate(first_node, env, second_cid)
 
     self.cid
-
-    // node.value.into_iter().rev().fold(next, |acc, cur| {
-    //   let env_copy = env.copy();
-    //   let cons_cid = self.insert_map(Unit::new(
-    //     env.copy(),
-    //     None,
-    //     Box::new(move |x| {
-
-    //       (acc, SchemeData::Nil)
-    //     })
-    //   ));
-    //   self.evaluate(cur, env, cons_cid)
-    // })
   }
 
   pub fn evaluate_buildin_is_null(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {

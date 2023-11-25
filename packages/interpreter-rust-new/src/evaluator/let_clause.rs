@@ -5,7 +5,7 @@ use crate::{parser::{SchemeExp, SchemeData}, env::Env};
 use super::{ Evaluator, Unit };
 
 /**
- * 语法：
+ * 语法(**此语句有返回值**)：
  * 1.let 表达式：
  * (let ((i 1) (j 2))
  *    (+ i j))
@@ -62,9 +62,10 @@ impl Evaluator {
       let def_cid = self.insert_map(Unit::new(
         env.copy(),
         None,
-        Box::new(move |x| {
-          current_env.set(&name_copy, x.clone());
-          (acc, SchemeData::Nil)
+        Box::new(move |mut v| {
+          let item = v.pop().expect("Evaluate Unit-let error!");
+          current_env.set(&name_copy, item.clone());
+          (acc, v)
         })
       ));
 
@@ -104,9 +105,10 @@ impl Evaluator {
     let def_cid = self.insert_map(Unit::new(
       env.copy(),
       None,
-      Box::new(move |x| {
-        current_env.set(&name_copy, x.clone());
-        (current_next, SchemeData::Nil)
+      Box::new(move |mut v| {
+        let item = v.pop().expect("Evaluate Unit-let error!");
+        current_env.set(&name_copy, item.clone());
+        (current_next, v)
       })
     ));
 

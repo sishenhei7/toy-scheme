@@ -16,20 +16,23 @@ use anyhow::Error;
 
 use crate::{
   env::Env,
-  parser::{SchemeCont, SchemeData, SchemeExp}, lexer::Location,
+  parser::{SchemeData, SchemeExp}, lexer::Location,
 };
 
 pub struct Unit {
   pub env: Env,
   pub loc: Option<Location>,
-  pub computer: Box<dyn FnMut(SchemeData) -> (usize, SchemeData)>
+  // 这里的 Vec<SchemeData> 是为了保存上一个 computer 的结果
+  // 主要是为了编译 (+ x xx xxx) 这种形式的表达式
+  // 但是有一定的限制，就是只会保存同级的表达式
+  pub computer: Box<dyn FnMut(Vec<SchemeData>) -> (usize, Vec<SchemeData>)>
 }
 
 impl Unit {
   pub fn new(
     env: Env,
     loc: Option<Location>,
-    computer: Box<dyn FnMut(SchemeData) -> (usize, SchemeData)>
+    computer: Box<dyn FnMut(Vec<SchemeData>) -> (usize, Vec<SchemeData>)>
   ) -> Self {
     Self {
       env,
@@ -76,9 +79,10 @@ impl Evaluator {
         self.insert_map(Unit::new(
           env.copy(),
           node.get_loc(),
-          Box::new(move |_| {
+          Box::new(move |mut v| {
             let node = env_copy.get(&identifier).expect("Env get 错误！");
-            (next, node)
+            v.push(node);
+            (next, v)
           })
         ))
       },
@@ -90,7 +94,10 @@ impl Evaluator {
         self.insert_map(Unit::new(
           env.copy(),
           node.get_loc(),
-          Box::new(move |_| (next, node_copy.clone()))
+          Box::new(move |mut v| {
+            v.push(node_copy.clone());
+            (next, v)
+          })
         ))
       },
       SchemeData::Continuation(..) => panic!(),
@@ -117,17 +124,26 @@ impl Evaluator {
         }
       },
       Some(SchemeData::Continuation(..)) => self.evaluate_cont(node, env.copy(), next),
-      // 没匹配上语法，则从左到右依次 parse
-      _ => self.evaluate_from_left(node.value, env, next)
+      _ => self.evaluate_from_left(node.value, env, next),
     }
   }
 
   // 从左到右依次求值，返回最后一个
+  // 这里的每一项都应该丢弃之前的返回值，只返回自己
   pub fn evaluate_from_left(&mut self, queue: VecDeque<SchemeData>, env: Env, next: usize) -> usize {
-    queue.into_iter().rev().fold(
-      next,
-      |acc, cur| self.evaluate(cur, env.copy(), acc)
-    )
+    queue.into_iter().rev().fold(next, |acc, cur| {
+      let begin_cid = self.insert_map(Unit::new(
+        env.copy(),
+        None,
+        Box::new(move |mut v| {
+          // 丢弃之前的返回，只返回自己
+          let res = if v.is_empty() { v } else { vec![v.pop().expect("Evaluate Begin-value error!")] };
+          (acc, res)
+        })
+      ));
+
+      self.evaluate(cur, env.copy(), begin_cid)
+    })
   }
 }
 

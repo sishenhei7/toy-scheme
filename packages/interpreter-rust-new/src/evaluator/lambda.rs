@@ -3,7 +3,7 @@ use crate::{parser::{SchemeExp, SchemeData, SchemeProc}, env::Env};
 use super::{ Evaluator, Unit };
 
 /**
- * 语法：
+ * 语法(**此语句有返回值**)：
  * (lambda (a b c) (+ a b c))
  */
 impl Evaluator {
@@ -13,7 +13,10 @@ impl Evaluator {
     self.insert_map(Unit::new(
       env.copy(),
       loc,
-      Box::new(move |_| (next, proc.clone()))
+      Box::new(move |mut v| {
+        v.push(proc.clone());
+        (next, v)
+      })
     ))
   }
 
