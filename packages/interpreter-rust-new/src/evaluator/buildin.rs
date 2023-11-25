@@ -33,6 +33,8 @@ impl Evaluator {
     }
   }
 
+  // 已经解决了(+ x xx xxx xxx)无限多个的情况
+  // 但是(+ x (* y yy yyy) xx xxx)的情况又怎么解决呢？(TODO:fix it)
   pub fn evaluate_buildin_cons(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
     // let first_node = node.value.pop_front().expect("Evaluate buildin-cons error!");
     // let second_node = node.value.pop_front().expect("Evaluate buildin-cons error!");
