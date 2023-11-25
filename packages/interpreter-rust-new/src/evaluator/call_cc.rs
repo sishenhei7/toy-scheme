@@ -2,7 +2,7 @@ use std::collections::VecDeque;
 
 use crate::{parser::{SchemeExp, SchemeData, SchemeCont}, env::Env};
 
-use super::{ Evaluator, Unit };
+use super::Evaluator;
 
 /**
  * 语法（后面加一个 lambda 语句）(**此表达式有返回值**)：

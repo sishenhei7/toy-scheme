@@ -1,6 +1,6 @@
 use crate::{parser::SchemeExp, env::Env};
 
-use super::{ Evaluator, Unit };
+use super::Evaluator;
 
 /**
  * 语法：

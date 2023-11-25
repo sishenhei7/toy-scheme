@@ -51,7 +51,7 @@ impl Evaluator {
   ) -> usize {
     let body_cid = self.evaluate(body_node, env.copy(), next);
 
-    def_list.into_iter().rev().fold(body_cid, |acc, mut cur| {
+    def_list.into_iter().rev().fold(body_cid, |acc, cur| {
       let definition = cur.get_exp_list().expect("Evaluate let-definition error!");
       let name_node = definition.pop_front().expect("Evaluate let-definition-name error!");
       let name = name_node.get_identifier_string().expect("Evaluate let-definition-name error!");

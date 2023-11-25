@@ -1,4 +1,4 @@
-use crate::{parser::{SchemeExp, SchemeData}, env::Env};
+use crate::{parser::SchemeExp, env::Env};
 
 use super::{ Evaluator, Unit };
 

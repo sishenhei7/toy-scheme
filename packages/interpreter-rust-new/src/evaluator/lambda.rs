@@ -7,7 +7,7 @@ use super::{ Evaluator, Unit };
  * (lambda (a b c) (+ a b c))
  */
 impl Evaluator {
-  pub fn evaluate_lambda(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
+  pub fn evaluate_lambda(&mut self, node: SchemeExp, env: Env, next: usize) -> usize {
     let loc = node.loc.clone();
     let proc = SchemeData::Procedure(self.evaluate_lambda_to_proc(node, env.copy()));
     self.insert_map(Unit::new(

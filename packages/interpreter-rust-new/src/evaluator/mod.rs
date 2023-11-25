@@ -12,7 +12,7 @@ mod let_clause;
 mod proc;
 mod set;
 
-use anyhow::Error;
+// use anyhow::Error;
 
 use crate::{
   env::Env,
