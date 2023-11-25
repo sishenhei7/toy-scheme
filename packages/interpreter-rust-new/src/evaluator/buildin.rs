@@ -1,4 +1,5 @@
 use core::panic;
+use std::collections::VecDeque;
 
 use crate::{parser::{SchemeExp, SchemeData}, env::Env};
 
@@ -35,6 +36,7 @@ impl Evaluator {
 
   // 已经解决了(+ x xx xxx xxx)无限多个的情况
   // 但是(+ x (* y yy yyy) xx xxx)的情况又怎么解决呢？(TODO:fix it)
+  // 初步的想法是，在 evaluator 上面加一个 stack 来保存
   pub fn evaluate_buildin_cons(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
     // let first_node = node.value.pop_front().expect("Evaluate buildin-cons error!");
     // let second_node = node.value.pop_front().expect("Evaluate buildin-cons error!");
@@ -50,6 +52,31 @@ impl Evaluator {
 
     // let second_cid = self.evaluate(second_node, env, cons_cid);
     // self.evaluate(first_node, env, second_cid)
+
+    // let mut list = VecDeque::new();
+    // let cons_cid = self.insert_map(Unit::new(
+    //   env.copy(),
+    //   None,
+    //   Box::new(move |mut v| {
+    //     // evaluator.evaluate(item, env, current_next)
+    //     v.push(SchemeData::cons_from_vec(&mut list));
+    //     (next, v)
+    //   })
+    // ));
+    // node.value.into_iter().rev().fold(cons_cid, |acc, cur| {
+    //   let begin_cid = self.insert_map(Unit::new(
+    //     env.copy(),
+    //     None,
+    //     Box::new(move |mut v| {
+    //       // 丢弃之前的返回，只返回自己
+    //       // let res = if v.is_empty() { v } else { vec![v.pop().expect("Evaluate Begin-value error!")] };
+    //       list.push_back(v.pop().expect("xxxx"));
+    //       (acc, v)
+    //     })
+    //   ));
+
+    //   self.evaluate(cur, env.copy(), begin_cid)
+    // })
 
     self.cid
   }
