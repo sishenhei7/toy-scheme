@@ -1,4 +1,4 @@
-use crate::{parser::SchemeExp, env::Env};
+use crate::{parser::{SchemeExp, SchemeData}, env::Env};
 
 use super::{ Evaluator, Unit };
 
@@ -20,10 +20,9 @@ impl Evaluator {
       env.copy(),
       None,
       Box::new(move |mut v| {
-        let mut item = v.pop().expect("Evaluate Unit-if error!");
-        let predict = item.get_boolean().expect("Cond-predict should be boolean!");
+        let predict = v.get_boolean().expect("Cond-predict should be boolean!");
         let next = if predict { then_cid } else { else_cid };
-        (next, v)
+        (next, SchemeData::Nil)
       })
     ));
 

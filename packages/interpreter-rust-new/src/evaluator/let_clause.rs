@@ -62,10 +62,9 @@ impl Evaluator {
       let def_cid = self.insert_map(Unit::new(
         env.copy(),
         None,
-        Box::new(move |mut v| {
-          let item = v.pop().expect("Evaluate Unit-let error!");
-          current_env.set(&name_copy, item.clone());
-          (acc, v)
+        Box::new(move |v| {
+          current_env.set(&name_copy, v.clone());
+          (acc, SchemeData::Nil)
         })
       ));
 
@@ -105,10 +104,9 @@ impl Evaluator {
     let def_cid = self.insert_map(Unit::new(
       env.copy(),
       None,
-      Box::new(move |mut v| {
-        let item = v.pop().expect("Evaluate Unit-let error!");
-        current_env.set(&name_copy, item.clone());
-        (current_next, v)
+      Box::new(move |v| {
+        current_env.set(&name_copy, v.clone());
+        (current_next, SchemeData::Nil)
       })
     ));
 

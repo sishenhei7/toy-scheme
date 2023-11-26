@@ -13,10 +13,7 @@ impl Evaluator {
     self.insert_map(Unit::new(
       env.copy(),
       loc,
-      Box::new(move |mut v| {
-        v.push(proc.clone());
-        (next, v)
-      })
+      Box::new(move |_| (next, proc.clone()))
     ))
   }
 

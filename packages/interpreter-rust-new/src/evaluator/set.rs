@@ -1,4 +1,4 @@
-use crate::{parser::SchemeExp, env::Env};
+use crate::{parser::{SchemeExp, SchemeData}, env::Env};
 
 use super::{ Evaluator, Unit };
 
@@ -20,10 +20,9 @@ impl Evaluator {
     let set_cid = self.insert_map(Unit::new(
       env.copy(),
       None,
-      Box::new(move |mut v| {
-        let item = v.pop().expect("Evaluate Unit-let error!");
-        env_copy.set(&name_copy, item.clone());
-        (next, vec![])
+      Box::new(move |v| {
+        env_copy.set(&name_copy, v.clone());
+        (next, SchemeData::Nil)
       })
     ));
 

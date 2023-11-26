@@ -35,10 +35,9 @@ impl Evaluator {
           env.copy(),
           None,
           Box::new(move |mut v| {
-            let mut item = v.pop().expect("Evaluate Unit-cond error!");
-            let predict = item.get_boolean().expect("Cond-predict should be boolean!");
+            let predict = v.get_boolean().expect("Cond-predict should be boolean!");
             let next = if predict { value_cid } else { acc };
-            (next, v)
+            (next, SchemeData::Nil)
           })
         ));
         self.evaluate(predict, env.copy(), cond_cid)

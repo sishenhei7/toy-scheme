@@ -22,10 +22,9 @@ impl Evaluator {
       let set_cid = self.insert_map(Unit::new(
         env.copy(),
         None,
-        Box::new(move |mut v| {
-          let item = v.pop().expect("Evaluate Unit-define error!");
-          env_copy.set(&identifier, item);
-          (next, vec![])
+        Box::new(move |v| {
+          env_copy.set(&identifier, v.clone());
+          (next, SchemeData::Nil)
         })
       ));
       let second: SchemeData = node.value.pop_front().expect("Evaluate define-value error!");
@@ -54,7 +53,7 @@ impl Evaluator {
         None,
         Box::new(move |_| {
           env_copy.set(&name_copy, proc.clone());
-          (next, vec![])
+          (next, SchemeData::Nil)
         })
       ));
     }
