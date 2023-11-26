@@ -278,6 +278,22 @@ impl SchemeData {
       None
     }
   }
+
+  pub fn get_number(&mut self) -> Option<f64> {
+    if let SchemeData::Number(x) = self {
+      Some(x.value)
+    } else {
+      None
+    }
+  }
+
+  pub fn add(&mut self, node: &mut SchemeData) -> () {
+    self.get_number().expect("SchemeData add error!");
+    let num = node.get_number().expect("SchemeData add error!");
+    if let SchemeData::Number(ref mut x) = self {
+      x.value += num
+    }
+  }
 }
 
 // list is moved

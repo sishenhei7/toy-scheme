@@ -19,7 +19,7 @@ impl Evaluator {
     let if_cid = self.insert_map(Unit::new(
       env.copy(),
       None,
-      Box::new(move |mut v| {
+      Box::new(move |mut v, _| {
         let predict = v.get_boolean().expect("Cond-predict should be boolean!");
         let next = if predict { then_cid } else { else_cid };
         (next, SchemeData::Nil)

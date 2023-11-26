@@ -34,50 +34,7 @@ impl Evaluator {
     }
   }
 
-  // 已经解决了(+ x xx xxx xxx)无限多个的情况
-  // 但是(+ x (* y yy yyy) xx xxx)的情况又怎么解决呢？(TODO:fix it)
-  // 初步的想法是，在 evaluator 上面加一个 stack 来保存
   pub fn evaluate_buildin_cons(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
-    // let first_node = node.value.pop_front().expect("Evaluate buildin-cons error!");
-    // let second_node = node.value.pop_front().expect("Evaluate buildin-cons error!");
-
-    // let cons_cid = self.insert_map(Unit::new(
-    //   env.copy(),
-    //   None,
-    //   Box::new(move |x| {
-    //     // evaluator.evaluate(item, env, current_next)
-    //     (next, SchemeData::cons())
-    //   })
-    // ));
-
-    // let second_cid = self.evaluate(second_node, env, cons_cid);
-    // self.evaluate(first_node, env, second_cid)
-
-    // let mut list = VecDeque::new();
-    // let cons_cid = self.insert_map(Unit::new(
-    //   env.copy(),
-    //   None,
-    //   Box::new(move |mut v| {
-    //     // evaluator.evaluate(item, env, current_next)
-    //     v.push(SchemeData::cons_from_vec(&mut list));
-    //     (next, v)
-    //   })
-    // ));
-    // node.value.into_iter().rev().fold(cons_cid, |acc, cur| {
-    //   let begin_cid = self.insert_map(Unit::new(
-    //     env.copy(),
-    //     None,
-    //     Box::new(move |mut v| {
-    //       // 丢弃之前的返回，只返回自己
-    //       // let res = if v.is_empty() { v } else { vec![v.pop().expect("Evaluate Begin-value error!")] };
-    //       list.push_back(v.pop().expect("xxxx"));
-    //       (acc, v)
-    //     })
-    //   ));
-
-    //   self.evaluate(cur, env.copy(), begin_cid)
-    // })
-
     self.cid
   }
 
@@ -109,8 +66,42 @@ impl Evaluator {
     self.cid
   }
 
-  pub fn evaluate_buildin_add(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
-    self.cid
+  // TODO: 把所有的 Unit::new 的 loc 写上！
+  pub fn evaluate_buildin_add(&mut self, node: SchemeExp, env: Env, next: usize) -> usize {
+    let cons_cid = self.insert_map(Unit::new(
+      env.copy(),
+      None,
+      Box::new(move |_, mut e| {
+        let mut last_stack = e.pop_stack();
+        let value = last_stack.iter_mut().reduce(|acc, mut cur| {
+          acc.add(cur);
+          acc
+        }).expect("Evaluate add error!");
+        (next, value.clone())
+      })
+    ));
+
+    let value_cid = node.value.into_iter().rev().fold(cons_cid, |acc, cur| {
+      let begin_cid = self.insert_map(Unit::new(
+        env.copy(),
+        None,
+        Box::new(move |v, mut e| {
+          e.push_stack(v.clone());
+          (acc, SchemeData::Nil)
+        })
+      ));
+
+      self.evaluate(cur, env.copy(), begin_cid)
+    });
+
+    self.insert_map(Unit::new(
+      env.copy(),
+      None,
+      Box::new(move |_, mut e| {
+        e.add_stack();
+        (value_cid, SchemeData::Nil)
+      })
+    ))
   }
 
   pub fn evaluate_buildin_minus(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {

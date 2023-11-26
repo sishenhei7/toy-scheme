@@ -22,14 +22,14 @@ use crate::{
 pub struct Unit {
   pub env: Env,
   pub loc: Option<Location>,
-  pub computer: Box<dyn FnMut(SchemeData) -> (usize, SchemeData)>
+  pub computer: Box<dyn FnMut(SchemeData, Evaluator) -> (usize, SchemeData)>
 }
 
 impl Unit {
   pub fn new(
     env: Env,
     loc: Option<Location>,
-    computer: Box<dyn FnMut(SchemeData) -> (usize, SchemeData)>
+    computer: Box<dyn FnMut(SchemeData, Evaluator) -> (usize, SchemeData)>
   ) -> Self {
     Self {
       env,
@@ -45,7 +45,9 @@ pub struct Evaluator {
   pub initial_input: SchemeData,
   pub initial_env: Env,
   pub unit_map: HashMap<usize, Unit>,
-  pub cid: usize
+  pub cid: usize,
+  // 用来解决 (+ x (* y yy yyy) xx xxx) 的情况
+  pub stack: Vec<Vec<SchemeData>>
 }
 
 impl Evaluator {
@@ -54,7 +56,8 @@ impl Evaluator {
       initial_input: input.clone(),
       initial_env: Env::new(),
       unit_map: HashMap::new(),
-      cid: 1
+      cid: 1,
+      stack: vec![]
     }
   }
 
@@ -76,7 +79,7 @@ impl Evaluator {
         self.insert_map(Unit::new(
           env.copy(),
           node.get_loc(),
-          Box::new(move |_| {
+          Box::new(move |_, _| {
             let node = env_copy.get(&identifier).expect("Env get 错误！");
             (next, node)
           })
@@ -90,7 +93,7 @@ impl Evaluator {
         self.insert_map(Unit::new(
           env.copy(),
           node.get_loc(),
-          Box::new(move |_| (next, node_copy.clone()))
+          Box::new(move |_, _| (next, node_copy.clone()))
         ))
       },
       SchemeData::Continuation(..) => panic!(),
@@ -128,11 +131,24 @@ impl Evaluator {
       let begin_cid = self.insert_map(Unit::new(
         env.copy(),
         None,
-        Box::new(move |_| (acc, SchemeData::Nil))
+        Box::new(move |_, _| (acc, SchemeData::Nil))
       ));
 
       self.evaluate(cur, env.copy(), begin_cid)
     })
+  }
+
+  pub fn push_stack(&mut self, node: SchemeData) -> () {
+    let last_stack = self.stack.last_mut().expect("Evaluator push stack error!");
+    last_stack.push(node);
+  }
+
+  pub fn add_stack(&mut self) -> () {
+    self.stack.push(vec![]);
+  }
+
+  pub fn pop_stack(&mut self) -> Vec<SchemeData> {
+    self.stack.pop().expect("Evaluator pop stack error!")
   }
 }
 

@@ -62,7 +62,7 @@ impl Evaluator {
       let def_cid = self.insert_map(Unit::new(
         env.copy(),
         None,
-        Box::new(move |v| {
+        Box::new(move |v, _| {
           current_env.set(&name_copy, v.clone());
           (acc, SchemeData::Nil)
         })
@@ -104,7 +104,7 @@ impl Evaluator {
     let def_cid = self.insert_map(Unit::new(
       env.copy(),
       None,
-      Box::new(move |v| {
+      Box::new(move |v, _| {
         current_env.set(&name_copy, v.clone());
         (current_next, SchemeData::Nil)
       })
