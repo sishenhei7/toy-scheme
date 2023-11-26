@@ -25,6 +25,7 @@ impl Evaluator {
     let params = proc.params.get_exp_list().expect("Evaluate proc-params error!");
 
     // Evaluate params and arguments
+    // TODO: 这里的 arguments 要使用传进来的 env evaluate 一下！！！
     for (key, value) in params.iter().zip(arguments.iter()) {
       let key_str = key.get_identifier_string().expect("Evaluate proc-params error!");
       proc_env.set(key_str, value.clone());
