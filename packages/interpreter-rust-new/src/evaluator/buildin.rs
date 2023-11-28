@@ -34,8 +34,32 @@ impl Evaluator {
     }
   }
 
+  // 只能 cons 两个
   pub fn evaluate_buildin_cons(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
-    self.cid
+    let finally_cid = self.insert_map(Unit::new(
+      env.copy(),
+      None,
+      Box::new(move |_, mut e| {
+        let mut last_stack = e.pop_stack();
+        let second_value = last_stack.pop().expect("Evaluate buildin-cons-second error!");
+        let first_value = last_stack.pop().expect("Evaluate buildin-cons-first error!");
+        (next, SchemeData::cons(&first_value, &second_value))
+      })
+    ));
+
+    let first_node = node.value.pop_front().expect("Evaluate buildin-cons-first error!");
+    let second_node = node.value.pop_front().expect("Evaluate buildin-cons-second error!");
+    let second_cid = self.evaluate(second_node, env.copy(), finally_cid);
+    let first_cid = self.evaluate(first_node, env.copy(), second_cid);
+
+    self.insert_map(Unit::new(
+      env.copy(),
+      None,
+      Box::new(move |_, mut e| {
+        e.add_stack();
+        (first_cid, SchemeData::Nil)
+      })
+    ))
   }
 
   pub fn evaluate_buildin_is_null(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
