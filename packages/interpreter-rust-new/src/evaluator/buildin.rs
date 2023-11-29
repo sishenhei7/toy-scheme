@@ -83,6 +83,49 @@ impl Evaluator {
     ))
   }
 
+  pub fn evaluate_buildin_base_inf(
+    &mut self,
+    node: SchemeExp,
+    env: Env,
+    next: usize,
+    func: fn(SchemeData, SchemeData) -> SchemeData
+  ) -> usize {
+    let func_cid = self.insert_map(Unit::new(
+      env.copy(),
+      None,
+      Box::new(move |_, mut e| {
+        let last_stack = e.pop_stack();
+        let value = last_stack
+          .into_iter()
+          .reduce(|acc, cur| func(acc, cur))
+          .expect("Evaluate add error!");
+        (next, value.clone())
+      })
+    ));
+
+    let value_cid = node.value.into_iter().rev().fold(func_cid, |acc, cur| {
+      let begin_cid = self.insert_map(Unit::new(
+        env.copy(),
+        None,
+        Box::new(move |v, mut e| {
+          e.push_stack(v.clone());
+          (acc, SchemeData::Nil)
+        })
+      ));
+
+      self.evaluate(cur, env.copy(), begin_cid)
+    });
+
+    self.insert_map(Unit::new(
+      env.copy(),
+      None,
+      Box::new(move |_, mut e| {
+        e.add_stack();
+        (value_cid, SchemeData::Nil)
+      })
+    ))
+  }
+
   // 只能 cons 两个
   // TODO: 下面的 node 加 mut 前缀和不加有什么区别？为什么不需要加前缀？
   pub fn evaluate_buildin_cons(&mut self, node: SchemeExp, env: Env, next: usize) -> usize {
@@ -140,61 +183,84 @@ impl Evaluator {
   }
 
   pub fn evaluate_buildin_is_more_than(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
-    self.cid
+    self.evaluate_buildin_base_two(
+      node,
+      env,
+      next,
+      |mut x, mut y| {
+        let first_value = x.get_number().expect("Evaluate buildin-is-equal error!");
+        let second_value = y.get_number().expect("Evaluate buildin-is-equal error!");
+        SchemeData::Boolean(SchemeBoolean{
+          value: first_value > second_value,
+          loc: None
+        })
+      }
+    )
   }
 
   pub fn evaluate_buildin_is_less_than(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
-    self.cid
+    self.evaluate_buildin_base_two(
+      node,
+      env,
+      next,
+      |mut x, mut y| {
+        let first_value = x.get_number().expect("Evaluate buildin-is-equal error!");
+        let second_value = y.get_number().expect("Evaluate buildin-is-equal error!");
+        SchemeData::Boolean(SchemeBoolean{
+          value: first_value < second_value,
+          loc: None
+        })
+      }
+    )
   }
 
   // TODO: 把所有的 Unit::new 的 loc 写上！
   pub fn evaluate_buildin_add(&mut self, node: SchemeExp, env: Env, next: usize) -> usize {
-    let cons_cid = self.insert_map(Unit::new(
-      env.copy(),
-      None,
-      Box::new(move |_, mut e| {
-        let mut last_stack = e.pop_stack();
-        let value = last_stack.iter_mut().reduce(|acc, mut cur| {
-          acc.add(cur);
-          acc
-        }).expect("Evaluate add error!");
-        (next, value.clone())
-      })
-    ));
-
-    let value_cid = node.value.into_iter().rev().fold(cons_cid, |acc, cur| {
-      let begin_cid = self.insert_map(Unit::new(
-        env.copy(),
-        None,
-        Box::new(move |v, mut e| {
-          e.push_stack(v.clone());
-          (acc, SchemeData::Nil)
-        })
-      ));
-
-      self.evaluate(cur, env.copy(), begin_cid)
-    });
-
-    self.insert_map(Unit::new(
-      env.copy(),
-      None,
-      Box::new(move |_, mut e| {
-        e.add_stack();
-        (value_cid, SchemeData::Nil)
-      })
-    ))
+    self.evaluate_buildin_base_inf(
+      node,
+      env,
+      next,
+      |mut acc, mut cur| {
+        acc.add(&mut cur);
+        acc
+      },
+    )
   }
 
   pub fn evaluate_buildin_minus(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
-    self.cid
+    self.evaluate_buildin_base_inf(
+      node,
+      env,
+      next,
+      |mut acc, mut cur| {
+        acc.minus(&mut cur);
+        acc
+      },
+    )
   }
 
   pub fn evaluate_buildin_multiply(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
-    self.cid
+    self.evaluate_buildin_base_inf(
+      node,
+      env,
+      next,
+      |mut acc, mut cur| {
+        acc.minus(&mut cur);
+        acc
+      },
+    )
   }
 
   pub fn evaluate_buildin_divide(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
-    self.cid
+    self.evaluate_buildin_base_inf(
+      node,
+      env,
+      next,
+      |mut acc, mut cur| {
+        acc.divide(&mut cur);
+        acc
+      },
+    )
   }
 
   pub fn evaluate_buildin_min(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {

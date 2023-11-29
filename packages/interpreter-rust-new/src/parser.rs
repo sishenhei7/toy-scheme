@@ -319,6 +319,30 @@ impl SchemeData {
     }
   }
 
+  pub fn minus(&mut self, node: &mut SchemeData) -> () {
+    self.get_number().expect("SchemeData add error!");
+    let num = node.get_number().expect("SchemeData add error!");
+    if let SchemeData::Number(ref mut x) = self {
+      x.value -= num
+    }
+  }
+
+  pub fn multiply(&mut self, node: &mut SchemeData) -> () {
+    self.get_number().expect("SchemeData add error!");
+    let num = node.get_number().expect("SchemeData add error!");
+    if let SchemeData::Number(ref mut x) = self {
+      x.value *= num
+    }
+  }
+
+  pub fn divide(&mut self, node: &mut SchemeData) -> () {
+    self.get_number().expect("SchemeData add error!");
+    let num = node.get_number().expect("SchemeData add error!");
+    if let SchemeData::Number(ref mut x) = self {
+      x.value /= num
+    }
+  }
+
   pub fn is_nil(& self) -> bool {
     matches!(*self, SchemeData::Nil)
   }
