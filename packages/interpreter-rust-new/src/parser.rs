@@ -239,7 +239,7 @@ impl SchemeData {
     };
   }
 
-  pub fn get_exp_list(&mut self) -> Option<&mut VecDeque<SchemeData>> {
+  pub fn get_exp_queue(&mut self) -> Option<&mut VecDeque<SchemeData>> {
     if let SchemeData::Exp(x) = self {
       Some(&mut x.value)
     } else {
@@ -287,12 +287,40 @@ impl SchemeData {
     }
   }
 
+  pub fn get_list(&mut self) -> Option<(Box<SchemeData>, Box<SchemeData>)> {
+    if let SchemeData::List(x) = self {
+      Some(x.value.clone())
+    } else {
+      None
+    }
+  }
+
+  pub fn get_list_car(&mut self) -> Option<Box<SchemeData>> {
+    if let SchemeData::List(x) = self {
+      Some(x.value.0.clone())
+    } else {
+      None
+    }
+  }
+
+  pub fn get_list_cdr(&mut self) -> Option<Box<SchemeData>> {
+    if let SchemeData::List(x) = self {
+      Some(x.value.1.clone())
+    } else {
+      None
+    }
+  }
+
   pub fn add(&mut self, node: &mut SchemeData) -> () {
     self.get_number().expect("SchemeData add error!");
     let num = node.get_number().expect("SchemeData add error!");
     if let SchemeData::Number(ref mut x) = self {
       x.value += num
     }
+  }
+
+  pub fn is_nil(& self) -> bool {
+    matches!(*self, SchemeData::Nil)
   }
 }
 

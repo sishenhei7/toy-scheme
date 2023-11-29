@@ -35,7 +35,7 @@ impl Evaluator {
     let first_cloned = first.clone();
     if let SchemeData::Exp(..) = first {
       let mut second = node.value.pop_front().expect("Evaluate define-proc error!");
-      let second_list = second.get_exp_list().expect("Evaluate define-proc error!");
+      let second_list = second.get_exp_queue().expect("Evaluate define-proc error!");
       let name_node = second_list.pop_front().expect("Evaluate define-proc-name error!");
       let name = name_node.get_identifier_string().expect("Evaluate define-proc-name error!");
       let name_copy = name.clone();

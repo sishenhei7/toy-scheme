@@ -1,7 +1,7 @@
 use core::panic;
 use std::collections::VecDeque;
 
-use crate::{parser::{SchemeExp, SchemeData}, env::Env};
+use crate::{parser::{SchemeExp, SchemeData, SchemeBoolean}, env::Env};
 
 use super::{ Evaluator, Unit };
 
@@ -34,16 +34,37 @@ impl Evaluator {
     }
   }
 
-  // 只能 cons 两个
-  pub fn evaluate_buildin_cons(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
+  pub fn evaluate_buildin_base_one(
+    &mut self,
+    mut node: SchemeExp,
+    env: Env,
+    next: usize,
+    func: fn(SchemeData) -> SchemeData
+  ) -> usize {
+    let first_node = node.value.pop_front().expect("Evaluate buildin-is_null error!");
     let finally_cid = self.insert_map(Unit::new(
       env.copy(),
       None,
-      Box::new(move |_, mut e| {
+      Box::new(move |x, _| (next, func(x)))
+    ));
+    self.evaluate(first_node, env.copy(), finally_cid)
+  }
+
+  pub fn evaluate_buildin_base_two(
+    &mut self,
+    mut node: SchemeExp,
+    env: Env,
+    next: usize,
+    func: fn(SchemeData, SchemeData) -> SchemeData
+  ) -> usize {
+    let finally_cid = self.insert_map(Unit::new(
+      env.copy(),
+      None,
+      Box::new(move |_, mut e: Evaluator| {
         let mut last_stack = e.pop_stack();
         let second_value = last_stack.pop().expect("Evaluate buildin-cons-second error!");
         let first_value = last_stack.pop().expect("Evaluate buildin-cons-first error!");
-        (next, SchemeData::cons(&first_value, &second_value))
+        (next, func(first_value, second_value))
       })
     ));
 
@@ -62,24 +83,60 @@ impl Evaluator {
     ))
   }
 
-  pub fn evaluate_buildin_is_null(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
-    self.cid
+  // 只能 cons 两个
+  // TODO: 下面的 node 加 mut 前缀和不加有什么区别？为什么不需要加前缀？
+  pub fn evaluate_buildin_cons(&mut self, node: SchemeExp, env: Env, next: usize) -> usize {
+    self.evaluate_buildin_base_two(
+      node,
+      env,
+      next,
+      |x, y| SchemeData::cons(&x, &y)
+    )
   }
 
-  pub fn evaluate_buildin_car(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
-    self.cid
+  pub fn evaluate_buildin_is_null(&mut self, node: SchemeExp, env: Env, next: usize) -> usize {
+    self.evaluate_buildin_base_one(node, env, next, |x| SchemeData::Boolean(SchemeBoolean{
+      value: x.clone().is_nil(),
+      loc: x.get_loc()
+    }))
   }
 
-  pub fn evaluate_buildin_cdr(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
-    self.cid
+  pub fn evaluate_buildin_car(&mut self, node: SchemeExp, env: Env, next: usize) -> usize {
+    self.evaluate_buildin_base_one(node, env, next, |mut x| {
+      let car = x.get_list_car().expect("Evaluate buildin-car error!");
+      *car.clone()
+    })
   }
 
-  pub fn evaluate_buildin_cadr(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
-    self.cid
+  pub fn evaluate_buildin_cdr(&mut self, node: SchemeExp, env: Env, next: usize) -> usize {
+    self.evaluate_buildin_base_one(node, env, next, |mut x| {
+      let cdr = x.get_list_cdr().expect("Evaluate buildin-car error!");
+      *cdr.clone()
+    })
   }
 
-  pub fn evaluate_buildin_is_equal(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
-    self.cid
+  pub fn evaluate_buildin_cadr(&mut self, node: SchemeExp, env: Env, next: usize) -> usize {
+    self.evaluate_buildin_base_one(node, env, next, |mut x| {
+      let mut cdr = x.get_list_cdr().expect("Evaluate buildin-cadr error!");
+      let cadr = cdr.get_list_car().expect("Evaluate buildin-cadr error!");
+      *cadr.clone()
+    })
+  }
+
+  pub fn evaluate_buildin_is_equal(&mut self, node: SchemeExp, env: Env, next: usize) -> usize {
+    self.evaluate_buildin_base_two(
+      node,
+      env,
+      next,
+      |mut x, mut y| {
+        let first_value = x.get_number().expect("Evaluate buildin-is-equal error!");
+        let second_value = y.get_number().expect("Evaluate buildin-is-equal error!");
+        SchemeData::Boolean(SchemeBoolean{
+          value: first_value == second_value,
+          loc: None
+        })
+      }
+    )
   }
 
   pub fn evaluate_buildin_is_more_than(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {

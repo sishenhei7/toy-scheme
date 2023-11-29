@@ -20,7 +20,7 @@ impl Evaluator {
     node.value.pop_front();
 
     node.value.into_iter().rev().fold(next, |acc, mut cur| {
-      let exp_list = cur.get_exp_list().expect("Evaluate cond-list error!");
+      let exp_list = cur.get_exp_queue().expect("Evaluate cond-list error!");
       let predict = exp_list.pop_front().expect("Evaluate cond-predict error!");
       let value = exp_list.pop_front().expect("Evaluate cond-clause error!");
       if let SchemeData::Identifier(ref y) = predict {

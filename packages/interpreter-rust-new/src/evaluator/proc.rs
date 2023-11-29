@@ -16,13 +16,13 @@ impl Evaluator {
     let mut proc_data = env.get(&identifier).expect("Evaluate proc-data error!");
     let proc = proc_data.get_proc().expect("Evaluate proc-data error!");
     let mut arguments_data = node.value.pop_front().expect("Evaluate proc-arguments error!");
-    let arguments = arguments_data.get_exp_list().expect("Evaluate proc-arguments error!");
+    let arguments = arguments_data.get_exp_queue().expect("Evaluate proc-arguments error!");
     self.evaluate_proc_with_arguments(proc, arguments, env, next)
   }
 
   pub fn evaluate_proc_with_arguments(&mut self, proc: &mut SchemeProc, arguments: &mut VecDeque<SchemeData>, env: Env, next: usize) -> usize {
     let proc_env = &mut proc.env;
-    let params = proc.params.get_exp_list().expect("Evaluate proc-params error!");
+    let params = proc.params.get_exp_queue().expect("Evaluate proc-params error!");
 
     // Evaluate params and arguments
     // TODO: 这里的 arguments 要使用传进来的 env evaluate 一下！！！

@@ -25,7 +25,7 @@ impl Evaluator {
     let identifier = identifier_node.get_identifier_string().expect("Evaluate let-symbol error!");
     let new_env = env.extend(None);
     let mut def_node = node.value.pop_front().expect("Evaluate let-def error!");
-    let def_list = def_node.get_exp_list().expect("Evaluate let-def error!");
+    let def_list = def_node.get_exp_queue().expect("Evaluate let-def error!");
     let body_node = node.value.pop_front().expect("Evaluate let-body error!");
 
     match identifier.as_ref() {
@@ -52,7 +52,7 @@ impl Evaluator {
     let body_cid = self.evaluate(body_node, env.copy(), next);
 
     def_list.into_iter().rev().fold(body_cid, |acc, cur| {
-      let definition = cur.get_exp_list().expect("Evaluate let-definition error!");
+      let definition = cur.get_exp_queue().expect("Evaluate let-definition error!");
       let name_node = definition.pop_front().expect("Evaluate let-definition-name error!");
       let name = name_node.get_identifier_string().expect("Evaluate let-definition-name error!");
       let value_node = definition.pop_front().expect("Evaluate let-definition-value error!");
@@ -93,7 +93,7 @@ impl Evaluator {
     }
 
     let mut definition_node = def_list.pop_front().expect("Evaluate let-definition error!");
-    let definition = definition_node.get_exp_list().expect("Evaluate let-definition error!");
+    let definition = definition_node.get_exp_queue().expect("Evaluate let-definition error!");
     let name_node = definition.pop_front().expect("Evaluate let-definition-name error!");
     let name = name_node.get_identifier_string().expect("Evaluate let-definition-name error!");
     let value_node = definition.pop_front().expect("Evaluate let-definition-value error!");
@@ -130,7 +130,7 @@ impl Evaluator {
   ) -> usize {
     let mut env_copy = env.copy();
     for item in def_list.iter_mut() {
-      let definition = item.get_exp_list().expect("Evaluate let-definition error!");
+      let definition = item.get_exp_queue().expect("Evaluate let-definition error!");
       let name_node = definition.front().expect("Evaluate let-definition error!");
       let name = name_node.get_identifier_string().expect("Evaluate let-name error!");
       env_copy.set(&name.clone(), SchemeData::Nil);
