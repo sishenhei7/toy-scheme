@@ -1,7 +1,11 @@
 use core::panic;
 use std::collections::VecDeque;
 
-use crate::{parser::{SchemeExp, SchemeData, SchemeBoolean}, env::Env};
+use crate::{
+  parser::{SchemeExp, SchemeData, SchemeBoolean, SchemeNumber},
+  env::Env,
+  lexer::Location
+};
 
 use super::{ Evaluator, Unit };
 
@@ -227,7 +231,7 @@ impl Evaluator {
     )
   }
 
-  pub fn evaluate_buildin_minus(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
+  pub fn evaluate_buildin_minus(&mut self, node: SchemeExp, env: Env, next: usize) -> usize {
     self.evaluate_buildin_base_inf(
       node,
       env,
@@ -239,7 +243,7 @@ impl Evaluator {
     )
   }
 
-  pub fn evaluate_buildin_multiply(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
+  pub fn evaluate_buildin_multiply(&mut self, node: SchemeExp, env: Env, next: usize) -> usize {
     self.evaluate_buildin_base_inf(
       node,
       env,
@@ -263,35 +267,109 @@ impl Evaluator {
     )
   }
 
-  pub fn evaluate_buildin_min(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
-    self.cid
+  pub fn evaluate_buildin_min(&mut self, node: SchemeExp, env: Env, next: usize) -> usize {
+    self.evaluate_buildin_base_inf(
+      node,
+      env,
+      next,
+      |mut acc, mut cur| {
+        acc.min(&mut cur);
+        acc
+      },
+    )
   }
 
-  pub fn evaluate_buildin_max(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
-    self.cid
+  pub fn evaluate_buildin_max(&mut self, node: SchemeExp, env: Env, next: usize) -> usize {
+    self.evaluate_buildin_base_inf(
+      node,
+      env,
+      next,
+      |mut acc, mut cur| {
+        acc.max(&mut cur);
+        acc
+      },
+    )
   }
 
-  pub fn evaluate_buildin_abs(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
-    self.cid
+  pub fn evaluate_buildin_abs(&mut self, node: SchemeExp, env: Env, next: usize) -> usize {
+    self.evaluate_buildin_base_one(node, env, next, |mut x| {
+      x.abs();
+      x
+    })
   }
 
-  pub fn evaluate_buildin_is_zero(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
-    self.cid
+  pub fn evaluate_buildin_is_zero(&mut self, node: SchemeExp, env: Env, next: usize) -> usize {
+    self.evaluate_buildin_base_one(node, env, next, |mut x| {
+      let num = x.get_number().expect("SchemeData buildin-is-zero error!");
+      SchemeData::Boolean(SchemeBoolean{
+        value: num == 0.0,
+        loc: x.get_loc()
+      })
+    })
   }
 
-  pub fn evaluate_buildin_length(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
-    self.cid
+  pub fn evaluate_buildin_length(&mut self, node: SchemeExp, env: Env, next: usize) -> usize {
+    self.evaluate_buildin_base_one(node, env, next, |mut x| {
+      SchemeData::Number(SchemeNumber{
+        value: x.get_list_length().expect("SchemeData buildin-length error!"),
+        loc: x.get_loc()
+      })
+    })
   }
 
-  pub fn evaluate_buildin_not(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
-    self.cid
+  pub fn evaluate_buildin_not(&mut self, node: SchemeExp, env: Env, next: usize) -> usize {
+    self.evaluate_buildin_base_one(node, env, next, |mut x| {
+      let value = x.get_boolean().expect("SchemeData buildin-length error!");
+      SchemeData::Boolean(SchemeBoolean{
+        value: !value,
+        loc: x.get_loc()
+      })
+    })
   }
 
   pub fn evaluate_buildin_and(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
-    self.cid
+    self.evaluate_buildin_base_inf(
+      node,
+      env,
+      next,
+      |mut acc, mut cur| {
+        let acc_value = acc.get_boolean().expect("SchemeData buildin-and error!");
+        let cur_value = cur.get_boolean().expect("SchemeData buildin-and error!");
+        let acc_loc = acc.get_loc().unwrap_or_default();
+        let cur_loc = cur.get_loc().unwrap_or_default();
+        SchemeData::Boolean(SchemeBoolean{
+          value: acc_value && cur_value,
+          loc: Some(Location {
+            line_start: acc_loc.line_start,
+            column_start: acc_loc.column_start,
+            line_end: cur_loc.line_end,
+            column_end: cur_loc.column_end,
+          })
+        })
+      },
+    )
   }
 
   pub fn evaluate_buildin_or(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
-    self.cid
+    self.evaluate_buildin_base_inf(
+      node,
+      env,
+      next,
+      |mut acc, mut cur| {
+        let acc_value = acc.get_boolean().expect("SchemeData buildin-and error!");
+        let cur_value = cur.get_boolean().expect("SchemeData buildin-and error!");
+        let acc_loc = acc.get_loc().unwrap_or_default();
+        let cur_loc = cur.get_loc().unwrap_or_default();
+        SchemeData::Boolean(SchemeBoolean{
+          value: acc_value || cur_value,
+          loc: Some(Location {
+            line_start: acc_loc.line_start,
+            column_start: acc_loc.column_start,
+            line_end: cur_loc.line_end,
+            column_end: cur_loc.column_end,
+          })
+        })
+      },
+    )
   }
 }

@@ -162,7 +162,7 @@ impl SchemeData {
   }
 
   pub fn cons(a: &SchemeData, b: &SchemeData) -> SchemeData {
-    let loc = a.get_loc().unwrap_or(Default::default());
+    let loc = a.get_loc().unwrap_or_default();
     let last_loc = b.get_loc().unwrap_or(loc.clone());
     build_list!(
       Box::new(a.clone()),
@@ -224,7 +224,7 @@ impl SchemeData {
     }
 
     return if let Some(last_data) = scheme_data_list.last() {
-      let last_loc = last_data.get_loc().unwrap_or(Default::default());
+      let last_loc = last_data.get_loc().unwrap_or_default();
       Ok(SchemeExp {
         value: VecDeque::from(scheme_data_list),
         loc: Some(Location {
@@ -311,6 +311,23 @@ impl SchemeData {
     }
   }
 
+  pub fn get_list_length(&mut self) -> Option<f64> {
+    fn get_list_length_func(mut node: SchemeData) -> f64 {
+      match node {
+        SchemeData::List(..) => 1.0 + get_list_length_func(*node.get_list_cdr().unwrap()),
+        SchemeData::Nil => 0.0,
+        _ => 0.0
+      }
+    }
+
+    if let SchemeData::List(..) = self {
+      let self_copy = self.clone();
+      Some(get_list_length_func(self_copy))
+    } else {
+      None
+    }
+  }
+
   pub fn add(&mut self, node: &mut SchemeData) -> () {
     self.get_number().expect("SchemeData add error!");
     let num = node.get_number().expect("SchemeData add error!");
@@ -320,26 +337,49 @@ impl SchemeData {
   }
 
   pub fn minus(&mut self, node: &mut SchemeData) -> () {
-    self.get_number().expect("SchemeData add error!");
-    let num = node.get_number().expect("SchemeData add error!");
+    self.get_number().expect("SchemeData minus error!");
+    let num = node.get_number().expect("SchemeData minus error!");
     if let SchemeData::Number(ref mut x) = self {
       x.value -= num
     }
   }
 
   pub fn multiply(&mut self, node: &mut SchemeData) -> () {
-    self.get_number().expect("SchemeData add error!");
-    let num = node.get_number().expect("SchemeData add error!");
+    self.get_number().expect("SchemeData multiply error!");
+    let num = node.get_number().expect("SchemeData multiply error!");
     if let SchemeData::Number(ref mut x) = self {
       x.value *= num
     }
   }
 
   pub fn divide(&mut self, node: &mut SchemeData) -> () {
-    self.get_number().expect("SchemeData add error!");
-    let num = node.get_number().expect("SchemeData add error!");
+    self.get_number().expect("SchemeData divide error!");
+    let num = node.get_number().expect("SchemeData divide error!");
     if let SchemeData::Number(ref mut x) = self {
       x.value /= num
+    }
+  }
+
+  pub fn min(&mut self, node: &mut SchemeData) -> () {
+    self.get_number().expect("SchemeData min error!");
+    let num = node.get_number().expect("SchemeData min error!");
+    if let SchemeData::Number(ref mut x) = self {
+      x.value = x.value.min(num);
+    }
+  }
+
+  pub fn max(&mut self, node: &mut SchemeData) -> () {
+    self.get_number().expect("SchemeData max error!");
+    let num = node.get_number().expect("SchemeData max error!");
+    if let SchemeData::Number(ref mut x) = self {
+      x.value = x.value.max(num);
+    }
+  }
+
+  pub fn abs(&mut self) -> () {
+    self.get_number().expect("SchemeData abs error!");
+    if let SchemeData::Number(ref mut x) = self {
+      x.value = x.value.abs();
     }
   }
 
