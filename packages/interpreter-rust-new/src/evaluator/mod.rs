@@ -22,14 +22,14 @@ use crate::{
 pub struct Unit {
   pub env: Env,
   pub loc: Option<Location>,
-  pub computer: Box<dyn FnMut(SchemeData, &mut Evaluator) -> (usize, SchemeData)>
+  pub computer: Box<dyn FnMut(SchemeData, &mut Vec<Vec<SchemeData>>) -> (usize, SchemeData)>
 }
 
 impl Unit {
   pub fn new(
     env: Env,
     loc: Option<Location>,
-    computer: Box<dyn FnMut(SchemeData, &mut Evaluator) -> (usize, SchemeData)>
+    computer: Box<dyn FnMut(SchemeData, &mut Vec<Vec<SchemeData>>) -> (usize, SchemeData)>
   ) -> Self {
     Self {
       env,
@@ -40,10 +40,10 @@ impl Unit {
 
   pub fn run(
     &mut self,
-    evaluator: &mut Evaluator,
-    value: SchemeData
+    value: SchemeData,
+    stack: &mut Vec<Vec<SchemeData>>
   ) -> (usize, SchemeData) {
-    (self.computer)(value, evaluator)
+    (self.computer)(value, stack)
   }
 }
 
@@ -162,14 +162,14 @@ impl Evaluator {
   pub fn run_unit(&mut self, cid: usize, value: SchemeData) -> (usize, SchemeData) {
     let map = &mut self.unit_map;
     let unit = map.get_mut(&cid).expect("Evaluator run error!");
-    unit.run(self, value)
+    unit.run(value, &mut self.stack)
   }
 
   pub fn run(&mut self, cid: usize, value: SchemeData) -> SchemeData {
     let mut next = cid;
     let mut next_value = value;
     while let Some(x) = self.unit_map.get_mut(&next) {
-      (next, next_value) = x.run(self, next_value);
+      (next, next_value) = x.run(next_value, &mut self.stack);
     }
     next_value
   }
