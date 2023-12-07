@@ -50,23 +50,27 @@ impl Unit {
 // 由于所有权的原因，unit 不方便同时放入 unit_map、next 里面(用Rc也可以)
 // 所以考虑把所有的 unit 放入 unit_map、next 里面只存索引
 pub struct Evaluator {
-  pub initial_input: SchemeData,
+  pub initial_input: SchemeExp,
   pub initial_env: Env,
   pub unit_map: HashMap<usize, Unit>,
+  pub initial_cid: usize,
   pub cid: usize,
   // 用来解决 (+ x (* y yy yyy) xx xxx) 的情况
   pub stack: Vec<Vec<SchemeData>>
 }
 
 impl Evaluator {
-  pub fn new(input: SchemeData) -> Self {
-    Self {
+  pub fn new(input: SchemeExp) -> Self {
+    let mut evaluator = Self {
       initial_input: input.clone(),
       initial_env: Env::new(),
       unit_map: HashMap::new(),
-      cid: 1,
+      initial_cid: 0,
+      cid: 0,
       stack: vec![]
-    }
+    };
+    evaluator.initial_cid = evaluator.evaluate_exp(input, evaluator.initial_env.copy(), 0);
+    evaluator
   }
 
   pub fn insert_map(&mut self, value: Unit) -> usize {
@@ -104,8 +108,6 @@ impl Evaluator {
           Box::new(move |_, _| (next, node_copy.clone()))
         ))
       },
-      SchemeData::Continuation(..) => panic!(),
-      SchemeData::Procedure(..) => panic!(),
       SchemeData::Exp(ref x) => self.evaluate_exp(x.clone(), env, next),
       _ => panic!(),
     }
@@ -116,18 +118,19 @@ impl Evaluator {
       // 匹配上了语法
       Some(SchemeData::Identifier(ref x)) => {
         match x.value.as_str() {
-          "begin" => self.evaluate_begin(node, env.copy(), next),
-          "call-with-current-continuation" => self.evaluate_call_cc(node, env.copy(), next),
-          "cond" => self.evaluate_cond(node, env.copy(), next),
-          "define" => self.evaluate_define(node, env.copy(), next),
-          "if" => self.evaluate_if(node, env.copy(), next),
-          "lambda" => self.evaluate_lambda(node, env.copy(), next),
-          "let" | "let*" | "letrec" => self.evaluate_let(node, env.copy(), next),
-          "set!" => self.evaluate_set(node, env.copy(), next),
+          "begin" => self.evaluate_begin(node, env, next),
+          "call-with-current-continuation" => self.evaluate_call_cc(node, env, next),
+          "cond" => self.evaluate_cond(node, env, next),
+          "define" => self.evaluate_define(node, env, next),
+          "if" => self.evaluate_if(node, env, next),
+          "lambda" => self.evaluate_lambda(node, env, next),
+          "let" | "let*" | "letrec" => self.evaluate_let(node, env, next),
+          "set!" => self.evaluate_set(node, env, next),
           _ => self.evaluate_buildin(node, env, next)
         }
       },
-      Some(SchemeData::Continuation(..)) => self.evaluate_cont(node, env.copy(), next),
+      Some(SchemeData::Procedure(..)) => self.evaluate_proc(node, env, next),
+      Some(SchemeData::Continuation(..)) => self.evaluate_cont(node, env, next),
       _ => self.evaluate_from_left(node.value, env, next),
     }
   }
@@ -165,13 +168,13 @@ impl Evaluator {
     unit.run(value, &mut self.stack)
   }
 
-  pub fn run(&mut self, cid: usize, value: SchemeData) -> SchemeData {
-    let mut next = cid;
-    let mut next_value = value;
-    while let Some(x) = self.unit_map.get_mut(&next) {
-      (next, next_value) = x.run(next_value, &mut self.stack);
+  pub fn run(&mut self) -> SchemeData {
+    let mut cid = self.initial_cid;
+    let mut value = SchemeData::Nil;
+    while let Some(x) = self.unit_map.get_mut(&cid) {
+      (cid, value) = x.run(value, &mut self.stack);
     }
-    next_value
+    value
   }
 }
 
