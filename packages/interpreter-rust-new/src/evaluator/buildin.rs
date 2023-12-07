@@ -186,7 +186,7 @@ impl Evaluator {
     )
   }
 
-  pub fn evaluate_buildin_is_more_than(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
+  pub fn evaluate_buildin_is_more_than(&mut self, node: SchemeExp, env: Env, next: usize) -> usize {
     self.evaluate_buildin_base_two(
       node,
       env,
@@ -202,7 +202,7 @@ impl Evaluator {
     )
   }
 
-  pub fn evaluate_buildin_is_less_than(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
+  pub fn evaluate_buildin_is_less_than(&mut self, node: SchemeExp, env: Env, next: usize) -> usize {
     self.evaluate_buildin_base_two(
       node,
       env,
@@ -255,7 +255,7 @@ impl Evaluator {
     )
   }
 
-  pub fn evaluate_buildin_divide(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
+  pub fn evaluate_buildin_divide(&mut self, node: SchemeExp, env: Env, next: usize) -> usize {
     self.evaluate_buildin_base_inf(
       node,
       env,
@@ -327,7 +327,7 @@ impl Evaluator {
     })
   }
 
-  pub fn evaluate_buildin_and(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
+  pub fn evaluate_buildin_and(&mut self, node: SchemeExp, env: Env, next: usize) -> usize {
     self.evaluate_buildin_base_inf(
       node,
       env,
@@ -350,7 +350,7 @@ impl Evaluator {
     )
   }
 
-  pub fn evaluate_buildin_or(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
+  pub fn evaluate_buildin_or(&mut self, node: SchemeExp, env: Env, next: usize) -> usize {
     self.evaluate_buildin_base_inf(
       node,
       env,
