@@ -64,7 +64,7 @@ impl Evaluator {
     let finally_cid = self.insert_map(Unit::new(
       env.copy(),
       None,
-      Box::new(move |_, mut e: Evaluator| {
+      Box::new(move |_, e: &mut Evaluator| {
         let mut last_stack = e.pop_stack();
         let second_value = last_stack.pop().expect("Evaluate buildin-cons-second error!");
         let first_value = last_stack.pop().expect("Evaluate buildin-cons-first error!");
