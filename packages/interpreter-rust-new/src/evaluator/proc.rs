@@ -2,7 +2,7 @@ use std::collections::VecDeque;
 
 use crate::{parser::{SchemeExp, SchemeData, SchemeProc}, env::Env};
 
-use super::Evaluator;
+use super::{ Evaluator, Unit };
 
 /**
  * 语法(**此语句有返回值**)：
@@ -23,15 +23,23 @@ impl Evaluator {
   pub fn evaluate_proc_with_arguments(&mut self, proc: &mut SchemeProc, arguments: &mut VecDeque<SchemeData>, env: Env, next: usize) -> usize {
     let proc_env = &mut proc.env;
     let params = proc.params.get_exp_queue().expect("Evaluate proc-params error!");
+    let body_cid = self.evaluate((*proc.body).clone(), proc_env.clone(), next);
 
-    // Evaluate params and arguments
-    // TODO: 这里的 arguments 要使用传进来的 env evaluate 一下！！！
-    for (key, value) in params.iter().zip(arguments.iter()) {
-      let key_str = key.get_identifier_string().expect("Evaluate proc-params error!");
-      proc_env.set(key_str, value.clone());
-    }
+    params.iter().zip(arguments.iter()).rev().fold(body_cid, |acc, cur| {
+      let (key, value) = cur;
+      let key_clone = key.clone();
+      let mut env_clone = env.copy();
+      let argument_cid = self.insert_map(Unit::new(
+        env.copy(),
+        None,
+        Box::new(move |v, _| {
+          let key_str = key_clone.get_identifier_string().expect("Evaluate proc-params error!");
+          env_clone.set(key_str, v.clone());
+          (acc, SchemeData::Nil)
+        })
+      ));
 
-    // Evaluate body
-    self.evaluate((*proc.body).clone(), proc_env.clone(), next)
+      self.evaluate(value.clone(), env.copy(), argument_cid)
+    })
   }
 }
