@@ -1,5 +1,4 @@
 use core::panic;
-use std::collections::VecDeque;
 
 use crate::{
   parser::{SchemeExp, SchemeData, SchemeBoolean, SchemeNumber},
