@@ -64,8 +64,8 @@ impl Evaluator {
     let finally_cid = self.insert_map(Unit::new(
       env.copy(),
       None,
-      Box::new(move |_, e: &mut Evaluator| {
-        let mut last_stack = e.pop_stack();
+      Box::new(move |_, e| {
+        let mut last_stack = e.pop().expect("Evaluator pop stack error!");
         let second_value = last_stack.pop().expect("Evaluate buildin-cons-second error!");
         let first_value = last_stack.pop().expect("Evaluate buildin-cons-first error!");
         (next, func(first_value, second_value))
@@ -80,8 +80,8 @@ impl Evaluator {
     self.insert_map(Unit::new(
       env.copy(),
       None,
-      Box::new(move |_, mut e| {
-        e.add_stack();
+      Box::new(move |_, e| {
+        e.push(vec![]);
         (first_cid, SchemeData::Nil)
       })
     ))
@@ -97,8 +97,8 @@ impl Evaluator {
     let func_cid = self.insert_map(Unit::new(
       env.copy(),
       None,
-      Box::new(move |_, mut e| {
-        let last_stack = e.pop_stack();
+      Box::new(move |_, e| {
+        let last_stack = e.pop().expect("Evaluator pop stack error!");
         let value = last_stack
           .into_iter()
           .reduce(|acc, cur| func(acc, cur))
@@ -111,8 +111,9 @@ impl Evaluator {
       let begin_cid = self.insert_map(Unit::new(
         env.copy(),
         None,
-        Box::new(move |v, mut e| {
-          e.push_stack(v.clone());
+        Box::new(move |v, e| {
+          let last_stack = e.last_mut().expect("Evaluator push stack error!");
+          last_stack.push(v.clone());
           (acc, SchemeData::Nil)
         })
       ));
@@ -123,8 +124,8 @@ impl Evaluator {
     self.insert_map(Unit::new(
       env.copy(),
       None,
-      Box::new(move |_, mut e| {
-        e.add_stack();
+      Box::new(move |_, e| {
+        e.push(vec![]);
         (value_cid, SchemeData::Nil)
       })
     ))
