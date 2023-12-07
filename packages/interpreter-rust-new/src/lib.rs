@@ -6,20 +6,16 @@ pub mod evaluator;
 pub mod lexer;
 pub mod parser;
 
-use std::cell::RefCell;
-use std::rc::Rc;
-use once_cell::sync::Lazy;
-
 use anyhow::Error;
 // use napi_derive::napi;
 use env::*;
 use lexer::*;
 use parser::*;
-// use evaluator::{ evaluate_exp, EvaluateResponse };
+use evaluator::Evaluator;
 
 // #[napi(custom_finalize)]
 pub struct Interpreter {
-  // node: EvaluateResponse
+  result: SchemeData
 }
 
 struct StepResponse {
@@ -31,18 +27,12 @@ struct StepResponse {
 impl Interpreter {
   // #[napi(constructor)]
   pub fn new(program: String) -> Result<Self, Error> {
-    Ok(Self {})
-    // let token_list = tokenize(&program)?;
-    // let scheme_exp = parse(token_list)?;
-    // let initial_env = Env::new();
-    // let initial_cont = SchemeCont {
-    //   func: Closure::new(|x| Ok(EvaluateResponse::Data(x))),
-    //   data: None,
-    //   env: initial_env.clone(),
-    //   loc: None,
-    // };
-    // let node = evaluate_exp(&scheme_exp, &initial_env, &initial_cont)?;
-    // Ok(Self { node })
+    // Ok(Self {})
+    let token_list = Lexer::new(&program).collect::<Vec<TokenItem>>();
+    let data = parse(token_list).expect("输入的 program 有误！");
+    let mut evaluator = Evaluator::new(data);
+    let result = evaluator.run();
+    Ok(Self { result })
   }
 
   // pub fn run(&self) -> String {
