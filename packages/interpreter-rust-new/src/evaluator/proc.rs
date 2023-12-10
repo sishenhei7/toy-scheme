@@ -13,6 +13,8 @@ impl Evaluator {
   pub fn evaluate_proc(&mut self, mut node: SchemeExp, env: Env, next: usize) -> usize {
     let identifier_data = node.value.pop_front().expect("Evaluate proc-identifier error!");
     let identifier = identifier_data.get_identifier_string().expect("Evaluate proc-identifier error!");
+    println!("{:?},{:?}", &identifier, env);
+    // TODO: 这里 proc 从 env 里面的取值要放到 unit 里面去！！！
     let mut proc_data = env.get(&identifier).expect("Evaluate proc-data error!");
     let proc = proc_data.get_proc().expect("Evaluate proc-data error!");
     let mut arguments_data = node.value.pop_front().expect("Evaluate proc-arguments error!");
@@ -34,7 +36,7 @@ impl Evaluator {
         None,
         Box::new(move |v, _| {
           let key_str = key_clone.get_identifier_string().expect("Evaluate proc-params error!");
-          env_clone.set(key_str, v.clone());
+          env_clone.define(key_str, v.clone());
           (acc, SchemeData::Nil)
         })
       ));

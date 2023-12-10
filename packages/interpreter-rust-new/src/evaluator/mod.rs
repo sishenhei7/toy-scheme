@@ -1,4 +1,5 @@
 use std::collections::{HashMap, VecDeque};
+use std::fmt;
 
 mod begin;
 mod buildin;
@@ -13,7 +14,6 @@ mod proc;
 mod set;
 
 // use anyhow::Error;
-
 use crate::{
   env::Env,
   parser::{SchemeData, SchemeExp}, lexer::Location,
@@ -44,6 +44,12 @@ impl Unit {
     stack: &mut Vec<Vec<SchemeData>>
   ) -> (usize, SchemeData) {
     (self.computer)(value, stack)
+  }
+}
+
+impl fmt::Debug for Unit {
+  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    write!(f, "Unit,{:?}", self.env)
   }
 }
 
@@ -92,6 +98,7 @@ impl Evaluator {
           env.copy(),
           node.get_loc(),
           Box::new(move |_, _| {
+            println!("{:?},{:?}", &identifier, env_copy);
             let node = env_copy.get(&identifier).expect("Env get 错误！");
             (next, node)
           })
@@ -117,7 +124,14 @@ impl Evaluator {
     match node.value.front() {
       // 匹配上了语法
       Some(SchemeData::Identifier(ref x)) => {
-        match x.value.as_str() {
+        let identifier = x.value.as_str();
+
+        // 首先匹配 proc
+        if let Some(..) = env.get(identifier) {
+          return self.evaluate_proc(node, env, next)
+        }
+
+        match identifier {
           "begin" => self.evaluate_begin(node, env, next),
           "call-with-current-continuation" => self.evaluate_call_cc(node, env, next),
           "cond" => self.evaluate_cond(node, env, next),
@@ -139,13 +153,12 @@ impl Evaluator {
   // 这里的每一项都应该丢弃之前的返回值，只返回自己
   pub fn evaluate_from_left(&mut self, queue: VecDeque<SchemeData>, env: Env, next: usize) -> usize {
     queue.into_iter().rev().fold(next, |acc, cur| {
-      let begin_cid = self.insert_map(Unit::new(
+      let value_cid = self.evaluate(cur, env.copy(), acc);
+      self.insert_map(Unit::new(
         env.copy(),
         None,
-        Box::new(move |_, _| (acc, SchemeData::Nil))
-      ));
-
-      self.evaluate(cur, env.copy(), begin_cid)
+        Box::new(move |_, _| (value_cid, SchemeData::Nil))
+      ))
     })
   }
 
@@ -173,6 +186,7 @@ impl Evaluator {
     let mut value = SchemeData::Nil;
     while let Some(x) = self.unit_map.get_mut(&cid) {
       (cid, value) = x.run(value, &mut self.stack);
+      println!("{:?},{:?}", cid, value);
     }
     value
   }

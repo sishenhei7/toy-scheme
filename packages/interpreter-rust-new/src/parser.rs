@@ -287,6 +287,14 @@ impl SchemeData {
     }
   }
 
+  pub fn get_string(&mut self) -> Option<String> {
+    if let SchemeData::String(x) = self {
+      Some(x.value.clone())
+    } else {
+      None
+    }
+  }
+
   pub fn get_list(&mut self) -> Option<(Box<SchemeData>, Box<SchemeData>)> {
     if let SchemeData::List(x) = self {
       Some(x.value.clone())
@@ -380,6 +388,27 @@ impl SchemeData {
     self.get_number().expect("SchemeData abs error!");
     if let SchemeData::Number(ref mut x) = self {
       x.value = x.value.abs();
+    }
+  }
+
+  pub fn is_equal(&mut self, node: &mut SchemeData) -> bool {
+    match self {
+      SchemeData::Boolean(..) => {
+        let x = self.get_boolean().expect("Equal error: should both be boolean!");
+        let y = node.get_boolean().expect("Equal error: should both be boolean!");
+        x == y
+      },
+      SchemeData::Number(..) => {
+        let x = self.get_number().expect("Equal error: should both be number!");
+        let y = node.get_number().expect("Equal error: should both be number!");
+        x == y
+      },
+      SchemeData::String(..) => {
+        let x = self.get_string().expect("Equal error: should both be boolean!");
+        let y = node.get_string().expect("Equal error: should both be boolean!");
+        x == y
+      },
+      _ => false
     }
   }
 

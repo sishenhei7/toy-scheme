@@ -1,4 +1,4 @@
-use std::cell::RefCell;
+use std::cell::{ RefCell, RefMut };
 use std::collections::HashMap;
 use std::rc::Rc;
 
@@ -48,28 +48,30 @@ impl Env {
     Env(self.0.clone())
   }
 
-  pub fn get_parent(&self) -> Option<Env> {
-    self.0.borrow_mut().parent.clone()
+  pub fn borrow_env_mut(&self) -> RefMut<BaseEnv> {
+    self.0.borrow_mut()
   }
 
   pub fn get(&self, key: &str) -> Option<SchemeData> {
-    let scope = &self.0.borrow_mut().scope;
+    let env = self.borrow_env_mut();
+    let scope = &env.scope;
     match scope.get(key) {
       Some(x) => Some(x.clone()),
-      None => self.get_parent()?.get(key),
+      None => env.parent.clone()?.get(key),
     }
   }
 
   pub fn set(&mut self, key: &str, val: SchemeData) -> Option<SchemeData> {
-    let scope = &mut self.0.borrow_mut().scope;
+    let mut env = self.borrow_env_mut();
+    let scope = &mut env.scope;
     match scope.get(key) {
       Some(_) => scope.insert(key.to_string(), val),
-      None => self.get_parent()?.set(key, val),
+      None => env.parent.clone()?.set(key, val),
     }
   }
 
   pub fn define(&mut self, key: &str, val: SchemeData) -> Option<SchemeData> {
-    let scope = &mut self.0.borrow_mut().scope;
+    let scope = &mut self.borrow_env_mut().scope;
     match scope.get(key) {
       Some(_) => None,
       None => scope.insert(key.to_string(), val),
@@ -77,7 +79,7 @@ impl Env {
   }
 
   pub fn modify(&mut self, key: &str, val: SchemeData) -> Option<SchemeData> {
-    let scope = &mut self.0.borrow_mut().scope;
+    let scope = &mut self.borrow_env_mut().scope;
     scope.insert(key.to_string(), val)
   }
 }

@@ -49,6 +49,7 @@ impl Evaluator {
     env: Env,
     next: usize
   ) -> usize {
+    println!("evaluate_let_normal{:?}", &body_node);
     let body_cid = self.evaluate(body_node, env.copy(), next);
 
     def_list.into_iter().rev().fold(body_cid, |acc, cur| {
@@ -59,11 +60,12 @@ impl Evaluator {
 
       let name_copy = name.clone();
       let mut current_env = env.copy();
+      println!("{:?},{:?}", &name, value_node);
       let def_cid = self.insert_map(Unit::new(
         env.copy(),
         None,
         Box::new(move |v, _| {
-          current_env.set(&name_copy, v.clone());
+          current_env.define(&name_copy, v.clone());
           (acc, SchemeData::Nil)
         })
       ));
@@ -105,7 +107,8 @@ impl Evaluator {
       env.copy(),
       None,
       Box::new(move |v, _| {
-        current_env.set(&name_copy, v.clone());
+        current_env.define(&name_copy, v.clone());
+        println!("{:?},{:?}", &name_copy, current_env);
         (current_next, SchemeData::Nil)
       })
     ));
@@ -133,8 +136,37 @@ impl Evaluator {
       let definition = item.get_exp_queue().expect("Evaluate let-definition error!");
       let name_node = definition.front().expect("Evaluate let-definition error!");
       let name = name_node.get_identifier_string().expect("Evaluate let-name error!");
-      env_copy.set(&name.clone(), SchemeData::Nil);
+      env_copy.define(&name.clone(), SchemeData::Nil);
     }
     self.evaluate_let_normal(def_list, body_node, env_copy, next)
   }
+}
+
+#[cfg(test)]
+mod tests {
+  use crate::{Interpreter, build_number, SchemeData, SchemeNumber};
+
+  #[test]
+  fn test_let_normal() -> () {
+    let mut interpreter = Interpreter::new("(let ((x 1) (y 2)) (+ x y))".to_string());
+    let mut result = interpreter.run();
+    let mut expect = build_number!(3 as f64, None);
+    assert_eq!(result.is_equal(&mut expect), true);
+  }
+
+  // #[test]
+  // fn test_let_star() -> () {
+  //   let mut interpreter = Interpreter::new("(let* ((x 1) (y (+ x 2))) (* x y))".to_string());
+  //   let mut result = interpreter.run();
+  //   let mut expect = build_number!(3 as f64, None);
+  //   assert_eq!(result.is_equal(&mut expect), true);
+  // }
+
+  // #[test]
+  // fn test_letrec() -> () {
+  //   let mut interpreter = Interpreter::new("(letrec ((iter (lambda (x n) (if (zero? n) x (iter (+ x n) (- n 1)))))) (iter 0 5))".to_string());
+  //   let mut result = interpreter.run();
+  //   let mut expect = build_number!(3 as f64, None);
+  //   assert_eq!(result.is_equal(&mut expect), true);
+  // }
 }

@@ -23,7 +23,7 @@ impl Evaluator {
         env.copy(),
         None,
         Box::new(move |v, _| {
-          env_copy.set(&identifier, v.clone());
+          env_copy.define(&identifier, v.clone());
           (next, SchemeData::Nil)
         })
       ));
@@ -52,7 +52,7 @@ impl Evaluator {
         env.copy(),
         None,
         Box::new(move |_, _| {
-          env_copy.set(&name_copy, proc.clone());
+          env_copy.define(&name_copy, proc.clone());
           (next, SchemeData::Nil)
         })
       ));

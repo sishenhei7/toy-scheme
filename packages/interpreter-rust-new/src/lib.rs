@@ -14,7 +14,7 @@ use evaluator::Evaluator;
 
 // #[napi(custom_finalize)]
 pub struct Interpreter {
-  result: SchemeData
+  pub evaluator: Evaluator
 }
 
 // struct StepResponse {
@@ -25,13 +25,14 @@ pub struct Interpreter {
 
 impl Interpreter {
   // #[napi(constructor)]
-  pub fn new(program: String) -> Result<Self, Error> {
-    // Ok(Self {})
+  pub fn new(program: String) -> Self {
     let token_list = Lexer::new(&program).collect::<Vec<TokenItem>>();
     let data = parse(token_list).expect("输入的 program 有误！");
-    let mut evaluator = Evaluator::new(data);
-    let result = evaluator.run();
-    Ok(Self { result })
+    Interpreter { evaluator: Evaluator::new(data) }
+  }
+
+  pub fn run(&mut self) -> SchemeData {
+    self.evaluator.run()
   }
 
   // pub fn run(&self) -> String {

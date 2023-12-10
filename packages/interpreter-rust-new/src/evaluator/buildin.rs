@@ -33,7 +33,7 @@ impl Evaluator {
       "not" => self.evaluate_buildin_not(node, env, next),
       "and" => self.evaluate_buildin_and(node, env, next),
       "or" => self.evaluate_buildin_or(node, env, next),
-      _ => panic!("Evaluate buildin error!")
+      _ => panic!("Evaluate buildin {:?} error!", &identifier)
     }
   }
 
@@ -176,10 +176,8 @@ impl Evaluator {
       env,
       next,
       |mut x, mut y| {
-        let first_value = x.get_number().expect("Evaluate buildin-is-equal error!");
-        let second_value = y.get_number().expect("Evaluate buildin-is-equal error!");
         SchemeData::Boolean(SchemeBoolean{
-          value: first_value == second_value,
+          value: x.is_equal(&mut y),
           loc: None
         })
       }
@@ -371,5 +369,18 @@ impl Evaluator {
         })
       },
     )
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use crate::{Interpreter, build_number, SchemeData, SchemeNumber};
+
+  #[test]
+  fn test_add() -> () {
+    let mut interpreter = Interpreter::new("(+ 1 2)".to_string());
+    let mut result = interpreter.run();
+    let mut expect = build_number!(3 as f64, None);
+    assert_eq!(result.is_equal(&mut expect), true);
   }
 }
