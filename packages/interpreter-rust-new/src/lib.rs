@@ -8,7 +8,6 @@ pub mod parser;
 
 use anyhow::Error;
 // use napi_derive::napi;
-use env::*;
 use lexer::*;
 use parser::*;
 use evaluator::Evaluator;
@@ -18,11 +17,11 @@ pub struct Interpreter {
   result: SchemeData
 }
 
-struct StepResponse {
-  range: Option<Location>,
-  stack: Vec<String>,
-  scope: Vec<String>,
-}
+// struct StepResponse {
+//   range: Option<Location>,
+//   stack: Vec<String>,
+//   scope: Vec<String>,
+// }
 
 impl Interpreter {
   // #[napi(constructor)]

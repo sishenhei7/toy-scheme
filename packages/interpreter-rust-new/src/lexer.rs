@@ -130,7 +130,7 @@ impl<'a> Lexer<'a> {
   }
 
   fn read_comment(&mut self) -> Option<TokenItem> {
-    let mut content = self
+    let content = self
       .get_content(|&c| c != '\n')
       .unwrap_or(";".to_string());
     let offset = content.len();
@@ -141,7 +141,7 @@ impl<'a> Lexer<'a> {
   }
 
   fn read_string(&mut self) -> Option<TokenItem> {
-    let mut content = self
+    let content = self
       .get_content(|&c| c != '"' && c != '\n')
       .unwrap_or("\"\"".to_string());
     let offset = content.len();
@@ -152,7 +152,7 @@ impl<'a> Lexer<'a> {
   }
 
   fn read_whitespace(&mut self) -> Option<TokenItem> {
-    let mut content = self
+    let content = self
       .get_content(|&c| c.is_whitespace())
       .unwrap_or("".to_string());
     let offset = content.len();
