@@ -428,7 +428,7 @@ mod tests {
   use crate::lexer::Lexer;
 
   #[test]
-  fn test_add() {
+  fn test_parser() {
     let tokens = Lexer::new("(+ 1 2)").collect::<Vec<TokenItem>>();
     let data = parse(tokens).unwrap_or(SchemeExp {
       value: VecDeque::new(),

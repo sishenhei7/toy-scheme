@@ -148,7 +148,11 @@ mod tests {
 
   #[test]
   fn test_let_normal() -> () {
-    let mut interpreter = Interpreter::new("(let ((x 1) (y 2)) (+ x y))".to_string());
+    let program = "
+    (let ((x 1) (y 2))
+      (+ x y))
+    ";
+    let mut interpreter = Interpreter::new(program.to_string());
     let mut result = interpreter.run();
     let mut expect = build_number!(3 as f64, None);
     assert_eq!(result.is_equal(&mut expect), true);
@@ -156,7 +160,11 @@ mod tests {
 
   // #[test]
   // fn test_let_star() -> () {
-  //   let mut interpreter = Interpreter::new("(let* ((x 1) (y (+ x 2))) (* x y))".to_string());
+  //   let program = "
+  //   (let* ((x 1) (y (+ x 2)))
+  //     (* x y))
+  //   ";
+  //   let mut interpreter = Interpreter::new(program.to_string());
   //   let mut result = interpreter.run();
   //   let mut expect = build_number!(3 as f64, None);
   //   assert_eq!(result.is_equal(&mut expect), true);
@@ -164,7 +172,15 @@ mod tests {
 
   // #[test]
   // fn test_letrec() -> () {
-  //   let mut interpreter = Interpreter::new("(letrec ((iter (lambda (x n) (if (zero? n) x (iter (+ x n) (- n 1)))))) (iter 0 5))".to_string());
+  //   let program = "
+  //   (letrec ((iter
+  //     (lambda (x n)
+  //       (if (zero? n)
+  //       x
+  //       (iter (+ x n) (- n 1))))))
+  //     (iter 0 5))
+  //   ";
+  //   let mut interpreter = Interpreter::new(program.to_string());
   //   let mut result = interpreter.run();
   //   let mut expect = build_number!(3 as f64, None);
   //   assert_eq!(result.is_equal(&mut expect), true);

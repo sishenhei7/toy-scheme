@@ -216,7 +216,7 @@ mod tests {
   use super::*;
 
   #[test]
-  fn test_add() {
+  fn test_lexer() {
     let tokens = Lexer::new("(+ 1 2)").collect::<Vec<TokenItem>>();
     assert_eq!(
       tokens,

@@ -378,7 +378,10 @@ mod tests {
 
   #[test]
   fn test_add() -> () {
-    let mut interpreter = Interpreter::new("(+ 1 2)".to_string());
+    let program = "
+    (+ 1 2)
+    ";
+    let mut interpreter = Interpreter::new(program.to_string());
     let mut result = interpreter.run();
     let mut expect = build_number!(3 as f64, None);
     assert_eq!(result.is_equal(&mut expect), true);

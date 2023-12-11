@@ -29,3 +29,21 @@ impl Evaluator {
     self.evaluate(value_node, env, set_cid)
   }
 }
+
+#[cfg(test)]
+mod tests {
+  use crate::{Interpreter, build_number, SchemeData, SchemeNumber};
+
+  #[test]
+  fn test_set() -> () {
+    let program = "
+    (define x 0)
+    (set! x 3)
+    x
+    ";
+    let mut interpreter = Interpreter::new(program.to_string());
+    let mut result = interpreter.run();
+    let mut expect = build_number!(3 as f64, None);
+    assert_eq!(result.is_equal(&mut expect), true);
+  }
+}
