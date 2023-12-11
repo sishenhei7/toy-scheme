@@ -1,5 +1,3 @@
-use core::panic;
-
 use crate::{
   parser::{SchemeExp, SchemeData, SchemeBoolean, SchemeNumber},
   env::Env,
