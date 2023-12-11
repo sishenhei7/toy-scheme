@@ -33,7 +33,8 @@ impl Evaluator {
       "not" => self.evaluate_buildin_not(node, env, next),
       "and" => self.evaluate_buildin_and(node, env, next),
       "or" => self.evaluate_buildin_or(node, env, next),
-      _ => panic!("Evaluate buildin {:?} error!", &identifier)
+      // 如果都没有匹配上，则当做 proc 进行处理
+      _ => self.evaluate_proc(node, env, next)
     }
   }
 

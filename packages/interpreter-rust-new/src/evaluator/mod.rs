@@ -125,12 +125,6 @@ impl Evaluator {
       // 匹配上了语法
       Some(SchemeData::Identifier(ref x)) => {
         let identifier = x.value.as_str();
-
-        // 首先匹配 proc
-        if let Some(..) = env.get(identifier) {
-          return self.evaluate_proc(node, env, next)
-        }
-
         match identifier {
           "begin" => self.evaluate_begin(node, env, next),
           "call-with-current-continuation" => self.evaluate_call_cc(node, env, next),
