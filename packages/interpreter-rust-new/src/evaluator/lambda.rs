@@ -24,6 +24,7 @@ impl Evaluator {
     let body = node.value.pop_front().expect("Evaluate lambda-body error!");
 
     if matches!(params, SchemeData::Exp(..)) && matches!(body, SchemeData::Exp(..)) {
+      // TODO: 这里每次执行可以用同一个 proc 的 env ？？？
       return SchemeProc {
         name: "<<lambda>>".to_string(),
         params: Box::new(params),
