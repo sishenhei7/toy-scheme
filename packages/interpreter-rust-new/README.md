@@ -15,7 +15,7 @@ continuation 有这三种情况：
 
 这就是这个包的主要考虑。
 
-TODO:
-[ ]lambda 的 body 能接多个 expr
-[ ]continuation 是expr层级的
-[ ]关于 proc 如何处理 body 的 evaluate
+### TODO:
+- [ ] lambda 的 body 能接多个 expr
+- [ ] continuation 是expr层级的
+- [ ] 关于 proc 如何处理 body 的 evaluate
