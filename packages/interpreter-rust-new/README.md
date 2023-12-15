@@ -14,3 +14,8 @@ continuation 有这三种情况：
 3.求完这个表达式之后，根据这个表达式的值来决定求值哪一个（控制流）
 
 这就是这个包的主要考虑。
+
+TODO:
+[ ]lambda 的 body 能接多个 expr
+[ ]continuation 是expr层级的
+[ ]关于 proc 如何处理 body 的 evaluate
